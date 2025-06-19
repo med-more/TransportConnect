@@ -25,8 +25,10 @@ const register = async (req, res) => {
       role
     });
 
+    // Generate JWT token
     const token = generateToken({ id: user._id, role: user.role });
 
+    // Send welcome email
     const emailHtml = `
       <h1>Welcome to TransportConnect!</h1>
       <p>Hello ${firstName} ${lastName},</p>
@@ -65,7 +67,6 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user exists
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({
@@ -74,7 +75,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check if account is active
     if (!user.isActive) {
       return res.status(403).json({
         success: false,
@@ -82,7 +82,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Check password
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({
@@ -91,7 +90,6 @@ const login = async (req, res) => {
       });
     }
 
-    // Generate JWT token
     const token = generateToken({ id: user._id, role: user.role });
 
     res.json({
@@ -120,8 +118,43 @@ const login = async (req, res) => {
 };
 
 
+const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .populate('ratings', 'rating comment from createdAt');
+
+    res.json({
+      success: true,
+      data: { user }
+    });
+  } catch (error) {
+    logger.error('Get profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching profile'
+    });
+  }
+};
+
+
+const logout = async (req, res) => {
+  try {
+    res.json({
+      success: true,
+      message: 'Logged out successfully'
+    });
+  } catch (error) {
+    logger.error('Logout error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error logging out'
+    });
+  }
+};
 
 module.exports = {
   register,
   login,
+  getProfile,
+  logout
 };
