@@ -6,8 +6,16 @@ const validate = require('../middleware/validation');
 const { authLimiter } = require('../middleware/rateLimiter');
 const { registerValidator, loginValidator } = require('../validators/authValidator');
 
+
 router.post('/register', authLimiter, registerValidator, validate, register);
+
+
 router.post('/login', authLimiter, loginValidator, validate, login);
 
+
+router.get('/profile', auth, getProfile);
+
+
+router.post('/logout', auth, logout);
 
 module.exports = router;
