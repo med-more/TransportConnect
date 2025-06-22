@@ -61,7 +61,7 @@ const LoginPage = () => {
           </div>
           <h2 className="text-3xl font-bold text-black mb-2">Bon retour !</h2>
           <p className="text-xl text-black/60 font-medium mb-2">Connectez-vous à votre compte</p>
-          <p className="text-base text-primary font-semibold italic">La plateforme qui relie expéditeurs et conducteurs partout en France</p>
+          <p className="text-base text-primary font-semibold italic">La plateforme qui relie expéditeurs et conducteurs partout en Maroc</p>
         </div>
 
         {/* Formulaire */}
