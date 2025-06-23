@@ -1,5 +1,0 @@
-[2025-06-20T08:55:36.044Z] ERROR: Error: Not allowed by CORS 
-[2025-06-20T10:40:28.639Z] ERROR: Error: Not allowed by CORS 
-[2025-06-20T10:41:30.584Z] ERROR: Error: Not allowed by CORS 
-[2025-06-20T12:47:47.869Z] ERROR: Error sending email: "nodemailer.createTransporter is not a function"
-[2025-06-20T13:04:51.544Z] ERROR: Error sending email: "nodemailer.createTransporter is not a function"
