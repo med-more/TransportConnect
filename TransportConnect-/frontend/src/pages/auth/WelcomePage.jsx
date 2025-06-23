@@ -371,41 +371,10 @@ const WelcomePage = () => {
                 La plateforme de référence pour le transport de marchandises au Maroc.
               </p>
             </div>
-
-            {[
-              {
-                title: "Produit",
-                links: ["Fonctionnalités", "Tarifs", "Sécurité", "API"],
-              },
-              {
-                title: "Support",
-                links: ["Centre d'aide", "Contact", "FAQ", "Documentation"],
-              },
-              {
-                title: "Légal",
-                links: ["Conditions d'utilisation", "Politique de confidentialité", "Mentions légales", "Cookies"],
-              },
-            ].map((section, index) => (
-              <div key={section.title} className="space-y-4">
-                <h5 className="font-bold text-white text-lg">{section.title}</h5>
-                <ul className="space-y-3">
-                  {section.links.map((link) => (
-                    <li key={link}>
-                      <a
-                        href="#"
-                        className="text-white inline-block"
-                      >
-                        {link}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
           </div>
 
           <div className="border-t border-white/10 mt-12 pt-8 text-center">
-            <p className="text-white">&copy; 2024 TransportConnect. Tous droits réservés. Fait avec ❤️ au Maroc.</p>
+            <p className="text-white">&copy; 2025 TransportConnect. Tous droits réservés. Fait avec ❤️ au Maroc.</p>
           </div>
         </div>
       </footer>
