@@ -91,33 +91,6 @@ export const validateRequest = [
   handleValidationErrors,
 ]
 
-
-export const validateReview = [
-  body("rating").isInt({ min: 1, max: 5 }).withMessage("La note doit être entre 1 et 5"),
-  body("comment")
-    .optional()
-    .trim()
-    .isLength({ max: 300 })
-    .withMessage("Le commentaire ne peut pas dépasser 300 caractères"),
-  body("criteria.punctuality")
-    .optional()
-    .isInt({ min: 1, max: 5 })
-    .withMessage("La note de ponctualité doit être entre 1 et 5"),
-  body("criteria.communication")
-    .optional()
-    .isInt({ min: 1, max: 5 })
-    .withMessage("La note de communication doit être entre 1 et 5"),
-  body("criteria.cargoHandling")
-    .optional()
-    .isInt({ min: 1, max: 5 })
-    .withMessage("La note de manipulation doit être entre 1 et 5"),
-  body("criteria.professionalism")
-    .optional()
-    .isInt({ min: 1, max: 5 })
-    .withMessage("La note de professionnalisme doit être entre 1 et 5"),
-  handleValidationErrors,
-]
-
 export const validateObjectId = (paramName) => [
   param(paramName).isMongoId().withMessage(`${paramName} invalide`),
   handleValidationErrors,

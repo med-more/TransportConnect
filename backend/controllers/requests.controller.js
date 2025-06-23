@@ -1,8 +1,6 @@
 import Request from "../models/Request.js";
 import User from "../models/User.js";
-import Chat from "../models/Chat.js";
 import Trip from "../models/Trip.js";
-import {sendNotificationEmail} from "../utils/emailService.js"
 
 
 
@@ -110,114 +108,52 @@ export const getRequestById = async (req, res) => {
 export const createRequest = async (req, res) => {
   try {
     const { tripId, ...requestData } = req.body
-
     const trip = await Trip.findById(tripId).populate("driver")
     if (!trip) {
       return res.status(404).json({ message: "Trajet non trouvé" })
     }
-
     if (!trip.driver) {
       return res.status(400).json({ message: "Le conducteur du trajet est introuvable" })
     }
-
     if (trip.status !== "active") {
       return res.status(400).json({ message: "Ce trajet n'est plus disponible" })
     }
-
     if  (trip.driver && trip.driver._id.toString() === req.user._id.toString()) {
       return res.status(400).json({ message: "Vous ne pouvez pas demander votre propre trajet" })
     }
-
     if (requestData.cargo.weight > trip.availableCapacity.weight) {
       return res.status(400).json({
         message: "Le poids de votre colis dépasse la capacité disponible",
       })
     }
-
     if (!trip.acceptedCargoTypes.includes(requestData.cargo.type)) {
       return res.status(400).json({
         message: "Ce type de cargaison n'est pas accepté pour ce trajet",
       })
     }
-
     const existingRequest = await Request.findOne({
       sender: req.user._id,
       trip: tripId,
       status: { $in: ["pending", "accepted"] },
     })
-
     if (existingRequest) {
       return res.status(400).json({
         message: "Vous avez déjà une demande en cours pour ce trajet",
       })
     }
-
     const request = new Request({
       ...requestData,
       sender: req.user._id,
       trip: tripId,
     })
-
     await request.save()
-
     trip.requests.push(request._id)
     await trip.save()
-
     await request.populate([
       { path: "sender", select: "firstName lastName avatar" },
       { path: "trip", select: "departure destination departureDate driver" },
     ])
-
-    const chat = new Chat({
-      request: request._id,
-      participants: [req.user._id, trip.driver._id],
-      messages: [],
-      isActive: true,
-    })
-    await chat.save()
-
-    try {
-      await sendNotificationEmail(
-        trip.driver.email,
-        "Nouvelle demande de transport",
-        `Vous avez reçu une nouvelle demande de transport de ${req.user.firstName} ${req.user.lastName}.`,
-      )
-    } catch (emailError) {
-      console.error("Erreur envoi email:", emailError)
-    }
-
-    const io = req.app.get("io")
-    console.log("🔔 Émission de l'événement new_request vers:", `user_${trip.driver._id}`)
-    console.log("📤 Données envoyées:", {
-      requestId: request._id,
-      sender: {
-        name: `${req.user.firstName} ${req.user.lastName}`,
-        avatar: req.user.avatar,
-      },
-      trip: {
-        departure: trip.departure.city,
-        destination: trip.destination.city,
-      },
-      cargo: request.cargo,
-    })
-    
-    io.to(`user_${trip.driver._id}`).emit("new_request", {
-      requestId: request._id,
-      sender: {
-        name: `${req.user.firstName} ${req.user.lastName}`,
-        avatar: req.user.avatar,
-      },
-      trip: {
-        departure: trip.departure.city,
-        destination: trip.destination.city,
-      },
-      cargo: request.cargo,
-    })
-
-    res.status(201).json({
-      message: "Demande créée avec succès",
-      request,
-    })
+    res.status(201).json({ request })
   } catch (error) {
     console.error("Erreur création demande:", error)
     res.status(500).json({ message: "Erreur lors de la création de la demande" })
@@ -296,17 +232,6 @@ export const acceptRequest = async (req, res) => {
         $inc: { "stats.totalRequests": 1 },
       })
   
-      try {
-        await sendNotificationEmail(
-          request.sender.email,
-          "Demande acceptée",
-          `Votre demande de transport a été acceptée par ${req.user.firstName} ${req.user.lastName}.`,
-        )
-      } catch (emailError) {
-        console.error("Erreur envoi email:", emailError)
-      }
-  
-      
       const io = req.app.get("io")
       const targetUserId = request.sender._id.toString()
       const targetRoom = `user_${targetUserId}`
@@ -372,17 +297,6 @@ export const acceptRequest = async (req, res) => {
         respondedAt: new Date(),
       }
       await request.save()
-  
-      
-      try {
-        await sendNotificationEmail(
-          request.sender.email,
-          "Demande refusée",
-          `Votre demande de transport a été refusée par ${req.user.firstName} ${req.user.lastName}.`,
-        )
-      } catch (emailError) {
-        console.error("Erreur envoi email:", emailError)
-      }
   
       const io = req.app.get("io")
       console.log("🔔 Émission de l'événement request_rejected vers:", `user_${request.sender._id}`)

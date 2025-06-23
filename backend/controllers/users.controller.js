@@ -1,7 +1,6 @@
 import User from "../models/User.js"
 import Trip from "../models/Trip.js"
 import Request from "../models/Request.js"
-import Review from "../models/Review.js"
 
 // Obtenir les statistiques de l'utilisateur connecté
 export const getUserStats = async (req, res) => {
@@ -11,7 +10,6 @@ export const getUserStats = async (req, res) => {
     // Compter les trajets selon le rôle
     let totalTrips = 0
     let totalRequests = 0
-    let averageRating = 0
 
     if (req.user.role === "conducteur") {
       // Pour les conducteurs, compter leurs trajets
@@ -26,26 +24,11 @@ export const getUserStats = async (req, res) => {
       totalRequests = await Request.countDocuments({ sender: userId })
     }
 
-    // Calculer la note moyenne
-    const reviews = await Review.find({ 
-      $or: [
-        { reviewedUser: userId },
-        { reviewer: userId }
-      ]
-    })
-
-    if (reviews.length > 0) {
-      const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0)
-      averageRating = (totalRating / reviews.length).toFixed(1)
-    }
-
     res.json({
       success: true,
       data: {
         totalTrips,
-        totalRequests,
-        averageRating: parseFloat(averageRating),
-        totalReviews: reviews.length
+        totalRequests
       }
     })
   } catch (error) {
