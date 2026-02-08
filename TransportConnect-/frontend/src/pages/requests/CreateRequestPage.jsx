@@ -84,6 +84,19 @@ const CreateRequestPage = () => {
     createRequestMutation.mutate(requestData)
   }
 
+  // If no tripId is provided, redirect to trips page to select a trip
+  if (!tripId) {
+    return (
+      <div className="p-6 text-center max-w-md mx-auto">
+        <h1 className="text-2xl font-bold text-foreground mb-4">Select a Trip</h1>
+        <p className="text-muted-foreground mb-6">
+          Please select a trip first to create a transport request.
+        </p>
+        <Button onClick={() => navigate("/trips")}>Browse Available Trips</Button>
+      </div>
+    )
+  }
+
   if (tripLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -96,7 +109,11 @@ const CreateRequestPage = () => {
     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold text-foreground mb-4">Trip not found</h1>
-        <Button onClick={() => navigate("/trips")}>Back to trips</Button>
+        <p className="text-muted-foreground mb-6">The trip you're looking for doesn't exist or has been removed.</p>
+        <div className="flex gap-4 justify-center">
+          <Button variant="outline" onClick={() => navigate(-1)}>Go Back</Button>
+          <Button onClick={() => navigate("/trips")}>Browse Trips</Button>
+        </div>
       </div>
     )
   }

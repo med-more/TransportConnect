@@ -94,6 +94,16 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/requests/create"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CreateRequestPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/requests/create/:tripId"
         element={
           <ProtectedRoute>

@@ -42,7 +42,8 @@ const ProfilePage = () => {
     queryFn: usersAPI.getStats,
   })
 
-  const stats = statsData?.data || {
+  // Backend returns: { success: true, data: { totalTrips, totalRequests } }
+  const stats = statsData?.data?.data || statsData?.data || {
     totalTrips: 0,
     totalRequests: 0,
     averageRating: 0,
@@ -183,7 +184,9 @@ const ProfilePage = () => {
   const statsCards = [
     {
       title: user?.role === "conducteur" ? "Total Trips" : "Total Requests",
-      value: stats.totalTrips || stats.totalRequests || 0,
+      value: user?.role === "conducteur" 
+        ? (stats.totalTrips || 0)
+        : (stats.totalRequests || 0),
       icon: Package,
       color: "text-primary",
       bgColor: "bg-primary/10",
