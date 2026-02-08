@@ -1,20 +1,23 @@
 import express from "express"
 import dotenv from "dotenv"
 import cors from "cors"
+import path from "path"
+import { fileURLToPath } from "url"
+import http from "http"
+
+// Load environment variables FIRST, before importing any modules that use them
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+dotenv.config({ path: path.join(__dirname, ".env") })
+
+// Now import modules that depend on environment variables
 import { connectDB } from "./config/db.js"
+import passport from "./config/passport.js"
 import authRoutes from "./routes/auth.route.js"
 import tripsRoutes from "./routes/trips.route.js"
 import usersRoutes from "./routes/users.route.js"
-import http from "http"
 import requestRoutes from "./routes/requests.route.js"
 import adminRoutes from "./routes/admin.route.js"
-import path from "path"
-import { fileURLToPath } from "url"
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
-dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 7000
@@ -33,6 +36,9 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
+
+// Initialize Passport (for Google OAuth)
+app.use(passport.initialize())
 
 // Serve uploaded files statically (for local storage fallback)
 // Use absolute path to ensure it works correctly

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react"
-import { Link, useNavigate, useLocation } from "react-router-dom"
+import { Link, useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { Eye, EyeOff, Truck, Mail, Lock, ArrowLeft, ArrowRight, Facebook, Twitter, Linkedin, Instagram, Home } from "lucide-react"
+import { Eye, EyeOff, Truck, Mail, Lock, ArrowLeft, ArrowRight, Facebook, Twitter, Linkedin, Instagram, Home, AlertCircle } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
+import toast from "react-hot-toast"
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -13,8 +14,19 @@ const LoginPage = () => {
   const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
 
   const from = location.state?.from?.pathname || "/dashboard"
+
+  // Check for error messages in URL params
+  useEffect(() => {
+    const error = searchParams.get("error")
+    if (error === "google_oauth_not_configured") {
+      toast.error("Google OAuth is not configured. Please use email/password login or contact support.")
+    } else if (error === "google_auth_failed") {
+      toast.error("Google authentication failed. Please try again or use email/password login.")
+    }
+  }, [searchParams])
 
   const {
     register,
@@ -181,8 +193,8 @@ const LoginPage = () => {
             </div>
 
             {/* Social Login */}
-            <button
-              type="button"
+            <a
+              href={`${import.meta.env.VITE_API_BASE_URL || "http://localhost:7000/api"}/auth/google`}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-border hover:bg-accent transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -204,7 +216,7 @@ const LoginPage = () => {
                 />
               </svg>
               <span className="text-foreground font-medium">Login with Google</span>
-            </button>
+            </a>
 
             {/* Submit Button */}
             <Button type="submit" loading={loading} className="w-full bg-primary hover:bg-primary/90 text-white" size="large">

@@ -28,13 +28,24 @@ const userSchema = new mongoose.Schema({
       },
       phone: {
         type: String,
-        required: [true, "Le téléphone est requis"],
+        required: function() {
+          // Phone is required only if user is not using OAuth
+          return !this.googleId
+        },
         match: [/^[0-9+\-\s()]+$/, "Numéro de téléphone invalide"],
       },
       password: {
         type: String,
-        required: [true, "Le mot de passe est requis"],
+        required: function() {
+          // Password is required only if user is not using OAuth
+          return !this.googleId
+        },
         minlength: [6, "Le mot de passe doit contenir au moins 6 caractères"],
+      },
+      googleId: {
+        type: String,
+        default: null,
+        sparse: true, // Allows multiple null values but unique when set
       },
       role: {
         type: String,
@@ -105,7 +116,8 @@ const userSchema = new mongoose.Schema({
 
 
    userSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next()
+    // Skip password hashing if password is not modified or user is using OAuth
+    if (!this.isModified("password") || !this.password) return next()
   
     try {
       const salt = await bcrypt.genSalt(12)

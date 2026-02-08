@@ -223,3 +223,27 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: "Error resetting password" })
   }
 }
+
+// Google OAuth callback handler
+export const googleCallback = async (req, res) => {
+  try {
+    const user = req.user
+
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5174"}/login?error=google_auth_failed`)
+    }
+
+    // Generate JWT token
+    const token = generateToken(user._id)
+
+    // Redirect to frontend with token
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"
+    const redirectUrl = `${frontendUrl}/auth/google/callback?token=${token}&userId=${user._id}`
+
+    res.redirect(redirectUrl)
+  } catch (error) {
+    console.error("Error in Google OAuth callback:", error)
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"
+    res.redirect(`${frontendUrl}/login?error=google_auth_failed`)
+  }
+}

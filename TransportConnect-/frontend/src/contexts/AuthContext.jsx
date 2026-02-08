@@ -203,12 +203,23 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: "UPDATE_USER", payload: userData })
   }
 
+  // Expose dispatch for advanced use cases (like Google OAuth callback)
+  const setAuthState = (user, token) => {
+    localStorage.setItem("token", token)
+    localStorage.setItem("user", JSON.stringify(user))
+    dispatch({
+      type: "LOGIN_SUCCESS",
+      payload: { user, token },
+    })
+  }
+
   const value = {
     ...state,
     login,
     register,
     logout,
     updateUser,
+    setAuthState,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

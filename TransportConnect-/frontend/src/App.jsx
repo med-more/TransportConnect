@@ -10,6 +10,7 @@ import LoginPage from "./pages/auth/LoginPage"
 import RegisterPage from "./pages/auth/RegisterPage"
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage"
 import ResetPasswordPage from "./pages/auth/ResetPasswordPage"
+import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage"
 
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import TripsPage from "./pages/trips/TripsPage"
@@ -37,6 +38,7 @@ function AppRoutes() {
       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
       <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
       <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
+      <Route path="/auth/google/callback" element={<PublicRoute><GoogleCallbackPage /></PublicRoute>} />
 
       {/* Protected user routes with Layout */}
       <Route
