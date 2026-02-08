@@ -48,7 +48,18 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         const name = displayName?.split(" ") || []
         const firstName = name[0] || ""
         const lastName = name.slice(1).join(" ") || ""
-        const avatar = photos?.[0]?.value || null
+        
+        // Get avatar - Google provides photos array with value property
+        let avatar = null
+        if (photos && photos.length > 0) {
+          avatar = photos[0].value || photos[0] || null
+        }
+
+        console.log("🔍 Google OAuth Profile Data:")
+        console.log("   Email:", email)
+        console.log("   Name:", displayName)
+        console.log("   Photos object:", JSON.stringify(photos, null, 2))
+        console.log("   Avatar URL extracted:", avatar)
 
         if (!email) {
           return done(new Error("Email not provided by Google"), null)
@@ -58,12 +69,17 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         let user = await User.findOne({ googleId: id })
 
         if (user) {
-          // User exists, update last login
+          // User exists, update last login and avatar if needed
           user.lastLogin = new Date()
-          if (avatar && !user.avatar) {
+          // Always update avatar from Google if available (in case user changed their Google profile picture)
+          if (avatar) {
             user.avatar = avatar
+            console.log("✅ Updated existing user avatar:", avatar)
           }
           await user.save()
+          console.log("✅ Existing Google user logged in:")
+          console.log("   User ID:", user._id)
+          console.log("   Avatar:", user.avatar)
           return done(null, user)
         }
 
@@ -74,29 +90,37 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           // User exists with email but no Google ID, link the accounts
           user.googleId = id
           user.lastLogin = new Date()
-          if (avatar && !user.avatar) {
+          // Update avatar from Google if available
+          if (avatar) {
             user.avatar = avatar
+            console.log("✅ Linked account and updated avatar:", avatar)
           }
           await user.save()
+          console.log("✅ Linked Google account to existing user:")
+          console.log("   User ID:", user._id)
+          console.log("   Avatar:", user.avatar)
           return done(null, user)
         }
 
         // Create new user
-        // For OAuth users, we need to set a default role
-        // You might want to prompt for role selection or default to "expediteur"
+        // For OAuth users, default role is "expediteur" (shipper)
+        // Users can change their role later in profile settings if needed
         user = new User({
           googleId: id,
           email: email.toLowerCase(),
           firstName: firstName || "User",
           lastName: lastName || "Name",
-          avatar: avatar,
+          avatar: avatar, // Google profile picture
           phone: "", // Will be required later if user wants to create trips/requests
-          role: "expediteur", // Default role, can be changed later
+          role: "expediteur", // Default role: shipper (can be changed later by admin or in profile)
           isVerified: true, // Google accounts are considered verified
           password: undefined, // No password for OAuth users
         })
 
         await user.save()
+        console.log("✅ New Google user created:")
+        console.log("   User ID:", user._id)
+        console.log("   Avatar saved:", user.avatar)
         return done(null, user)
       } catch (error) {
         console.error("Error in Google OAuth strategy:", error)

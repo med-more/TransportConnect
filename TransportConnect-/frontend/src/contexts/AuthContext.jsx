@@ -68,6 +68,7 @@ export const AuthProvider = ({ children }) => {
               type: "LOGIN_SUCCESS",
               payload: { user, token },
             })
+            // Don't show toast here - it's just a page refresh/reload
           } else {
             // Fallback to localStorage if profile fetch fails
             const user = JSON.parse(userData)
@@ -205,12 +206,15 @@ export const AuthProvider = ({ children }) => {
 
   // Expose dispatch for advanced use cases (like Google OAuth callback)
   const setAuthState = (user, token) => {
+    console.log("🔧 Setting auth state with user:", user)
+    console.log("   Avatar in setAuthState:", user.avatar)
     localStorage.setItem("token", token)
     localStorage.setItem("user", JSON.stringify(user))
     dispatch({
       type: "LOGIN_SUCCESS",
       payload: { user, token },
     })
+    // Note: Don't show toast here - let the calling component handle it to avoid duplicates
   }
 
   const value = {

@@ -29,6 +29,9 @@ const GoogleCallbackPage = () => {
       }
 
       try {
+        // Store token first
+        localStorage.setItem("token", token)
+
         // Fetch user profile
         const profileResponse = await authAPI.getProfile()
         if (profileResponse.data?.user) {
@@ -38,16 +41,27 @@ const GoogleCallbackPage = () => {
             _id: serverUser.id || serverUser._id,
           }
 
+          console.log("🔍 User profile from server:", user)
+          console.log("   Avatar:", user.avatar)
+
+          // Store user data
+          localStorage.setItem("user", JSON.stringify(user))
+
           // Set auth state properly (this updates isAuthenticated and token)
           setAuthState(user, token)
 
-          toast.success(`Welcome ${user.firstName}!`)
+          // Show welcome message only once (use unique ID to prevent duplicates)
+          toast.success(`Welcome ${user.firstName}!`, { 
+            id: "google-login-success",
+            duration: 3000 
+          })
           
-          // Small delay to ensure state is updated before navigation
+          // Wait a bit longer to ensure state is fully updated
+          // Then navigate (don't use window.location.href to avoid full reload)
           setTimeout(() => {
             const redirectPath = user.role === "admin" ? "/admin" : "/dashboard"
             navigate(redirectPath, { replace: true })
-          }, 100)
+          }, 300)
         } else {
           throw new Error("Failed to fetch user profile")
         }

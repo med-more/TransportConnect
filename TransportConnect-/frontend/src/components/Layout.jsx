@@ -220,11 +220,23 @@ const Layout = ({ children }) => {
             )}
             title={sidebarCollapsed ? `${user?.firstName} ${user?.lastName}` : ""}
           >
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-              <span className="text-sm font-semibold text-white">
-                {user?.firstName?.charAt(0)?.toUpperCase()}
-                {user?.lastName?.charAt(0)?.toUpperCase()}
-              </span>
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+              {user?.avatar ? (
+                <img
+                  src={normalizeAvatarUrl(user.avatar)}
+                  alt={`${user.firstName} ${user.lastName}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error("Avatar image failed to load:", normalizeAvatarUrl(user.avatar))
+                    e.target.style.display = "none"
+                  }}
+                />
+              ) : (
+                <span className="text-sm font-semibold text-white">
+                  {user?.firstName?.charAt(0)?.toUpperCase()}
+                  {user?.lastName?.charAt(0)?.toUpperCase()}
+                </span>
+              )}
             </div>
             {!sidebarCollapsed && (
               <div className="flex-1 min-w-0">
@@ -389,10 +401,15 @@ const Layout = ({ children }) => {
                     src={normalizeAvatarUrl(user.avatar)}
                     alt={`${user.firstName} ${user.lastName}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error("Avatar image failed to load in header:", normalizeAvatarUrl(user.avatar))
+                      e.target.style.display = "none"
+                    }}
                   />
                 ) : (
                   <span className="text-sm font-semibold text-white">
                     {user?.firstName?.charAt(0)?.toUpperCase()}
+                    {user?.lastName?.charAt(0)?.toUpperCase()}
                   </span>
                 )}
               </div>
