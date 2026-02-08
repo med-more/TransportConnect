@@ -24,7 +24,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
-import { tripsAPI } from "../../services/api"
+import { tripsAPI, requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
@@ -61,7 +61,24 @@ const TripsPage = () => {
     enabled: !!user,
   })
 
+  // Fetch user requests to check for existing requests on trips
+  const { data: userRequestsData } = useQuery({
+    queryKey: ["user-requests-all"],
+    queryFn: () => requestsAPI.getRequests(),
+    enabled: !!user && user?.role !== "conducteur",
+  })
+
   const trips = tripsData?.data?.trips || []
+  const userRequests = userRequestsData?.data?.requests || []
+
+  // Helper function to check if user has an active request for a trip
+  const hasActiveRequestForTrip = (tripId) => {
+    const existingRequest = userRequests.find(
+      (req) => (req.trip?._id === tripId || req.trip === tripId) && 
+      ["pending", "accepted", "in_transit"].includes(req.status)
+    )
+    return existingRequest
+  }
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }))
@@ -519,12 +536,24 @@ const TripsPage = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {isShipper && trip.status === "active" && (
-                          <Link to={`/requests/create/${trip._id}`}>
-                            <Button size="small" className="bg-gradient-to-r from-primary to-primary/90">
-                              <Package className="w-4 h-4 mr-2" />
-                              Request
+                          hasActiveRequestForTrip(trip._id) ? (
+                            <Button 
+                              size="small" 
+                              disabled
+                              variant="outline"
+                              className="opacity-50 cursor-not-allowed"
+                            >
+                              <Clock className="w-4 h-4 mr-2" />
+                              Request Exists
                             </Button>
-                          </Link>
+                          ) : (
+                            <Link to={`/requests/create/${trip._id}`}>
+                              <Button size="small" className="bg-gradient-to-r from-primary to-primary/90">
+                                <Package className="w-4 h-4 mr-2" />
+                                Request
+                              </Button>
+                            </Link>
+                          )
                         )}
                         <Link to={`/trips/${trip._id}`}>
                           <Button variant="ghost" size="small">

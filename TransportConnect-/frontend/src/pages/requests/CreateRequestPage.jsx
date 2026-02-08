@@ -41,13 +41,44 @@ const CreateRequestPage = () => {
 
   const createRequestMutation = useMutation({
     mutationFn: requestsAPI.createRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries("requests")
-      toast.success("Request created successfully!")
-      navigate("/requests")
+    onSuccess: async (response) => {
+      // Show success toast
+      toast.success("Request created successfully!", {
+        duration: 3000,
+      })
+      
+      // Invalidate all requests queries (including all tabs: all, pending, accepted, etc.)
+      await queryClient.invalidateQueries({ 
+        queryKey: ["requests"],
+        exact: false, // This will invalidate all queries that start with ["requests"]
+      })
+      
+      // Invalidate user requests queries to update buttons on trips page
+      await queryClient.invalidateQueries({ 
+        queryKey: ["user-requests"],
+        exact: false,
+      })
+      
+      // Also invalidate user stats to update request count
+      await queryClient.invalidateQueries({ queryKey: ["user-stats"] })
+      
+      // Navigate to requests page after a short delay
+      setTimeout(() => {
+        navigate("/requests", { replace: true })
+      }, 500)
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Error creating request")
+      const errorMessage = error.response?.data?.message || "Error creating request"
+      toast.error(errorMessage, {
+        duration: 4000,
+      })
+      
+      // If error is about existing request, redirect to requests page after showing error
+      if (errorMessage.includes("déjà une demande") || errorMessage.includes("already have a request")) {
+        setTimeout(() => {
+          navigate("/requests", { replace: true })
+        }, 2000)
+      }
     },
   })
 
@@ -57,6 +88,11 @@ const CreateRequestPage = () => {
   const estimatedPrice = watchedWeight && trip ? (Number.parseFloat(watchedWeight) * trip.pricePerKg).toFixed(2) : 0
 
   const onSubmit = async (data) => {
+    // Prevent double submission
+    if (createRequestMutation.isLoading) {
+      return
+    }
+
     const requestData = {
       tripId,
       cargo: {
@@ -370,10 +406,18 @@ const CreateRequestPage = () => {
         </Card>
 
         <div className="flex items-center justify-end gap-4">
-          <Button variant="outline" onClick={() => navigate(-1)}>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate(-1)}
+            disabled={createRequestMutation.isLoading}
+          >
             Cancel
           </Button>
-          <Button type="submit" loading={createRequestMutation.isLoading}>
+          <Button 
+            type="submit" 
+            loading={createRequestMutation.isLoading}
+            disabled={createRequestMutation.isLoading}
+          >
             Send Request
           </Button>
         </div>

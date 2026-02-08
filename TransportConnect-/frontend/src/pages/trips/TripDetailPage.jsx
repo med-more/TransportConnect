@@ -21,7 +21,7 @@ import {
   XCircle,
   Eye,
 } from "lucide-react"
-import { tripsAPI } from "../../services/api"
+import { tripsAPI, requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
@@ -43,6 +43,21 @@ const TripDetailPage = () => {
     queryKey: ["trip", id],
     queryFn: () => tripsAPI.getTripById(id),
   })
+
+  // Check if user has an existing request for this trip
+  const { data: userRequestsData } = useQuery({
+    queryKey: ["user-requests", id],
+    queryFn: () => requestsAPI.getRequests({ tripId: id }),
+    enabled: !!user && !!id && user?.role !== "conducteur",
+  })
+
+  // Find existing request for this trip
+  const existingRequest = userRequestsData?.data?.requests?.find(
+    (req) => req.trip?._id === id || req.trip === id
+  )
+
+  // Check if existing request is in a blocking state (pending or accepted)
+  const hasActiveRequest = existingRequest && ["pending", "accepted", "in_transit"].includes(existingRequest.status)
 
   const deleteTripMutation = useMutation({
     mutationFn: tripsAPI.deleteTrip,
@@ -513,12 +528,34 @@ const TripDetailPage = () => {
           {/* Create Request Button (for non-drivers) */}
           {user?.role !== "conducteur" && trip.status === "active" && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-              <Link to={`/requests/create/${trip._id}`} className="block">
-                <Button className="w-full bg-gradient-to-r from-primary to-primary/90 shadow-lg">
-                  <Package className="w-4 h-4 mr-2" />
-                  Create Request
-                </Button>
-              </Link>
+              {hasActiveRequest ? (
+                <Card className="p-4 sm:p-5 md:p-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-warning/10 rounded-lg">
+                      <Clock className="w-5 h-5 text-warning" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">Request Already Created</p>
+                      <p className="text-xs text-muted-foreground">
+                        You have a {existingRequest.status} request for this trip. Wait until it's cancelled or delivered.
+                      </p>
+                    </div>
+                    <Link to={`/requests/${existingRequest._id}`}>
+                      <Button variant="outline" size="small">
+                        <Eye className="w-4 h-4 mr-2" />
+                        View Request
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              ) : (
+                <Link to={`/requests/create/${trip._id}`} className="block">
+                  <Button className="w-full bg-gradient-to-r from-primary to-primary/90 shadow-lg">
+                    <Package className="w-4 h-4 mr-2" />
+                    Create Request
+                  </Button>
+                </Link>
+              )}
             </motion.div>
           )}
         </div>

@@ -51,8 +51,11 @@ const RequestDetailPage = () => {
 
   const acceptRequestMutation = useMutation({
     mutationFn: ({ id, message }) => requestsAPI.acceptRequest(id, message),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["request", id])
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request accepted successfully")
     },
     onError: (error) => {
@@ -62,8 +65,11 @@ const RequestDetailPage = () => {
 
   const rejectRequestMutation = useMutation({
     mutationFn: ({ id, message }) => requestsAPI.rejectRequest(id, message),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["request", id])
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request rejected")
     },
     onError: (error) => {
@@ -73,8 +79,11 @@ const RequestDetailPage = () => {
 
   const cancelRequestMutation = useMutation({
     mutationFn: requestsAPI.cancelRequest,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["request", id])
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request cancelled")
     },
     onError: (error) => {
@@ -84,8 +93,11 @@ const RequestDetailPage = () => {
 
   const confirmPickupMutation = useMutation({
     mutationFn: requestsAPI.confirmPickup,
-    onSuccess: () => {
-      queryClient.invalidateQueries(["request", id])
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Pickup confirmed")
     },
     onError: (error) => {
@@ -95,8 +107,11 @@ const RequestDetailPage = () => {
 
   const confirmDeliveryMutation = useMutation({
     mutationFn: ({ id, signature }) => requestsAPI.confirmDelivery(id, signature),
-    onSuccess: () => {
-      queryClient.invalidateQueries(["request", id])
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Delivery confirmed")
     },
     onError: (error) => {
