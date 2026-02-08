@@ -1,20 +1,20 @@
 import { useState, useEffect } from "react"
-import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { Link, useSearchParams, useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, Home, Facebook, Twitter, Linkedin, Instagram } from "lucide-react"
+import { ArrowLeft, Lock, CheckCircle, Home, Eye, EyeOff, Facebook, Twitter, Linkedin, Instagram } from "lucide-react"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import toast from "react-hot-toast"
 import { authAPI } from "../../services/api"
 
 const ResetPasswordPage = () => {
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [passwordReset, setPasswordReset] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
   const token = searchParams.get("token")
 
   const {
@@ -47,19 +47,16 @@ const ResetPasswordPage = () => {
     setLoading(true)
     try {
       const response = await authAPI.resetPassword(token, data.password)
-      if (response.data.success) {
-        setPasswordReset(true)
-        toast.success(response.data.message || "Password reset successfully!")
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-          navigate("/login")
-        }, 3000)
-      } else {
-        toast.error(response.data.message || "Error resetting password")
-      }
+      setPasswordReset(true)
+      toast.success(response.data?.message || "Password reset successfully!")
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate("/login")
+      }, 2000)
     } catch (error) {
-      console.error("Error resetting password:", error)
-      toast.error(error.response?.data?.message || "Error resetting password. The link may have expired.")
+      const errorMessage = error.response?.data?.message || "Error resetting password. Please try again."
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -129,12 +126,10 @@ const ResetPasswordPage = () => {
 
           {/* Welcome Message */}
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
-              {passwordReset ? "Password Reset Successful!" : "Reset Your Password"}
-            </h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Reset Password</h2>
             <p className="text-sm sm:text-base text-muted-foreground px-2">
               {passwordReset
-                ? "Your password has been reset successfully. Redirecting to login..."
+                ? "Your password has been reset successfully!"
                 : "Enter your new password below"}
             </p>
           </div>
@@ -151,7 +146,7 @@ const ResetPasswordPage = () => {
                 <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="w-10 h-10 text-success" />
                 </div>
-                <h3 className="text-2xl font-semibold text-foreground mb-3">Password Reset Complete!</h3>
+                <h3 className="text-2xl font-semibold text-foreground mb-3">Password Reset!</h3>
                 <p className="text-muted-foreground mb-8">
                   Your password has been successfully reset. You can now log in with your new password.
                 </p>
@@ -189,7 +184,7 @@ const ResetPasswordPage = () => {
                       onClick={() => setShowPassword(!showPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>
@@ -212,7 +207,7 @@ const ResetPasswordPage = () => {
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
                 </div>

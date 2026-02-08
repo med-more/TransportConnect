@@ -22,15 +22,11 @@ const ForgotPasswordPage = () => {
     setLoading(true)
     try {
       const response = await authAPI.forgotPassword(data.email)
-      if (response.data.success) {
-        setEmailSent(true)
-        toast.success(response.data.message || "Password reset email sent!")
-      } else {
-        toast.error(response.data.message || "Error sending email")
-      }
+      setEmailSent(true)
+      toast.success(response.data?.message || "Password reset email sent!")
     } catch (error) {
-      console.error("Error sending password reset email:", error)
-      toast.error(error.response?.data?.message || "Error sending email. Please try again.")
+      const errorMessage = error.response?.data?.message || "Error sending email. Please try again."
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

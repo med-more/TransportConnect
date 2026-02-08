@@ -1,95 +1,110 @@
 import nodemailer from "nodemailer"
 
-// Create reusable transporter object using SMTP transport
+// Create reusable transporter
 const createTransporter = () => {
-  // Check if email credentials are provided
-  const emailHost = process.env.EMAIL_HOST
-  const emailPort = process.env.EMAIL_PORT
-  const emailUser = process.env.EMAIL_USER
-  const emailPassword = process.env.EMAIL_PASSWORD
-
-  if (!emailHost || !emailPort || !emailUser || !emailPassword) {
-    console.warn("⚠️ Email credentials not configured. Email functionality will be disabled.")
-    return null
+  // Check if we're using Gmail or custom SMTP
+  if (process.env.EMAIL_SERVICE === "gmail") {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD, // App password for Gmail
+      },
+    })
   }
 
+  // Custom SMTP configuration
   return nodemailer.createTransport({
-    host: emailHost,
-    port: parseInt(emailPort),
-    secure: emailPort === "465", // true for 465, false for other ports
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT || "587"),
+    secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
     auth: {
-      user: emailUser,
-      pass: emailPassword,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
     },
   })
 }
 
-// Send password reset email
 export const sendPasswordResetEmail = async (email, resetToken, firstName) => {
   try {
     const transporter = createTransporter()
-    if (!transporter) {
-      console.error("Email transporter not configured")
-      return { success: false, message: "Email service not configured" }
-    }
 
-    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}`
-    const appName = process.env.APP_NAME || "TransportConnect"
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5174"}/reset-password?token=${resetToken}`
 
     const mailOptions = {
-      from: `"${appName}" <${process.env.EMAIL_USER}>`,
+      from: `"TransportConnect" <${process.env.EMAIL_USER}>`,
       to: email,
-      subject: "Password Reset Request",
+      subject: "Password Reset Request - TransportConnect",
       html: `
         <!DOCTYPE html>
         <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Password Reset</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">${appName}</h1>
-          </div>
-          <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;">
-            <h2 style="color: #111827; margin-top: 0;">Hello ${firstName || "User"},</h2>
-            <p style="color: #4b5563; font-size: 16px;">
-              We received a request to reset your password. Click the button below to create a new password:
-            </p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${resetUrl}" 
-                 style="display: inline-block; background: #ef4444; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                Reset Password
-              </a>
-            </div>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-              Or copy and paste this link into your browser:
-            </p>
-            <p style="color: #ef4444; font-size: 12px; word-break: break-all; background: #f3f4f6; padding: 10px; border-radius: 4px;">
-              ${resetUrl}
-            </p>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-              This link will expire in <strong>1 hour</strong>. If you didn't request a password reset, please ignore this email.
-            </p>
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-            <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-              © ${new Date().getFullYear()} ${appName}. All rights reserved.
-            </p>
-          </div>
-        </body>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Password Reset</title>
+          </head>
+          <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f5f5f5;">
+            <table role="presentation" style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td align="center" style="padding: 40px 20px;">
+                  <table role="presentation" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <!-- Header -->
+                    <tr>
+                      <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 8px 8px 0 0;">
+                        <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">TransportConnect</h1>
+                      </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                      <td style="padding: 40px;">
+                        <h2 style="margin: 0 0 20px; color: #111827; font-size: 24px;">Hello ${firstName || "User"},</h2>
+                        <p style="margin: 0 0 20px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                          We received a request to reset your password for your TransportConnect account.
+                        </p>
+                        <p style="margin: 0 0 30px; color: #4b5563; font-size: 16px; line-height: 1.6;">
+                          Click the button below to reset your password. This link will expire in 1 hour.
+                        </p>
+                        
+                        <!-- Button -->
+                        <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                          <tr>
+                            <td align="center" style="padding: 20px 0;">
+                              <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background-color: #ef4444; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; text-align: center;">Reset Password</a>
+                            </td>
+                          </tr>
+                        </table>
+                        
+                        <p style="margin: 30px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                          If the button doesn't work, copy and paste this link into your browser:
+                        </p>
+                        <p style="margin: 10px 0 0; color: #ef4444; font-size: 14px; word-break: break-all;">
+                          <a href="${resetUrl}" style="color: #ef4444; text-decoration: underline;">${resetUrl}</a>
+                        </p>
+                        
+                        <p style="margin: 30px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                          If you didn't request a password reset, please ignore this email or contact support if you have concerns.
+                        </p>
+                      </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                      <td style="padding: 30px 40px; background-color: #f9fafb; border-radius: 0 0 8px 8px; text-align: center;">
+                        <p style="margin: 0; color: #6b7280; font-size: 12px;">
+                          © ${new Date().getFullYear()} TransportConnect. All rights reserved.
+                        </p>
+                        <p style="margin: 10px 0 0; color: #9ca3af; font-size: 12px;">
+                          This is an automated email, please do not reply.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </body>
         </html>
-      `,
-      text: `
-        Hello ${firstName || "User"},
-        
-        We received a request to reset your password. Click the link below to create a new password:
-        
-        ${resetUrl}
-        
-        This link will expire in 1 hour. If you didn't request a password reset, please ignore this email.
-        
-        © ${new Date().getFullYear()} ${appName}. All rights reserved.
       `,
     }
 
@@ -98,68 +113,7 @@ export const sendPasswordResetEmail = async (email, resetToken, firstName) => {
     return { success: true, messageId: info.messageId }
   } catch (error) {
     console.error("Error sending password reset email:", error)
-    return { success: false, message: error.message }
-  }
-}
-
-// Send password reset success email
-export const sendPasswordResetSuccessEmail = async (email, firstName) => {
-  try {
-    const transporter = createTransporter()
-    if (!transporter) {
-      console.error("Email transporter not configured")
-      return { success: false, message: "Email service not configured" }
-    }
-
-    const appName = process.env.APP_NAME || "TransportConnect"
-    const loginUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/login`
-
-    const mailOptions = {
-      from: `"${appName}" <${process.env.EMAIL_USER}>`,
-      to: email,
-      subject: "Password Reset Successful",
-      html: `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Password Reset Successful</title>
-        </head>
-        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">${appName}</h1>
-          </div>
-          <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 10px 10px; border: 1px solid #e5e7eb;">
-            <h2 style="color: #111827; margin-top: 0;">Hello ${firstName || "User"},</h2>
-            <p style="color: #4b5563; font-size: 16px;">
-              Your password has been successfully reset. You can now log in with your new password.
-            </p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${loginUrl}" 
-                 style="display: inline-block; background: #10b981; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                Go to Login
-              </a>
-            </div>
-            <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-              If you didn't make this change, please contact our support team immediately.
-            </p>
-            <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 30px 0;">
-            <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 0;">
-              © ${new Date().getFullYear()} ${appName}. All rights reserved.
-            </p>
-          </div>
-        </body>
-        </html>
-      `,
-    }
-
-    const info = await transporter.sendMail(mailOptions)
-    console.log("Password reset success email sent:", info.messageId)
-    return { success: true, messageId: info.messageId }
-  } catch (error) {
-    console.error("Error sending password reset success email:", error)
-    return { success: false, message: error.message }
+    throw error
   }
 }
 
