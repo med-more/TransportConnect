@@ -1,39 +1,72 @@
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { ArrowLeft, Mail, CheckCircle, Home, Facebook, Twitter, Linkedin, Instagram } from "lucide-react"
+import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle, Home, Facebook, Twitter, Linkedin, Instagram } from "lucide-react"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import toast from "react-hot-toast"
 import { authAPI } from "../../services/api"
 
-const ForgotPasswordPage = () => {
+const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false)
-  const [emailSent, setEmailSent] = useState(false)
+  const [passwordReset, setPasswordReset] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  const token = searchParams.get("token")
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm()
 
+  const password = watch("password")
+
+  useEffect(() => {
+    if (!token) {
+      toast.error("Invalid reset link. Please request a new password reset.")
+      navigate("/forgot-password")
+    }
+  }, [token, navigate])
+
   const onSubmit = async (data) => {
+    if (!token) {
+      toast.error("Invalid reset token")
+      return
+    }
+
+    if (data.password !== data.confirmPassword) {
+      toast.error("Passwords do not match")
+      return
+    }
+
     setLoading(true)
     try {
-      const response = await authAPI.forgotPassword(data.email)
+      const response = await authAPI.resetPassword(token, data.password)
       if (response.data.success) {
-        setEmailSent(true)
-        toast.success(response.data.message || "Password reset email sent!")
+        setPasswordReset(true)
+        toast.success(response.data.message || "Password reset successfully!")
+        // Redirect to login after 3 seconds
+        setTimeout(() => {
+          navigate("/login")
+        }, 3000)
       } else {
-        toast.error(response.data.message || "Error sending email")
+        toast.error(response.data.message || "Error resetting password")
       }
     } catch (error) {
-      console.error("Error sending password reset email:", error)
-      toast.error(error.response?.data?.message || "Error sending email. Please try again.")
+      console.error("Error resetting password:", error)
+      toast.error(error.response?.data?.message || "Error resetting password. The link may have expired.")
     } finally {
       setLoading(false)
     }
+  }
+
+  if (!token) {
+    return null // Will redirect in useEffect
   }
 
   return (
@@ -51,13 +84,13 @@ const ForgotPasswordPage = () => {
             {/* Mobile Image */}
             <img
               src="/auth/forgetMobile.webp"
-              alt="Forgot Password"
+              alt="Reset Password"
               className="lg:hidden w-full h-full object-cover opacity-80"
             />
             {/* Desktop Image */}
             <img
               src="/auth/forgetDesktop.webp"
-              alt="Forgot Password"
+              alt="Reset Password"
               className="hidden lg:block w-full h-full object-cover opacity-80"
             />
             {/* Overlay for better text readability */}
@@ -84,7 +117,7 @@ const ForgotPasswordPage = () => {
           </div>
         </div>
 
-        {/* Right Section - Forgot Password Form */}
+        {/* Right Section - Reset Password Form */}
         <div className="lg:w-[60%] bg-white p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-between">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
@@ -96,17 +129,19 @@ const ForgotPasswordPage = () => {
 
           {/* Welcome Message */}
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Forgot Password?</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+              {passwordReset ? "Password Reset Successful!" : "Reset Your Password"}
+            </h2>
             <p className="text-sm sm:text-base text-muted-foreground px-2">
-              {emailSent
-                ? "Check your email inbox for reset instructions"
-                : "Enter your email address to receive a password reset link"}
+              {passwordReset
+                ? "Your password has been reset successfully. Redirecting to login..."
+                : "Enter your new password below"}
             </p>
           </div>
 
           {/* Form */}
           <div className="flex-1 flex items-center justify-center">
-            {emailSent ? (
+            {passwordReset ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -116,14 +151,13 @@ const ForgotPasswordPage = () => {
                 <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="w-10 h-10 text-success" />
                 </div>
-                <h3 className="text-2xl font-semibold text-foreground mb-3">Email sent!</h3>
+                <h3 className="text-2xl font-semibold text-foreground mb-3">Password Reset Complete!</h3>
                 <p className="text-muted-foreground mb-8">
-                  We've sent a password reset link to your email address. Check your inbox and follow the instructions
-                  to reset your password.
+                  Your password has been successfully reset. You can now log in with your new password.
                 </p>
                 <Link to="/login">
                   <Button className="w-full bg-primary hover:bg-primary/90 text-white" size="large">
-                    Back to login
+                    Go to Login
                   </Button>
                 </Link>
               </motion.div>
@@ -136,31 +170,68 @@ const ForgotPasswordPage = () => {
                 className="space-y-6 max-w-md mx-auto w-full"
               >
                 <div>
-                  <Input
-                    type="email"
-                    placeholder="Email"
-                    error={errors.email?.message}
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^\S+@\S+$/i,
-                        message: "Invalid email format",
-                      },
-                    })}
-                    className="w-full"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="New Password"
+                      error={errors.password?.message}
+                      {...register("password", {
+                        required: "Password is required",
+                        minLength: {
+                          value: 6,
+                          message: "Password must be at least 6 characters",
+                        },
+                      })}
+                      className="w-full pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
-                <Button type="submit" loading={loading} className="w-full bg-primary hover:bg-primary/90 text-white" size="large">
-                  <Mail className="w-4 h-4 mr-2" />
-                  Send reset link
+                <div>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirm New Password"
+                      error={errors.confirmPassword?.message}
+                      {...register("confirmPassword", {
+                        required: "Please confirm your password",
+                        validate: (value) =>
+                          value === password || "Passwords do not match",
+                      })}
+                      className="w-full pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  loading={loading}
+                  className="w-full bg-primary hover:bg-primary/90 text-white"
+                  size="large"
+                >
+                  <Lock className="w-4 h-4 mr-2" />
+                  Reset Password
                 </Button>
               </motion.form>
             )}
           </div>
 
           {/* Back to Login Link */}
-          {!emailSent && (
+          {!passwordReset && (
             <div className="text-center mt-6">
               <Link to="/login" className="inline-flex items-center text-sm text-primary hover:underline font-medium">
                 <ArrowLeft className="w-4 h-4 mr-2" />
@@ -190,4 +261,5 @@ const ForgotPasswordPage = () => {
   )
 }
 
-export default ForgotPasswordPage
+export default ResetPasswordPage
+

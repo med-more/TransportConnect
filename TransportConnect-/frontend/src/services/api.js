@@ -47,6 +47,8 @@ export const authAPI = {
   register: (userData) => api.post("/auth/register", userData),
   getProfile: () => api.get("/auth/me"),
   refreshToken: () => api.post("/auth/refresh"),
+  forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
+  resetPassword: (token, password) => api.post("/auth/reset-password", { token, password }),
 }
 
 // API des trajets
