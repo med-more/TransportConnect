@@ -754,14 +754,14 @@ const WelcomePage = () => {
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/about-us" className="text-white/70 hover:text-white transition-colors">
                     About Us
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/contact" className="text-white/70 hover:text-white transition-colors">
                     Contact
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
@@ -771,29 +771,29 @@ const WelcomePage = () => {
               <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Services</h4>
               <ul className="space-y-2 sm:space-y-3">
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/services" className="text-white/70 hover:text-white transition-colors">
+                    Services
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/for-shippers" className="text-white/70 hover:text-white transition-colors">
                     For Shippers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/for-drivers" className="text-white/70 hover:text-white transition-colors">
                     For Drivers
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
-                    Pricing
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/features" className="text-white/70 hover:text-white transition-colors">
                     Features
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a href="#" className="text-white/70 hover:text-white transition-colors">
+                  <Link to="/support" className="text-white/70 hover:text-white transition-colors">
                     Support
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>

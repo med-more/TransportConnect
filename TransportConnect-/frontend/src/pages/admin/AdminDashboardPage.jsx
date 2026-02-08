@@ -192,18 +192,18 @@ const AdminDashboardPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-3 sm:p-4 md:p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-8">
-            <div className="h-32 bg-gray-200 rounded-3xl"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="animate-pulse space-y-4 sm:space-y-6 md:space-y-8">
+            <div className="h-24 sm:h-28 md:h-32 bg-gray-200 rounded-2xl sm:rounded-3xl"></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-32 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-24 sm:h-28 md:h-32 bg-gray-200 rounded-lg sm:rounded-xl"></div>
               ))}
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-48 bg-gray-200 rounded-xl"></div>
+                <div key={i} className="h-40 sm:h-44 md:h-48 bg-gray-200 rounded-lg sm:rounded-xl"></div>
               ))}
             </div>
           </div>
@@ -213,9 +213,9 @@ const AdminDashboardPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-3 sm:p-4 md:p-6">
       <motion.div 
-        className="max-w-7xl mx-auto space-y-8"
+        className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -223,17 +223,17 @@ const AdminDashboardPage = () => {
         {/* Hero Header */}
         <motion.div
           variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-8 text-white"
+          className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-4 sm:p-6 md:p-8 text-white"
         >
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
-            <div className="absolute top-1/2 right-0 w-24 h-24 bg-white rounded-full translate-x-12 -translate-y-12"></div>
-            <div className="absolute bottom-0 left-1/3 w-20 h-20 bg-white rounded-full translate-y-10"></div>
+            <div className="absolute top-0 left-0 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full -translate-x-8 sm:-translate-x-12 md:-translate-x-16 -translate-y-8 sm:-translate-y-12 md:-translate-y-16"></div>
+            <div className="absolute top-1/2 right-0 w-12 h-12 sm:w-18 sm:h-18 md:w-24 md:h-24 bg-white rounded-full translate-x-6 sm:translate-x-9 md:translate-x-12 -translate-y-6 sm:-translate-y-9 md:-translate-y-12"></div>
+            <div className="absolute bottom-0 left-1/3 w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white rounded-full translate-y-5 sm:translate-y-8 md:translate-y-10"></div>
           </div>
           
           <div className="relative z-10 text-center">
             <motion.h1 
-              className="text-5xl font-bold mb-4"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
@@ -241,7 +241,7 @@ const AdminDashboardPage = () => {
               Tableau de bord Admin
             </motion.h1>
             <motion.p 
-              className="text-xl opacity-90 max-w-2xl mx-auto"
+              className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 max-w-2xl mx-auto px-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
@@ -254,7 +254,7 @@ const AdminDashboardPage = () => {
         {/* Statistics Cards */}
         <motion.div 
           variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
         >
           {statCards.map((stat, index) => (
             <motion.div
@@ -263,15 +263,15 @@ const AdminDashboardPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className="p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
+              <Card className="p-4 sm:p-5 md:p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
                 <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.gradient}`}></div>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-text-secondary text-sm font-medium mb-1">{stat.title}</p>
-                    <p className="text-3xl font-bold text-text-primary">{stat.value}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-text-secondary text-xs sm:text-sm font-medium mb-1 truncate">{stat.title}</p>
+                    <p className="text-2xl sm:text-3xl font-bold text-text-primary">{stat.value}</p>
                   </div>
-                  <div className={`p-3 rounded-lg bg-${stat.color}/10 group-hover:bg-${stat.color}/20 transition-colors duration-300`}>
-                    <stat.icon className={`w-8 h-8 text-${stat.color}`} />
+                  <div className={`p-2 sm:p-3 rounded-lg bg-${stat.color}/10 group-hover:bg-${stat.color}/20 transition-colors duration-300 flex-shrink-0 ml-2`}>
+                    <stat.icon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-${stat.color}`} />
                   </div>
                 </div>
               </Card>
@@ -280,19 +280,21 @@ const AdminDashboardPage = () => {
         </motion.div>
 
         {/* Ajout du graphique sous les cards */}
-        <motion.div variants={itemVariants} className="my-8">
-          <Card className="p-6">
-            <Bar data={chartData} options={chartOptions} height={80} />
+        <motion.div variants={itemVariants} className="my-4 sm:my-6 md:my-8">
+          <Card className="p-3 sm:p-4 md:p-6">
+            <div className="h-48 sm:h-64 md:h-80">
+              <Bar data={chartData} options={chartOptions} />
+            </div>
           </Card>
         </motion.div>
 
         {/* Quick Actions */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center">
-            <Settings className="w-6 h-6 mr-3 text-primary" />
-            Actions rapides
+          <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 sm:mb-4 md:mb-6 flex items-center">
+            <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary flex-shrink-0" />
+            <span>Actions rapides</span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
             {quickActions.map((action, index) => (
               <motion.div
                 key={action.title}
@@ -300,20 +302,20 @@ const AdminDashboardPage = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: index * 0.1 }}
               >
-                <Card className="p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
+                <Card className="p-4 sm:p-5 md:p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
                   <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-${action.color} to-${action.color}/60`}></div>
-                  <div className="flex items-center space-x-4">
-                    <div className={`p-3 rounded-lg bg-${action.color}/10 group-hover:bg-${action.color}/20 transition-colors duration-300`}>
-                      <action.icon className={`w-8 h-8 text-${action.color}`} />
+                  <div className="flex items-center space-x-3 sm:space-x-4">
+                    <div className={`p-2 sm:p-3 rounded-lg bg-${action.color}/10 group-hover:bg-${action.color}/20 transition-colors duration-300 flex-shrink-0`}>
+                      <action.icon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-${action.color}`} />
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-text-primary mb-1">{action.title}</h3>
-                      <p className="text-text-secondary text-sm">{action.description}</p>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary mb-1 truncate">{action.title}</h3>
+                      <p className="text-text-secondary text-xs sm:text-sm line-clamp-2">{action.description}</p>
                     </div>
                     <Button
                       variant="ghost"
                       size="small"
-                      className={`text-${action.color} hover:bg-${action.color}/10`}
+                      className={`text-${action.color} hover:bg-${action.color}/10 flex-shrink-0`}
                       onClick={() => navigate(action.href)}
                     >
                       <Eye className="w-4 h-4" />
@@ -327,31 +329,31 @@ const AdminDashboardPage = () => {
 
         {/* Recent Activity */}
         <motion.div variants={itemVariants}>
-          <h2 className="text-2xl font-bold text-text-primary mb-6 flex items-center">
-            <BarChart3 className="w-6 h-6 mr-3 text-primary" />
-            Activité récente
+          <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 sm:mb-4 md:mb-6 flex items-center">
+            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary flex-shrink-0" />
+            <span>Activité récente</span>
           </h2>
-          <Card className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4 p-4 bg-green-50 rounded-lg">
-                <CheckCircle className="w-5 h-5 text-success" />
-                <div>
-                  <p className="font-medium text-text-primary">Nouveau trajet créé</p>
-                  <p className="text-sm text-text-secondary">Il y a 2 minutes</p>
+          <Card className="p-4 sm:p-5 md:p-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-green-50 rounded-lg">
+                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-text-primary text-sm sm:text-base">Nouveau trajet créé</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 2 minutes</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4 p-4 bg-yellow-50 rounded-lg">
-                <Clock className="w-5 h-5 text-warning" />
-                <div>
-                  <p className="font-medium text-text-primary">Demande en attente</p>
-                  <p className="text-sm text-text-secondary">Il y a 15 minutes</p>
+              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-yellow-50 rounded-lg">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-text-primary text-sm sm:text-base">Demande en attente</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 15 minutes</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
-                <UserCheck className="w-5 h-5 text-info" />
-                <div>
-                  <p className="font-medium text-text-primary">Utilisateur vérifié</p>
-                  <p className="text-sm text-text-secondary">Il y a 1 heure</p>
+              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-blue-50 rounded-lg">
+                <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-info flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-text-primary text-sm sm:text-base">Utilisateur vérifié</p>
+                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 1 heure</p>
                 </div>
               </div>
             </div>

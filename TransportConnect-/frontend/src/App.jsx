@@ -13,6 +13,14 @@ import ResetPasswordPage from "./pages/auth/ResetPasswordPage"
 import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage"
 import RoleSelectionPage from "./pages/auth/RoleSelectionPage"
 
+import ServicesPage from "./pages/static/ServicesPage"
+import ForShippersPage from "./pages/static/ForShippersPage"
+import ForDriversPage from "./pages/static/ForDriversPage"
+import FeaturesPage from "./pages/static/FeaturesPage"
+import SupportPage from "./pages/static/SupportPage"
+import AboutUsPage from "./pages/static/AboutUsPage"
+import ContactPage from "./pages/static/ContactPage"
+
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import TripsPage from "./pages/trips/TripsPage"
 import TripDetailPage from "./pages/trips/TripDetailPage"
@@ -41,6 +49,15 @@ function AppRoutes() {
       <Route path="/reset-password" element={<PublicRoute><ResetPasswordPage /></PublicRoute>} />
       <Route path="/auth/google/callback" element={<PublicRoute><GoogleCallbackPage /></PublicRoute>} />
       <Route path="/auth/select-role" element={<PublicRoute><RoleSelectionPage /></PublicRoute>} />
+
+      {/* Static Pages */}
+      <Route path="/services" element={<PublicRoute><ServicesPage /></PublicRoute>} />
+      <Route path="/for-shippers" element={<PublicRoute><ForShippersPage /></PublicRoute>} />
+      <Route path="/for-drivers" element={<PublicRoute><ForDriversPage /></PublicRoute>} />
+      <Route path="/features" element={<PublicRoute><FeaturesPage /></PublicRoute>} />
+      <Route path="/support" element={<PublicRoute><SupportPage /></PublicRoute>} />
+      <Route path="/about-us" element={<PublicRoute><AboutUsPage /></PublicRoute>} />
+      <Route path="/contact" element={<PublicRoute><ContactPage /></PublicRoute>} />
 
       {/* Protected user routes with Layout */}
       <Route

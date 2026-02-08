@@ -154,38 +154,38 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">Shipment Tracking</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Tracking</h3>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="small" className="text-xs">
+                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
                       Tracking
                     </Button>
-                    <Button variant="outline" size="small" className="text-xs">
+                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
                       Traffic
                     </Button>
-                    <Button variant="outline" size="small" className="text-xs">
+                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
                       POI
                     </Button>
                   </div>
                 </div>
 
                 {/* Map Placeholder */}
-                <div className="w-full h-64 bg-background rounded-lg border border-border mb-4 flex items-center justify-center">
+                <div className="w-full h-48 sm:h-56 md:h-64 bg-background rounded-lg border border-border mb-4 flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Map visualization</p>
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Distance to arrival</p>
-                      <p className="text-lg font-semibold text-foreground">120 KM / 1h 50min</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Distance to arrival</p>
+                      <p className="text-base sm:text-lg font-semibold text-foreground">120 KM / 1h 50min</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Traffic and route optimization</span>
                       <span className="font-medium text-foreground">85%</span>
                     </div>
@@ -194,9 +194,9 @@ const DashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button size="small">Optimize</Button>
-                    <Button variant="outline" size="small">
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button size="small" className="w-full sm:w-auto">Optimize</Button>
+                    <Button variant="outline" size="small" className="w-full sm:w-auto">
                       View all
                     </Button>
                   </div>
@@ -207,13 +207,13 @@ const DashboardPage = () => {
             {/* Recent Trips */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
                     {user?.role === "conducteur" ? "My Recent Trips" : "Available Trips"}
                   </h3>
                   <Link to="/trips">
-                    <Button variant="ghost" size="small">
-                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
                 </div>
@@ -229,13 +229,13 @@ const DashboardPage = () => {
                         key={trip._id}
                         className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-primary/10 rounded-lg">
-                              <Truck className="w-4 h-4 text-primary" />
+                        <div className="flex items-start justify-between mb-2 gap-2">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                              <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                             </div>
-                            <div>
-                              <p className="font-medium text-foreground">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-foreground text-sm sm:text-base truncate">
                                 {trip.departure.city} → {trip.destination.city}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -247,19 +247,19 @@ const DashboardPage = () => {
                               </p>
                             </div>
                           </div>
-                          <span className="text-lg font-bold text-primary">{trip.pricePerKg}€/kg</span>
+                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0">{trip.pricePerKg}€/kg</span>
                         </div>
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Package className="w-3 h-3" />
                             {trip.availableCapacity.weight}kg available
                           </span>
                           {user?.role !== "conducteur" && trip.driver && (
                             <span className="flex items-center gap-1">
-                              <span className="w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white text-xs">
+                              <span className="w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white text-xs flex-shrink-0">
                                 {trip.driver.firstName?.charAt(0)}
                               </span>
-                              {trip.driver.firstName} {trip.driver.lastName}
+                              <span className="truncate">{trip.driver.firstName} {trip.driver.lastName}</span>
                             </span>
                           )}
                         </div>
@@ -282,8 +282,8 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">Alerts & Notifications</h3>
-                  <div className="w-2 h-2 bg-primary rounded-full" />
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Alerts & Notifications</h3>
+                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
                 </div>
                 <div className="space-y-3">
                   <div className="p-3 bg-accent rounded-lg border-l-4 border-primary">
@@ -303,29 +303,29 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">Shipment Details</h3>
-                  <Button variant="ghost" size="small">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Details</h3>
+                  <Button variant="ghost" size="small" className="text-xs sm:text-sm">
                     Read more
                   </Button>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                      <span className="text-sm font-semibold text-white">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs sm:text-sm font-semibold text-white">
                         {user?.firstName?.charAt(0)}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-medium text-foreground">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground text-sm sm:text-base truncate">
                         {user?.firstName} {user?.lastName}
                       </p>
                       <p className="text-xs text-muted-foreground">ID: {user?._id?.slice(-8)}</p>
                     </div>
                   </div>
 
-                  <div className="p-3 bg-background rounded-lg">
+                  <div className="p-2 sm:p-3 bg-background rounded-lg">
                     <p className="text-xs text-muted-foreground mb-1">Total Value</p>
-                    <p className="text-xl font-bold text-foreground">$520.45</p>
+                    <p className="text-lg sm:text-xl font-bold text-foreground">$520.45</p>
                   </div>
 
                   <div className="space-y-2">
@@ -357,14 +357,14 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">Current Truck Capacity</h3>
-                  <Button variant="ghost" size="small">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Current Truck Capacity</h3>
+                  <Button variant="ghost" size="small" className="text-xs sm:text-sm">
                     Read more
                   </Button>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Truck Illustration */}
-                  <div className="relative w-full h-32 bg-background rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="relative w-full h-24 sm:h-28 md:h-32 bg-background rounded-lg flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 flex items-end">
                       <div className="w-full h-3/4 bg-primary/20 relative">
                         <div
@@ -373,23 +373,23 @@ const DashboardPage = () => {
                         />
                       </div>
                     </div>
-                    <Truck className="w-16 h-16 text-foreground/20 relative z-10" />
+                    <Truck className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-foreground/20 relative z-10" />
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Truck ID</span>
-                      <span className="font-medium text-foreground">AL-223965406</span>
+                      <span className="font-medium text-foreground text-xs sm:text-sm truncate ml-2">AL-223965406</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Capacity</span>
                       <span className="font-bold text-primary">82%</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Status</span>
                       <span className="text-primary font-medium">On Route</span>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-muted-foreground">Weight</span>
                       <span className="font-medium text-foreground">8,453 KG</span>
                     </div>
@@ -401,13 +401,13 @@ const DashboardPage = () => {
             {/* Recent Requests */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
                     {user?.role === "conducteur" ? "Received Requests" : "My Requests"}
                   </h3>
                   <Link to="/requests">
-                    <Button variant="ghost" size="small">
-                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
                 </div>
@@ -423,18 +423,18 @@ const DashboardPage = () => {
                         key={request._id}
                         className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
                       >
-                        <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-start justify-between mb-2 gap-2">
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-foreground truncate">
+                            <p className="font-medium text-xs sm:text-sm text-foreground truncate">
                               {request.cargo?.description?.substring(0, 30)}...
                             </p>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-1 truncate">
                               {request.pickup?.city} → {request.delivery?.city}
                             </p>
                           </div>
                           <span
                             className={clsx(
-                              "px-2 py-1 rounded-md text-xs font-medium ml-2 flex-shrink-0",
+                              "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium flex-shrink-0",
                               request.status === "pending"
                                 ? "bg-warning/10 text-warning"
                                 : request.status === "accepted"
