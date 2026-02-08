@@ -1,33 +1,58 @@
+import { useState } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Star } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  ArrowLeft,
+  Star,
+  MapPin,
+  Calendar,
+  Weight,
+  Truck,
+  Navigation,
+  Package,
+  User,
+  Phone,
+  Mail,
+  Ruler,
+  Euro,
+  CheckCircle,
+  Clock,
+  XCircle,
+  Eye,
+} from "lucide-react"
 import { tripsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import toast from "react-hot-toast"
 import Card from "../../components/ui/Card"
+import { normalizeAvatarUrl } from "../../utils/avatar"
+import clsx from "clsx"
 
 const TripDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const [deleteDialog, setDeleteDialog] = useState(false)
+  const [completeDialog, setCompleteDialog] = useState(false)
 
   const { data: tripData, isLoading } = useQuery({
     queryKey: ["trip", id],
-    queryFn: () => tripsAPI.getTripById(id)
+    queryFn: () => tripsAPI.getTripById(id),
   })
 
   const deleteTripMutation = useMutation({
     mutationFn: tripsAPI.deleteTrip,
     onSuccess: () => {
       queryClient.invalidateQueries("trips")
-      toast.success("Trajet supprimé avec succès")
+      toast.success("Trip deleted successfully")
       navigate("/trips")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la suppression")
+      toast.error(error.response?.data?.message || "Error deleting trip")
     },
   })
 
@@ -35,95 +60,29 @@ const TripDetailPage = () => {
     mutationFn: tripsAPI.completeTrip,
     onSuccess: () => {
       queryClient.invalidateQueries(["trip", id])
-      toast.success("Trajet marqué comme terminé")
+      toast.success("Trip marked as completed")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la finalisation")
+      toast.error(error.response?.data?.message || "Error completing trip")
     },
   })
 
   const handleDeleteTrip = () => {
-    toast((t) => (
-      <span style={{display: 'block', minWidth: 220}}>
-        <span style={{fontWeight: 600, color: '#b91c1c'}}>Supprimer ce trajet ?</span>
-        <div style={{marginTop: 14, display: 'flex', gap: 12, justifyContent: 'flex-end'}}>
-          <button
-            onClick={() => { toast.dismiss(t.id); deleteTripMutation.mutate(id); }}
-            style={{
-              background: 'linear-gradient(90deg,#ef4444,#fca5a5)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(239,68,68,0.08)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg,#dc2626,#ef4444)'}
-            onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg,#ef4444,#fca5a5)'}
-          >Oui</button>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{
-              background: '#f3f4f6',
-              color: '#222831',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#e5e7eb'}
-            onMouseOut={e => e.currentTarget.style.background = '#f3f4f6'}
-          >Non</button>
-        </div>
-      </span>
-    ), { duration: 7000 });
+    setDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = () => {
+    deleteTripMutation.mutate(id)
+    setDeleteDialog(false)
   }
 
   const handleCompleteTrip = () => {
-    toast((t) => (
-      <span style={{display: 'block', minWidth: 220}}>
-        <span style={{fontWeight: 600, color: '#256029'}}>Marquer comme terminé ?</span>
-        <div style={{marginTop: 14, display: 'flex', gap: 12, justifyContent: 'flex-end'}}>
-          <button
-            onClick={() => { toast.dismiss(t.id); completeTripMutation.mutate(id); }}
-            style={{
-              background: 'linear-gradient(90deg,#22c55e,#bbf7d0)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(34,197,94,0.08)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg,#16a34a,#22c55e)'}
-            onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg,#22c55e,#bbf7d0)'}
-          >Oui</button>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{
-              background: '#f3f4f6',
-              color: '#222831',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#e5e7eb'}
-            onMouseOut={e => e.currentTarget.style.background = '#f3f4f6'}
-          >Non</button>
-        </div>
-      </span>
-    ), { duration: 7000 });
+    setCompleteDialog(true)
+  }
+
+  const handleConfirmComplete = () => {
+    completeTripMutation.mutate(id)
+    setCompleteDialog(false)
   }
 
   if (isLoading) {
@@ -137,8 +96,8 @@ const TripDetailPage = () => {
   if (!tripData?.data?.trip) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-4">Trajet non trouvé</h1>
-        <Button onClick={() => navigate("/trips")}>Retour aux trajets</Button>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Trip not found</h1>
+        <Button onClick={() => navigate("/trips")}>Back to Trips</Button>
       </div>
     )
   }
@@ -146,163 +105,449 @@ const TripDetailPage = () => {
   const trip = tripData.data.trip
   const isOwner = user?.id === trip.driver._id
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "active":
+        return "bg-success/10 text-success border-success/20"
+      case "completed":
+        return "bg-info/10 text-info border-info/20"
+      case "cancelled":
+        return "bg-destructive/10 text-destructive border-destructive/20"
+      default:
+        return "bg-muted text-muted-foreground border-border"
+    }
+  }
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "active":
+        return <CheckCircle className="w-5 h-5 text-success" />
+      case "completed":
+        return <Clock className="w-5 h-5 text-info" />
+      case "cancelled":
+        return <XCircle className="w-5 h-5 text-destructive" />
+      default:
+        return <Truck className="w-5 h-5 text-muted-foreground" />
+    }
+  }
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "active":
+        return "Active"
+      case "completed":
+        return "Completed"
+      case "cancelled":
+        return "Cancelled"
+      default:
+        return status
+    }
+  }
+
+  const getRequestStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "bg-warning/10 text-warning border-warning/20"
+      case "accepted":
+        return "bg-success/10 text-success border-success/20"
+      case "rejected":
+        return "bg-destructive/10 text-destructive border-destructive/20"
+      case "in_transit":
+        return "bg-info/10 text-info border-info/20"
+      case "delivered":
+        return "bg-success/10 text-success border-success/20"
+      default:
+        return "bg-muted text-muted-foreground border-border"
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-f4f4f4 p-0 relative overflow-hidden">
-      {/* Illustration décorative */}
-      <div className="absolute right-0 top-0 w-[420px] h-[420px] pointer-events-none z-0 opacity-10">
-        <svg viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          <ellipse cx="210" cy="210" rx="210" ry="210" fill="#0072bb" fillOpacity="0.15" />
-          <rect x="120" y="120" width="180" height="80" rx="30" fill="#0072bb" fillOpacity="0.18" />
-          <rect x="170" y="200" width="80" height="40" rx="20" fill="#5bc0eb" fillOpacity="0.18" />
-        </svg>
-      </div>
-      <div className="relative z-10 p-6 max-w-6xl mx-auto space-y-8">
-        {/* Header modernisé */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <Button variant="ghost" onClick={() => navigate(-1)} className="mr-2">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-4xl font-extrabold text-primary flex items-center gap-2 mb-1">
-                {trip.departure.city} → {trip.destination.city}
-              </h1>
-              <div className="flex items-center gap-3">
-                <span className="text-lg text-black/60 font-medium">
-                  Départ le {new Date(trip.departureDate).toLocaleDateString("fr-FR")}
-                </span>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${trip.status === "active" ? "bg-success bg-opacity-20 text-success" : trip.status === "completed" ? "bg-info bg-opacity-20 text-info" : "bg-error bg-opacity-20 text-error"}`}>
-                  {trip.status === "active" ? "Actif" : trip.status === "completed" ? "Terminé" : "Annulé"}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3 w-full md:w-auto justify-end">
-            {isOwner && trip.status === "active" && (
-              <>
-                <Button variant="outline" onClick={handleCompleteTrip} loading={completeTripMutation.isLoading} className="rounded-xl">
-                  Marquer comme terminé
-                </Button>
-                <Button variant="danger" onClick={handleDeleteTrip} loading={deleteTripMutation.isLoading} className="rounded-xl">
-                  Supprimer
-                </Button>
-              </>
-            )}
+    <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+      >
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground truncate">
+              {trip.departure.city} → {trip.destination.city}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
+              Departure: {new Date(trip.departureDate).toLocaleDateString("en-US", { dateStyle: "long" })}
+            </p>
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Itinéraire</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-medium text-primary">Départ</h3>
-                  <p className="text-black/70">
-                    {trip.departure.address}, {trip.departure.city}
-                  </p>
-                  <p className="text-sm text-black/50">{new Date(trip.departureDate).toLocaleString("fr-FR")}</p>
+
+        <div
+          className={clsx(
+            "flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border font-semibold text-sm sm:text-base flex-shrink-0",
+            getStatusColor(trip.status)
+          )}
+        >
+          {getStatusIcon(trip.status)}
+          <span>{getStatusLabel(trip.status)}</span>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Route Information */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Navigation className="w-6 h-6 text-primary" />
                 </div>
-                <div>
-                  <h3 className="font-medium text-primary">Destination</h3>
-                  <p className="text-black/70">
-                    {trip.destination.address}, {trip.destination.city}
-                  </p>
-                  <p className="text-sm text-black/50">{new Date(trip.arrivalDate).toLocaleString("fr-FR")}</p>
-                </div>
+                <h2 className="text-xl font-semibold text-foreground">Route Information</h2>
               </div>
-            </Card>
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Capacité et tarification</h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-medium text-primary mb-2">Capacité disponible</h3>
-                  <p className="text-2xl font-extrabold text-primary">{trip.availableCapacity.weight} kg</p>
-                  <p className="text-sm text-black/50">
-                    Dimensions : {trip.availableCapacity.dimensions.length} × {trip.availableCapacity.dimensions.width} × {trip.availableCapacity.dimensions.height} cm
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">Departure</h3>
+                  </div>
+                  <p className="text-foreground mb-1">{trip.departure.address}</p>
+                  <p className="text-muted-foreground">{trip.departure.city}</p>
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {new Date(trip.departureDate).toLocaleString("en-US", {
+                          dateStyle: "long",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">Destination</h3>
+                  </div>
+                  <p className="text-foreground mb-1">{trip.destination.address}</p>
+                  <p className="text-muted-foreground">{trip.destination.city}</p>
+                  <div className="mt-3 pt-3 border-t border-border">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">
+                        {new Date(trip.arrivalDate).toLocaleString("en-US", {
+                          dateStyle: "long",
+                          timeStyle: "short",
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Capacity and Pricing */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Package className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">Capacity & Pricing</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Weight className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium text-muted-foreground">Available Weight</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">{trip.availableCapacity.weight} kg</p>
+                </div>
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Ruler className="w-4 h-4 text-muted-foreground" />
+                    <h3 className="text-sm font-medium text-muted-foreground">Dimensions</h3>
+                  </div>
+                  <p className="text-foreground font-semibold text-sm">
+                    {trip.availableCapacity.dimensions.length} × {trip.availableCapacity.dimensions.width} ×{" "}
+                    {trip.availableCapacity.dimensions.height} cm
                   </p>
                 </div>
-                <div>
-                  <h3 className="font-medium text-primary mb-2">Prix</h3>
-                  <p className="text-2xl font-extrabold text-primary">{trip.pricePerKg}DH/kg</p>
+                <div className="p-4 bg-primary/10 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Euro className="w-4 h-4 text-primary" />
+                    <h3 className="text-sm font-medium text-primary">Price per kg</h3>
+                  </div>
+                  <p className="text-2xl font-bold text-primary">{trip.pricePerKg}€/kg</p>
                 </div>
               </div>
             </Card>
-            <Card className="p-8">
-              <h2 className="text-2xl font-bold text-primary mb-4">Types de cargaison acceptés</h2>
-              <div className="flex flex-wrap gap-2">
-                {trip.acceptedCargoTypes.map((type) => (
-                  <span key={type} className="px-3 py-1 bg-input-background text-primary rounded-lg text-sm font-semibold">
-                    {type}
-                  </span>
-                ))}
-              </div>
-            </Card>
-            {trip.description && (
-              <Card className="p-8">
-                <h2 className="text-2xl font-bold text-primary mb-4">Description</h2>
-                <p className="text-black/70">{trip.description}</p>
+          </motion.div>
+
+          {/* Accepted Cargo Types */}
+          {trip.acceptedCargoTypes && trip.acceptedCargoTypes.length > 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <Package className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-foreground">Accepted Cargo Types</h2>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {trip.acceptedCargoTypes.map((type) => (
+                    <span
+                      key={type}
+                      className="px-4 py-2 bg-accent rounded-lg text-sm font-medium text-foreground"
+                    >
+                      {type}
+                    </span>
+                  ))}
+                </div>
               </Card>
-            )}
-            {isOwner && (
-              <Card className="p-8">
-                <h2 className="text-2xl font-bold text-primary mb-4">
-                  Demandes reçues ({trip.requests?.length || 0})
-                </h2>
+            </motion.div>
+          )}
+
+          {/* Description */}
+          {trip.description && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-xl font-semibold text-foreground mb-4">Description</h2>
+                <p className="text-muted-foreground leading-relaxed">{trip.description}</p>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Requests (for trip owner) */}
+          {isOwner && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-primary/10 rounded-lg">
+                      <Package className="w-6 h-6 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-foreground">
+                      Received Requests ({trip.requests?.length || 0})
+                    </h2>
+                  </div>
+                </div>
                 {trip.requests?.length > 0 ? (
                   <div className="space-y-4">
                     {trip.requests.map((request) => (
-                      <div key={request._id} className="border rounded-xl p-4 bg-white/70 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                          <h3 className="font-medium text-primary">
-                            {request.sender.firstName} {request.sender.lastName}
-                          </h3>
-                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${request.status === "pending" ? "bg-warning bg-opacity-20 text-warning" : request.status === "accepted" ? "bg-success bg-opacity-20 text-success" : "bg-error bg-opacity-20 text-error"}`}>{request.status}</span>
-                          <p className="text-sm text-black/60 mt-1">{request.cargo.description}</p>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="text-lg font-bold text-primary">{request.price}DH</span>
-                          <span className="text-sm text-black/60">{request.cargo.weight}kg</span>
+                      <div
+                        key={request._id}
+                        className="p-4 bg-accent rounded-lg border border-border hover:border-primary/20 transition-colors"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <User className="w-4 h-4 text-muted-foreground" />
+                              <span className="font-medium text-foreground">
+                                {request.sender.firstName} {request.sender.lastName}
+                              </span>
+                              <span
+                                className={clsx(
+                                  "px-2 py-1 rounded-md text-xs font-medium border",
+                                  getRequestStatusColor(request.status)
+                                )}
+                              >
+                                {request.status}
+                              </span>
+                            </div>
+                            <p className="text-sm text-muted-foreground mb-2">{request.cargo.description}</p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className="text-muted-foreground">
+                                <Weight className="w-3 h-3 inline mr-1" />
+                                {request.cargo.weight}kg
+                              </span>
+                              <span className="text-primary font-semibold">{request.price}€</span>
+                            </div>
+                          </div>
+                          <Link to={`/requests/${request._id}`}>
+                            <Button variant="ghost" size="small">
+                              <Eye className="w-4 h-4 mr-2" />
+                              View
+                            </Button>
+                          </Link>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-black/60">Aucune demande reçue pour ce trajet.</div>
+                  <div className="text-center py-8">
+                    <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-50" />
+                    <p className="text-muted-foreground">No requests received for this trip yet.</p>
+                  </div>
                 )}
               </Card>
-            )}
-          </div>
-          {/* Carte conducteur */}
-          <div className="space-y-6">
-            <Card className="p-8 flex flex-col items-center text-center">
-              <h2 className="text-2xl font-bold text-primary mb-4">Conducteur</h2>
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-blue-300 flex items-center justify-center text-white text-4xl font-bold mb-2 shadow-xl">
-                {trip.driver?.avatar ? (
-                  <img src={trip.driver.avatar} alt="Avatar conducteur" className="w-24 h-24 rounded-full object-cover" />
-                ) : (
-                  trip.driver?.firstName?.charAt(0)?.toUpperCase()
-                )}
+            </motion.div>
+          )}
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Driver Card */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-primary" />
+                Driver
+              </h2>
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                  {trip.driver?.avatar ? (
+                    <img
+                      src={trip.driver.avatar}
+                      alt="Driver avatar"
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-2xl font-bold">
+                      {trip.driver?.firstName?.charAt(0)?.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div>
+                  <div className="text-lg font-semibold text-foreground mb-1">
+                    {trip.driver?.firstName} {trip.driver?.lastName}
+                  </div>
+                  {trip.driver?.stats?.averageRating && (
+                    <div className="flex items-center justify-center gap-1 mb-2">
+                      <Star className="w-4 h-4 text-warning fill-warning" />
+                      <span className="text-sm font-medium text-foreground">
+                        {trip.driver.stats.averageRating.toFixed(1)}
+                      </span>
+                    </div>
+                  )}
+                  {trip.driver?.email && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Mail className="w-4 h-4" />
+                      {trip.driver.email}
+                    </div>
+                  )}
+                  {trip.driver?.phone && (
+                    <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                      <Phone className="w-4 h-4" />
+                      {trip.driver.phone}
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="text-lg font-semibold text-black/80 mb-1">{trip.driver?.firstName} {trip.driver?.lastName}</div>
-              <div className="text-sm text-black/60 mb-2">{trip.driver?.email}</div>
-              <div className="text-sm text-black/60">{trip.driver?.phone}</div>
             </Card>
-            {user?.role !== "conducteur" && trip.status === "active" && (
-              <div className="flex justify-center mt-6">
-                <Link to={`/requests/create/${trip._id}`} className="w-full">
-                  <button
-                    className="w-full bg-white/70 backdrop-blur-xl border-2 border-[#5bc0eb] shadow-2xl rounded-2xl px-8 py-5 flex items-center justify-center gap-3 text-xl font-extrabold text-[#0072bb] transition-all duration-300 hover:bg-gradient-to-r hover:from-[#0072bb]/90 hover:to-[#5bc0eb]/90 hover:text-white hover:scale-105 hover:shadow-[#5bc0eb]/40 animate-fade-in"
-                    style={{ boxShadow: '0 8px 32px 0 rgba(91,192,235,0.18)' }}
+          </motion.div>
+
+          {/* Vehicle Info */}
+          {trip.driver?.vehicleInfo && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-primary" />
+                  Vehicle
+                </h2>
+                <div className="space-y-2">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Type</p>
+                    <p className="text-foreground font-semibold">
+                      {trip.driver.vehicleInfo.type 
+                        ? trip.driver.vehicleInfo.type.charAt(0).toUpperCase() + trip.driver.vehicleInfo.type.slice(1)
+                        : "N/A"}
+                    </p>
+                  </div>
+                  {trip.driver.vehicleInfo.capacity && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Capacity</p>
+                      <p className="text-foreground font-semibold">{trip.driver.vehicleInfo.capacity} kg</p>
+                    </div>
+                  )}
+                  {trip.driver.vehicleInfo.licensePlate && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">License Plate</p>
+                      <p className="text-foreground font-semibold">{trip.driver.vehicleInfo.licensePlate}</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Actions */}
+          {isOwner && trip.status === "active" && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <h2 className="text-lg font-semibold text-foreground mb-4">Actions</h2>
+                <div className="space-y-3">
+                  <Button
+                    className="w-full bg-gradient-to-r from-success to-success/90"
+                    onClick={handleCompleteTrip}
+                    loading={completeTripMutation.isLoading}
                   >
-                    <svg className="w-7 h-7 mr-2" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                    Nouvelle demande
-                  </button>
-                </Link>
-              </div>
-            )}
-          </div>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Mark as Completed
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full border-destructive text-destructive hover:bg-destructive/10"
+                    onClick={handleDeleteTrip}
+                    loading={deleteTripMutation.isLoading}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Delete Trip
+                  </Button>
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Create Request Button (for non-drivers) */}
+          {user?.role !== "conducteur" && trip.status === "active" && (
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+              <Link to={`/requests/create/${trip._id}`} className="block">
+                <Button className="w-full bg-gradient-to-r from-primary to-primary/90 shadow-lg">
+                  <Package className="w-4 h-4 mr-2" />
+                  Create Request
+                </Button>
+              </Link>
+            </motion.div>
+          )}
         </div>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <ConfirmationDialog
+        isOpen={deleteDialog}
+        onClose={() => setDeleteDialog(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete this trip?"
+        message="This action cannot be undone. All associated requests will also be cancelled."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+        loading={deleteTripMutation.isLoading}
+      />
+
+      <ConfirmationDialog
+        isOpen={completeDialog}
+        onClose={() => setCompleteDialog(false)}
+        onConfirm={handleConfirmComplete}
+        title="Mark trip as completed?"
+        message="This will mark the trip as completed. Make sure all deliveries are finished."
+        confirmText="Mark as Completed"
+        cancelText="Cancel"
+        variant="success"
+        loading={completeTripMutation.isLoading}
+      />
     </div>
   )
 }

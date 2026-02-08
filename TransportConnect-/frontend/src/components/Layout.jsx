@@ -1,11 +1,40 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { Home, Truck, Package, MessageCircle, User, LogOut, Menu, X, Shield, Settings, BarChart3, Users, FileText } from "lucide-react"
+import {
+  Home,
+  Truck,
+  Package,
+  MessageCircle,
+  User,
+  LogOut,
+  Menu,
+  X,
+  Shield,
+  BarChart3,
+  Users,
+  FileText,
+  Bell,
+  Search,
+  ChevronDown,
+  Plus,
+  History,
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react"
 import clsx from "clsx"
+import Button from "./ui/Button"
+import logo from "../assets/logo.svg"
+import { normalizeAvatarUrl } from "../utils/avatar"
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  // Load sidebar collapsed state from localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem("sidebarCollapsed")
+    return saved ? JSON.parse(saved) : false
+  })
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile sidebar
   const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuth()
@@ -13,15 +42,34 @@ const Layout = ({ children }) => {
   const navigate = useNavigate()
   const notificationRef = useRef(null)
 
+  // Save sidebar collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(sidebarCollapsed))
+  }, [sidebarCollapsed])
+
   const navigationItems = [
-    { name: "Tableau de bord", href: "/dashboard", icon: Home },
+    { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Mes trajets", href: "/trips", icon: Truck },
     { name: "Mes demandes", href: "/requests", icon: Package },
     { name: "Profil", href: "/profile", icon: User },
   ]
 
+  const getCreateButtonHref = () => {
+    if (user?.role === "conducteur") {
+      return "/trips/create"
+    }
+    return "/requests/create"
+  }
+
+  const getCreateButtonLabel = () => {
+    if (user?.role === "conducteur") {
+      return "Créer un trajet"
+    }
+    return "Créer une demande"
+  }
+
   const adminNavigationItems = [
-    { name: "Admin Dashboard", href: "/admin", icon: BarChart3 },
+    { name: "Dashboard", href: "/admin", icon: BarChart3 },
     { name: "Utilisateurs", href: "/admin/users", icon: Users },
     { name: "Trajets", href: "/admin/trips", icon: Truck },
     { name: "Demandes", href: "/admin/requests", icon: Package },
@@ -30,7 +78,7 @@ const Layout = ({ children }) => {
 
   const currentNavigationItems = user?.role === "admin" ? [...adminNavigationItems] : [...navigationItems]
 
-  // Fermer la popup si on clique en dehors
+  // Close notification popup when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
@@ -47,161 +95,316 @@ const Layout = ({ children }) => {
     }
   }, [showNotifications])
 
-  // Marquer toutes les notifications comme lues
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }
-
   const handleLogout = () => {
     logout()
     navigate("/login")
   }
 
+  const unreadNotifications = notifications.filter((n) => !n.read).length
+
   return (
-    <div className="min-h-screen bg-background">
-    
-      <div className={clsx("fixed inset-0 z-50 lg:hidden", sidebarOpen ? "block" : "hidden")}>
-        <div className="fixed inset-0 bg-black bg-opacity-25" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 w-64 bg-white shadow-xl">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-xl font-bold text-primary">TransportConnect</h2>
-            <button onClick={() => setSidebarOpen(false)}>
-              <X className="w-6 h-6 text-text-secondary" />
-            </button>
-          </div>
-          <nav className="mt-4">
-            {currentNavigationItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={clsx(
-                    "flex items-center px-4 py-3 text-sm font-medium transition-colors",
-                    location.pathname === item.href
-                      ? "bg-primary text-white"
-                      : "text-text-secondary hover:bg-input-background hover:text-primary",
-                  )}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <Icon className="w-5 h-5 mr-3" />
-                  {item.name}
-                </Link>
-              )
-            })}
-          </nav>
-        </div>
-      </div>
+    <div className="min-h-screen bg-background flex">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-    
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white shadow-lg">
-          <div className="flex items-center px-6 py-4 border-b">
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <Truck className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="ml-3 text-xl font-bold text-primary">TransportConnect</h2>
-            </div>
-          </div>
-
-          <nav className="mt-6 flex-1">
-            {currentNavigationItems.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.href
-              
-              return (
-                <div key={item.name} className="relative">
-                  <Link
-                    to={item.href}
-                    className={clsx(
-                      "flex items-center px-6 py-3 text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-primary text-white border-r-4 border-text-primary"
-                        : "text-text-secondary hover:bg-input-background hover:text-primary",
-                    )}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.name}
-                  </Link>
-                </div>
-              )
-            })}
-          </nav>
-
-          <div className="p-6 border-t">
-            <div className="flex items-center mb-4">
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-white font-semibold">{user?.firstName?.charAt(0)}</span>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-text-primary">
-                  {user?.firstName} {user?.lastName}
-                </p>
-                <p className="text-xs text-text-secondary capitalize">{user?.role}</p>
-              </div>
-            </div>
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center w-full px-3 py-2 text-sm text-text-secondary hover:text-error transition-colors"
-            >
-              <LogOut className="w-4 h-4 mr-2" />
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </div>
-
-    
-      <div className="lg:pl-64">
-      
-        <div className="sticky top-0 z-40 bg-white shadow-sm border-b lg:hidden">
-          <div className="flex items-center justify-between px-4 py-3">
-            <button onClick={() => setSidebarOpen(true)} className="text-text-secondary hover:text-primary">
-              <Menu className="w-6 h-6" />
-            </button>
-
-            <h1 className="text-lg font-semibold text-primary">TransportConnect</h1>
-          </div>
-        </div>
-
-       
-        <main className="flex-1">{children}</main>
-      </div>
-
-      {/* Notification Popup */}
-      {showNotifications && (
-        <div ref={notificationRef} className="absolute left-64 top-10 z-50 w-[370px] max-w-[90vw] bg-white/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-[#5bc0eb] p-0 animate-fade-in flex flex-col gap-0" style={{ boxShadow: '0 8px 32px 0 rgba(91,192,235,0.25)' }}>
-          <div className="flex items-center justify-between px-6 py-4 border-b border-[#5bc0eb]/20 bg-gradient-to-r from-[#0072bb]/10 to-[#5bc0eb]/10 rounded-t-3xl">
-            <span className="font-bold text-lg text-[#0072bb] flex items-center gap-2">
-              Notifications
-            </span>
-            <button onClick={() => setShowNotifications(false)} className="text-[#222831] hover:text-[#0072bb] text-xl font-bold">×</button>
-          </div>
-          <div className="max-h-[400px] overflow-y-auto py-2 px-4 flex flex-col gap-3">
-            {notifications.length === 0 && (
-              <div className="text-center text-[#222831] py-8 opacity-60">
-                <span>Aucune notification pour le moment.</span>
+      {/* Sidebar */}
+      <aside
+        className={clsx(
+          "fixed inset-y-0 left-0 z-50 bg-white border-r border-border flex flex-col transition-all duration-300 lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          sidebarCollapsed ? "lg:w-20" : "lg:w-64"
+        )}
+      >
+        {/* Logo */}
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className={clsx("flex items-center gap-3", sidebarCollapsed && "justify-center w-full")}>
+            <img src={logo} alt="TransportConnect" className="h-16 w-auto flex-shrink-0" />
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold text-foreground truncate">TransportConnect</h1>
+                <p className="text-xs text-muted-foreground truncate">Tracking System</p>
               </div>
             )}
-            {notifications.map((notif, idx) => (
-              <div key={idx} className={
-                `rounded-2xl p-4 mb-1 shadow-md bg-white/70 border-l-4 ${
-                  notif.type === 'success' ? 'border-green-400' : notif.type === 'error' ? 'border-red-400' : 'border-[#5bc0eb]'
-                } flex flex-col gap-1 animate-slide-in`
-              }>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-semibold text-[#0072bb] text-base">{notif.title}</span>
-                  {!notif.read && <span className="ml-2 bg-[#5bc0eb] text-white text-xs px-2 py-0.5 rounded-full animate-pulse">Nouveau</span>}
-                </div>
-                <span className="text-[#222831] text-sm">{notif.message}</span>
-                <span className="text-xs text-gray-400 mt-1">{notif.date.toLocaleString()}</span>
-              </div>
-            ))}
           </div>
+          {/* Mobile Close Button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
         </div>
-      )}
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-hide">
+          {currentNavigationItems.map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.href
+
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={clsx(
+                  "flex items-center rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                  sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+                title={sidebarCollapsed ? item.name : ""}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span className="truncate">{item.name}</span>}
+                {/* Tooltip for collapsed state */}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                    {item.name}
+                  </div>
+                )}
+              </Link>
+            )
+          })}
+
+          {/* Create Button in Navigation */}
+          {user?.role !== "admin" && (
+            <button
+              onClick={() => {
+                navigate(getCreateButtonHref())
+                setSidebarOpen(false)
+              }}
+              className={clsx(
+                "w-full relative overflow-hidden group transition-all duration-300 mt-2",
+                sidebarCollapsed
+                  ? "px-3 py-3 justify-center"
+                  : "px-3 py-2.5 flex items-center gap-3",
+                "bg-gradient-to-r from-primary via-primary to-primary/90",
+                "hover:from-primary/90 hover:via-primary hover:to-primary",
+                "text-white font-semibold rounded-lg",
+                "shadow-lg hover:shadow-xl",
+                "transform hover:scale-[1.02] active:scale-[0.98]"
+              )}
+              title={sidebarCollapsed ? getCreateButtonLabel() : ""}
+            >
+              {/* Animated background effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              
+              <div className="relative flex items-center justify-center gap-3 w-full">
+                <div className="p-1 bg-white/20 rounded-md group-hover:bg-white/30 transition-colors">
+                  <Plus className="w-4 h-4" />
+                </div>
+                {!sidebarCollapsed && (
+                  <span className="font-semibold text-sm">{getCreateButtonLabel()}</span>
+                )}
+              </div>
+              
+              {/* Glow effect */}
+              <div className="absolute inset-0 rounded-lg bg-primary/50 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+            </button>
+          )}
+        </nav>
+
+        {/* User Profile Section */}
+        <div className={clsx("p-2 border-t border-border space-y-2", sidebarCollapsed && "px-2")}>
+          {/* User Info */}
+          <div
+            className={clsx(
+              "flex items-center rounded-lg bg-accent/50 group relative",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"
+            )}
+            title={sidebarCollapsed ? `${user?.firstName} ${user?.lastName}` : ""}
+          >
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-sm font-semibold text-white">
+                {user?.firstName?.charAt(0)?.toUpperCase()}
+                {user?.lastName?.charAt(0)?.toUpperCase()}
+              </span>
+            </div>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-xs text-muted-foreground capitalize truncate">
+                  {user?.role === "conducteur" ? "Driver" : user?.role === "expediteur" ? "Shipper" : "Admin"}
+                </p>
+              </div>
+            )}
+            {/* Tooltip for collapsed state */}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                {user?.firstName} {user?.lastName}
+                <br />
+                <span className="text-xs opacity-90">
+                  {user?.role === "conducteur" ? "Driver" : user?.role === "expediteur" ? "Shipper" : "Admin"}
+                </span>
+              </div>
+            )}
+          </div>
+
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className={clsx(
+              "w-full flex items-center rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-accent transition-colors",
+              sidebarCollapsed ? "justify-center px-3 py-2" : "gap-2 px-3 py-2"
+            )}
+            title={sidebarCollapsed ? "Logout" : ""}
+          >
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!sidebarCollapsed && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div
+        className={clsx(
+          "flex-1 flex flex-col transition-all duration-300",
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
+        )}
+      >
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 bg-white border-b border-border">
+          <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
+            {/* Left: Sidebar Toggle */}
+            <div className="flex-shrink-0">
+              {/* Desktop Sidebar Toggle */}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hidden lg:flex p-2 hover:bg-accent rounded-lg transition-colors"
+                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <Menu className="w-5 h-5 text-foreground" />
+              </button>
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+              >
+                <Menu className="w-5 h-5 text-foreground" />
+              </button>
+            </div>
+
+            {/* Center: Welcome & Search */}
+            <div className="flex-1 flex items-center justify-center gap-4 min-w-0">
+              <div className="hidden lg:block text-center min-w-0">
+                <h2 className="text-base lg:text-lg font-semibold text-foreground">
+                  Welcome back, {user?.firstName}!
+                </h2>
+                <p className="text-xs lg:text-sm text-muted-foreground hidden xl:block">
+                  {new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="hidden md:flex max-w-md w-full min-w-0">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Notifications & User Menu */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+
+              {/* Notifications */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-foreground" />
+                  {unreadNotifications > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div
+                    ref={notificationRef}
+                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[calc(100vh-120px)] overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-border">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground">Notifications</h3>
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No notifications</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-border">
+                          {notifications.map((notif, idx) => (
+                            <div
+                              key={idx}
+                              className={clsx(
+                                "p-4 hover:bg-accent transition-colors cursor-pointer",
+                                !notif.read && "bg-accent/50"
+                              )}
+                            >
+                              <p className="text-sm font-medium text-foreground">{notif.title}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {new Date(notif.date).toLocaleString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* User Avatar */}
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                {user?.avatar ? (
+                  <img
+                    src={normalizeAvatarUrl(user.avatar)}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-white">
+                    {user?.firstName?.charAt(0)?.toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

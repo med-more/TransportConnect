@@ -21,6 +21,7 @@ import {
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI } from "../../services/api"
 import toast from "react-hot-toast"
 
@@ -31,6 +32,8 @@ const AdminVerificationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUser, setSelectedUser] = useState(null)
   const [showDetails, setShowDetails] = useState(false)
+  const [rejectDialog, setRejectDialog] = useState(false)
+  const [rejectUserId, setRejectUserId] = useState(null)
 
   useEffect(() => {
     fetchUsers()
@@ -79,10 +82,15 @@ const AdminVerificationsPage = () => {
     }
   }
 
-  const handleRejectUser = async (userId) => {
-    if (window.confirm("Êtes-vous sûr de vouloir rejeter cet utilisateur ?")) {
+  const handleRejectUser = (userId) => {
+    setRejectUserId(userId)
+    setRejectDialog(true)
+  }
+
+  const handleConfirmReject = async () => {
+    if (rejectUserId) {
       try {
-        await adminAPI.suspendUser(userId)
+        await adminAPI.suspendUser(rejectUserId)
         toast.success("Utilisateur rejeté avec succès")
         fetchUsers()
         setShowDetails(false)
@@ -91,6 +99,8 @@ const AdminVerificationsPage = () => {
         toast.error("Erreur lors du rejet")
       }
     }
+    setRejectDialog(false)
+    setRejectUserId(null)
   }
 
   const handleViewDetails = (user) => {
@@ -390,6 +400,21 @@ const AdminVerificationsPage = () => {
             </motion.div>
           </motion.div>
         )}
+
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          isOpen={rejectDialog}
+          onClose={() => {
+            setRejectDialog(false)
+            setRejectUserId(null)
+          }}
+          onConfirm={handleConfirmReject}
+          title="Rejeter cet utilisateur ?"
+          message="Êtes-vous sûr de vouloir rejeter cet utilisateur ? Cette action ne peut pas être annulée."
+          confirmText="Rejeter"
+          cancelText="Annuler"
+          variant="danger"
+        />
       </motion.div>
     </div>
   )

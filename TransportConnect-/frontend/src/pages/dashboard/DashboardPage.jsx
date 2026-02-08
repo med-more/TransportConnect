@@ -1,7 +1,26 @@
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { Plus, Search, Package, TrendingUp, Clock, MapPin, ArrowRight } from "lucide-react"
+import clsx from "clsx"
+import {
+  Plus,
+  Search,
+  Package,
+  TrendingUp,
+  Clock,
+  MapPin,
+  ArrowRight,
+  Truck,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Star,
+  Route,
+  BarChart3,
+  MessageSquare,
+  Send,
+  Paperclip,
+} from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { tripsAPI, requestsAPI, usersAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
@@ -11,318 +30,447 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner"
 const DashboardPage = () => {
   const { user } = useAuth()
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats"],
-    queryFn: usersAPI.getStats
-  })
-  
-  const { data: recentTrips, isLoading: tripsLoading } = useQuery({
-    queryKey: ["recent-trips"],
-    queryFn: () => user?.role === "conducteur" ? tripsAPI.getMyTrips({ limit: 5 }) : tripsAPI.getTrips({ limit: 5 })
-  })
-  
-  const { data: recentRequests, isLoading: requestsLoading } = useQuery({
-    queryKey: ["recent-requests"],
-    queryFn: () => user?.role === "conducteur" ? requestsAPI.getReceivedRequests({ limit: 5 }) : requestsAPI.getRequests({ limit: 5 })
+    queryFn: usersAPI.getStats,
   })
 
-  const quickActions =
-    user?.role === "conducteur"
-      ? [
-          {
-            title: "Nouveau trajet",
-            description: "Créer un nouveau trajet",
-            icon: Plus,
-            href: "/trips/create",
-            color: "bg-primary",
-          },
-          {
-            title: "Mes trajets",
-            description: "Gérer mes trajets",
-            icon: Package,
-            href: "/trips",
-            color: "bg-text-secondary",
-          },
-          {
-            title: "Demandes reçues",
-            description: "Voir les demandes",
-            icon: Package,
-            href: "/requests",
-            color: "bg-info",
-          },
-        ]
-      : [
-          {
-            title: "Rechercher",
-            description: "Trouver un trajet",
-            icon: Search,
-            href: "/trips",
-            color: "bg-primary",
-          },
-          {
-            title: "Mes demandes",
-            description: "Suivre mes demandes",
-            icon: Package,
-            href: "/requests",
-            color: "bg-text-secondary",
-          },
-          {
-            title: "Messages",
-            description: "Mes conversations",
-            icon: Package,
-            href: "/chat",
-            color: "bg-info",
-          },
-        ]
+  const { data: recentTrips, isLoading: tripsLoading } = useQuery({
+    queryKey: ["recent-trips"],
+    queryFn: () =>
+      user?.role === "conducteur" ? tripsAPI.getMyTrips({ limit: 5 }) : tripsAPI.getTrips({ limit: 5 }),
+  })
+
+  const { data: recentRequests, isLoading: requestsLoading } = useQuery({
+    queryKey: ["recent-requests"],
+    queryFn: () =>
+      user?.role === "conducteur"
+        ? requestsAPI.getReceivedRequests({ limit: 5 })
+        : requestsAPI.getRequests({ limit: 5 }),
+  })
 
   const statsCards = [
     {
-      title: user?.role === "conducteur" ? "Trajets effectués" : "Demandes envoyées",
+      title: user?.role === "conducteur" ? "Total Trips" : "Total Requests",
       value: stats?.data?.totalTrips || stats?.data?.totalRequests || 0,
-      icon: Package,
+      icon: Truck,
       color: "text-primary",
+      bgColor: "bg-primary/10",
+      change: "+12%",
+      trend: "up",
+    },
+    {
+      title: "Active Shipments",
+      value: recentTrips?.data?.trips?.filter((t) => t.status === "active")?.length || 0,
+      icon: Package,
+      color: "text-info",
+      bgColor: "bg-info/10",
+      change: "+5%",
+      trend: "up",
+    },
+    {
+      title: "Pending Requests",
+      value: recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0,
+      icon: Clock,
+      color: "text-warning",
+      bgColor: "bg-warning/10",
+      change: "-3%",
+      trend: "down",
+    },
+    {
+      title: "Success Rate",
+      value: "96%",
+      icon: TrendingUp,
+      color: "text-success",
+      bgColor: "bg-success/10",
+      change: "+2%",
+      trend: "up",
     },
   ]
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-f4f4f4 p-0 relative overflow-hidden">
-      {/* Illustration décorative conducteur */}
-      {user?.role === "conducteur" && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 0.12, scale: 1 }}
-          transition={{ duration: 1 }}
-          className="absolute right-0 top-0 w-[420px] h-[420px] pointer-events-none z-0"
-        >
-          <svg viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <ellipse cx="210" cy="210" rx="210" ry="210" fill="#0072bb" fillOpacity="0.15" />
-            <rect x="120" y="120" width="180" height="80" rx="30" fill="#0072bb" fillOpacity="0.18" />
-            <rect x="170" y="200" width="80" height="40" rx="20" fill="#5bc0eb" fillOpacity="0.18" />
-          </svg>
-        </motion.div>
-      )}
-      <div className="relative z-10 p-6 space-y-8 max-w-7xl mx-auto">
-        {/* Header conducteur */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-blue-100 flex flex-col md:flex-row items-center gap-8">
-            <div className="flex-1">
-              <h1 className="text-4xl font-extrabold text-primary mb-2 flex items-center gap-2">
-                Bonjour {user?.firstName} !
-                <span className="inline-block animate-bounce">👋</span>
-              </h1>
-              <p className="text-xl text-black/70 mb-4 font-medium">
-                Gérez vos trajets, suivez vos demandes et transportez en toute sécurité.
-              </p>
-              <div className="flex items-center space-x-4 text-black/60 text-sm">
-                <div className="flex items-center space-x-2">
-                  <Clock className="w-5 h-5" />
-                  <span>Dernière connexion : {new Date().toLocaleDateString("fr-FR")}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <TrendingUp className="w-5 h-5" />
-                  <span>Compte conducteur</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex-shrink-0 hidden md:block">
-              <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }}>
-                <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="10" y="60" width="100" height="40" rx="20" fill="#0072bb" />
-                  <rect x="30" y="40" width="60" height="30" rx="15" fill="#5bc0eb" />
-                  <circle cx="30" cy="105" r="10" fill="#222831" />
-                  <circle cx="90" cy="105" r="10" fill="#222831" />
-                </svg>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+      },
+    },
+  }
+
+  return (
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+      <motion.div
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="space-y-6"
+      >
+        {/* Stats Cards */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {statsCards.map((stat, index) => {
             const Icon = stat.icon
             return (
-              <Card key={stat.title} className="text-center">
-                <div
-                  className={`inline-flex items-center justify-center w-12 h-12 rounded-xl ${stat.color} bg-opacity-10 mb-4`}
-                >
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+              <Card key={index} hover className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
+                  </div>
+                  <div
+                    className={clsx(
+                      "flex items-center gap-1 text-xs font-medium",
+                      stat.trend === "up" ? "text-success" : "text-destructive"
+                    )}
+                  >
+                    <TrendingUp className="w-3 h-3" />
+                    {stat.change}
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold text-text-primary mb-1">{stat.value}</h3>
-                <p className="text-text-secondary">{stat.title}</p>
+                <div>
+                  <p className="text-3xl font-bold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                </div>
               </Card>
             )
           })}
         </motion.div>
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          <h2 className="text-2xl font-bold text-text-primary mb-6">Actions rapides</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {quickActions.map((action, index) => {
-              const Icon = action.icon
-              return (
-                <Link key={action.title} to={action.href}>
-                  <Card className="text-center group cursor-pointer">
-                    <div
-                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${action.color} text-white mb-4 group-hover:scale-110 transition-transform`}
-                    >
-                      <Icon className="w-8 h-8" />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          {/* Left Column - 2/3 width */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Route Map Widget */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Shipment Tracking</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="outline" size="small" className="text-xs">
+                      Tracking
+                    </Button>
+                    <Button variant="outline" size="small" className="text-xs">
+                      Traffic
+                    </Button>
+                    <Button variant="outline" size="small" className="text-xs">
+                      POI
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Map Placeholder */}
+                <div className="w-full h-64 bg-background rounded-lg border border-border mb-4 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">Map visualization</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Distance to arrival</p>
+                      <p className="text-lg font-semibold text-foreground">120 KM / 1h 50min</p>
                     </div>
-                    <h3 className="text-lg font-semibold text-text-primary mb-2">{action.title}</h3>
-                    <p className="text-text-secondary">{action.description}</p>
-                  </Card>
-                </Link>
-              )
-            })}
-          </div>
-        </motion.div>
+                  </div>
 
-        {/* Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Recent Trips */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-text-primary">
-                {user?.role === "conducteur" ? "Mes trajets récents" : "Trajets disponibles"}
-              </h2>
-              <Link to="/trips">
-                <Button variant="ghost" size="small">
-                  Voir tout <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Traffic and route optimization</span>
+                      <span className="font-medium text-foreground">85%</span>
+                    </div>
+                    <div className="w-full bg-background rounded-full h-2">
+                      <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }} />
+                    </div>
+                  </div>
 
-            <div className="space-y-4">
-              {tripsLoading ? (
-                <LoadingSpinner />
-              ) : recentTrips?.data?.trips?.length > 0 ? (
-                recentTrips.data.trips.map((trip) => (
-                  <Card key={trip._id} className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="w-4 h-4 text-text-secondary" />
-                        <span className="font-semibold text-text-primary">
-                          {trip.departure.city} → {trip.destination.city}
-                        </span>
+                  <div className="flex gap-2">
+                    <Button size="small">Optimize</Button>
+                    <Button variant="outline" size="small">
+                      View all
+                    </Button>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Recent Trips */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {user?.role === "conducteur" ? "My Recent Trips" : "Available Trips"}
+                  </h3>
+                  <Link to="/trips">
+                    <Button variant="ghost" size="small">
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="space-y-3">
+                  {tripsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : recentTrips?.data?.trips?.length > 0 ? (
+                    recentTrips.data.trips.map((trip) => (
+                      <div
+                        key={trip._id}
+                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-primary/10 rounded-lg">
+                              <Truck className="w-4 h-4 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {trip.departure.city} → {trip.destination.city}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {new Date(trip.departureDate).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-lg font-bold text-primary">{trip.pricePerKg}€/kg</span>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Package className="w-3 h-3" />
+                            {trip.availableCapacity.weight}kg available
+                          </span>
+                          {user?.role !== "conducteur" && trip.driver && (
+                            <span className="flex items-center gap-1">
+                              <span className="w-5 h-5 bg-primary rounded-full flex items-center justify-center text-white text-xs">
+                                {trip.driver.firstName?.charAt(0)}
+                              </span>
+                              {trip.driver.firstName} {trip.driver.lastName}
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <span className="text-lg font-bold text-primary">{trip.pricePerKg}€/kg</span>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">No trips found</p>
                     </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          </div>
 
-                    <div className="flex items-center justify-between text-sm text-text-secondary">
-                      <span>{new Date(trip.departureDate).toLocaleDateString("fr-FR")}</span>
-                      <span>{trip.availableCapacity.weight}kg disponible</span>
+          {/* Right Column - 1/3 width */}
+          <div className="space-y-6">
+            {/* Alerts Widget */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Alerts & Notifications</h3>
+                  <div className="w-2 h-2 bg-primary rounded-full" />
+                </div>
+                <div className="space-y-3">
+                  <div className="p-3 bg-accent rounded-lg border-l-4 border-primary">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-foreground">Geofencing alert</span>
+                      <span className="text-xs text-muted-foreground">13:48</span>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Truck crossed geofence at Warehouse A. Driver arrival notification sent to staff.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
 
-                    {user?.role !== "conducteur" && (
-                      <div className="flex items-center mt-3 space-x-2">
-                        <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
-                          <span className="text-white text-xs font-bold">
-                            {trip.driver?.firstName?.charAt(0)}
+            {/* Shipment Details */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Shipment Details</h3>
+                  <Button variant="ghost" size="small">
+                    Read more
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                      <span className="text-sm font-semibold text-white">
+                        {user?.firstName?.charAt(0)}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {user?.firstName} {user?.lastName}
+                      </p>
+                      <p className="text-xs text-muted-foreground">ID: {user?._id?.slice(-8)}</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-background rounded-lg">
+                    <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                    <p className="text-xl font-bold text-foreground">$520.45</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Status</span>
+                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
+                        Delivered
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Type</span>
+                      <span className="px-2 py-1 bg-accent text-foreground rounded-md text-xs font-medium">
+                        Household
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Rating</span>
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4 fill-warning text-warning" />
+                        <span className="font-medium">4.2</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Truck Capacity */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">Current Truck Capacity</h3>
+                  <Button variant="ghost" size="small">
+                    Read more
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {/* Truck Illustration */}
+                  <div className="relative w-full h-32 bg-background rounded-lg flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 flex items-end">
+                      <div className="w-full h-3/4 bg-primary/20 relative">
+                        <div
+                          className="absolute bottom-0 left-0 right-0 bg-primary"
+                          style={{ height: "82%" }}
+                        />
+                      </div>
+                    </div>
+                    <Truck className="w-16 h-16 text-foreground/20 relative z-10" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Truck ID</span>
+                      <span className="font-medium text-foreground">AL-223965406</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Capacity</span>
+                      <span className="font-bold text-primary">82%</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Status</span>
+                      <span className="text-primary font-medium">On Route</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Weight</span>
+                      <span className="font-medium text-foreground">8,453 KG</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Recent Requests */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    {user?.role === "conducteur" ? "Received Requests" : "My Requests"}
+                  </h3>
+                  <Link to="/requests">
+                    <Button variant="ghost" size="small">
+                      View all <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="space-y-3">
+                  {requestsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : recentRequests?.data?.requests?.length > 0 ? (
+                    recentRequests.data.requests.map((request) => (
+                      <div
+                        key={request._id}
+                        className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-foreground truncate">
+                              {request.cargo?.description?.substring(0, 30)}...
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {request.pickup?.city} → {request.delivery?.city}
+                            </p>
+                          </div>
+                          <span
+                            className={clsx(
+                              "px-2 py-1 rounded-md text-xs font-medium ml-2 flex-shrink-0",
+                              request.status === "pending"
+                                ? "bg-warning/10 text-warning"
+                                : request.status === "accepted"
+                                  ? "bg-success/10 text-success"
+                                  : request.status === "rejected"
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {request.status === "pending"
+                              ? "Pending"
+                              : request.status === "accepted"
+                                ? "Accepted"
+                                : request.status === "rejected"
+                                  ? "Rejected"
+                                  : request.status}
                           </span>
                         </div>
-                        <span className="text-sm text-text-primary">
-                          {trip.driver?.firstName} {trip.driver?.lastName}
-                        </span>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{request.cargo?.weight}kg</span>
+                          <span className="font-medium text-foreground">{request.price}€</span>
+                        </div>
                       </div>
-                    )}
-                  </Card>
-                ))
-              ) : (
-                <Card className="text-center py-8">
-                  <Package className="w-12 h-12 text-placeholder-text mx-auto mb-4" />
-                  <p className="text-text-secondary">Aucun trajet trouvé</p>
-                </Card>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Recent Requests */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-text-primary">
-                {user?.role === "conducteur" ? "Demandes reçues" : "Mes demandes"}
-              </h2>
-              <Link to="/requests">
-                <Button variant="ghost" size="small">
-                  Voir tout <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-
-            <div className="space-y-4">
-              {requestsLoading ? (
-                <LoadingSpinner />
-              ) : recentRequests?.data?.requests?.length > 0 ? (
-                recentRequests.data.requests.map((request) => (
-                  <Card key={request._id} className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-2">
-                        <Package className="w-4 h-4 text-text-secondary" />
-                        <span className="font-semibold text-text-primary">
-                          {request.cargo?.description?.substring(0, 30)}...
-                        </span>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          request.status === "pending"
-                            ? "bg-warning bg-opacity-20 text-warning"
-                            : request.status === "accepted"
-                              ? "bg-success bg-opacity-20 text-success"
-                              : request.status === "rejected"
-                                ? "bg-error bg-opacity-20 text-error"
-                                : "bg-placeholder-text bg-opacity-20 text-placeholder-text"
-                        }`}
-                      >
-                        {request.status === "pending"
-                          ? "En attente"
-                          : request.status === "accepted"
-                            ? "Acceptée"
-                            : request.status === "rejected"
-                              ? "Refusée"
-                              : request.status}
-                      </span>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">No requests found</p>
                     </div>
-
-                    <div className="flex items-center justify-between text-sm text-text-secondary">
-                      <span>{request.cargo?.weight}kg</span>
-                      <span>{request.price}€</span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-sm text-text-secondary mt-2">
-                      <span>
-                        {request.pickup?.city} → {request.delivery?.city}
-                      </span>
-                      <span>{new Date(request.createdAt).toLocaleDateString("fr-FR")}</span>
-                    </div>
-                  </Card>
-                ))
-              ) : (
-                <Card className="text-center py-8">
-                  <Package className="w-12 h-12 text-placeholder-text mx-auto mb-4" />
-                  <p className="text-text-secondary">Aucune demande trouvée</p>
-                </Card>
-              )}
-            </div>
-          </motion.div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

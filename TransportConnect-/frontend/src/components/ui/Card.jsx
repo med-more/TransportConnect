@@ -1,8 +1,16 @@
 import clsx from "clsx"
 
-const Card = ({ children, className, hover = true, ...props }) => {
+const Card = ({ children, className, hover = false, padding = true, ...props }) => {
   return (
-    <div className={clsx("card p-6", hover && "hover:shadow-xl hover:-translate-y-1", className)} {...props}>
+    <div
+      className={clsx(
+        "card",
+        padding && "p-6",
+        hover && "card-hover cursor-pointer",
+        className
+      )}
+      {...props}
+    >
       {children}
     </div>
   )

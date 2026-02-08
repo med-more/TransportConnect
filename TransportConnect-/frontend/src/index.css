@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 /* Reset */
 * {
   margin: 0;
@@ -11,15 +13,18 @@
 
 /* Global styles */
 body {
-  font-family: "Poppins", sans-serif;
-  background-color: #f4f4f4;
-  color: #000000;
-  line-height: 1.6;
+  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  background-color: #f5f5f5;
+  color: #111827;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -28,64 +33,76 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0072bb;
+  background: #d1d5db;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #5bc0eb;
+  background: #9ca3af;
 }
 
 /* Custom Tailwind Components */
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-text-primary transition-all duration-200 transform hover:scale-105 active:scale-95;
+    @apply bg-primary text-white px-4 py-2 rounded-lg font-medium hover:bg-primary/90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
   .btn-secondary {
-    @apply bg-text-secondary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary transition-all duration-200;
+    @apply bg-secondary text-secondary-foreground px-4 py-2 rounded-lg font-medium hover:bg-secondary/80 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2;
   }
 
   .btn-outline {
-    @apply border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary hover:text-white transition-all duration-200;
+    @apply border border-border bg-transparent text-foreground px-4 py-2 rounded-lg font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent text-foreground px-4 py-2 rounded-lg font-medium hover:bg-accent hover:text-accent-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
   }
 
   .input-field {
-    @apply w-full px-4 py-3 bg-input-background border border-border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200;
+    @apply w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm;
   }
 
   .card {
-    @apply bg-white/70 backdrop-blur-xl border border-blue-100 rounded-3xl shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:shadow-2xl;
+    @apply bg-card text-card-foreground rounded-lg border border-border shadow-sm;
   }
 
-  .card-background {
-    @apply bg-card-background rounded-2xl shadow-md;
+  .card-hover {
+    @apply card transition-all duration-200 hover:shadow-md;
   }
 }
 
 /* Custom Utilities */
 @layer utilities {
-  .bg-input-background {
-    background-color: #f4f4f4;
+  .text-balance {
+    text-wrap: balance;
   }
 
-  .bg-card-background {
-    background-color: #f4f4f4;
+  /* Hide scrollbar */
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
   }
 
-  .border-border {
-    border-color: #5bc0eb;
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari and Opera */
   }
 }
 
 /* Spinner */
 .spinner {
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #0072bb;
+  border: 2px solid #f3f4f6;
+  border-top: 2px solid #ef4444;
   border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-lg {
   width: 40px;
   height: 40px;
-  animation: spin 1s linear infinite;
+  border-width: 3px;
 }
 
 @keyframes spin {
@@ -97,17 +114,24 @@ body {
   }
 }
 
-/* Toast */
+/* Toast customization */
 .toast-success {
-  background-color: #4caf50 !important;
+  background-color: #10b981 !important;
+  color: white !important;
 }
 
 .toast-error {
-  background-color: #f44336 !important;
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.toast-info {
+  background-color: #3b82f6 !important;
+  color: white !important;
 }
 
 /* Modal overlay */
 .modal-overlay {
-  background-color: rgba(34, 40, 49, 0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
 }

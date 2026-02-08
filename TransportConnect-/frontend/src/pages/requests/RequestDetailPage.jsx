@@ -1,21 +1,47 @@
-"use client"
-
-import { useContext } from "react"
+import { useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Package, MapPin, Clock, CheckCircle, XCircle, MessageCircle } from "lucide-react"
+import { motion } from "framer-motion"
+import {
+  ArrowLeft,
+  Package,
+  MapPin,
+  Clock,
+  CheckCircle,
+  XCircle,
+  MessageCircle,
+  Truck,
+  Calendar,
+  Weight,
+  Ruler,
+  Euro,
+  User,
+  Phone,
+  Mail,
+  Navigation,
+} from "lucide-react"
 import { requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
+import InputDialog from "../../components/ui/InputDialog"
 import toast from "react-hot-toast"
+import { normalizeAvatarUrl } from "../../utils/avatar"
+import clsx from "clsx"
 
 const RequestDetailPage = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const [cancelDialog, setCancelDialog] = useState(false)
+  const [pickupDialog, setPickupDialog] = useState(false)
+  const [deliveryDialog, setDeliveryDialog] = useState(false)
+  const [acceptDialog, setAcceptDialog] = useState(false)
+  const [rejectDialog, setRejectDialog] = useState(false)
+  const [deliverySignatureDialog, setDeliverySignatureDialog] = useState(false)
 
   const { data: requestData, isLoading } = useQuery({
     queryKey: ["request", id],
@@ -27,10 +53,10 @@ const RequestDetailPage = () => {
     mutationFn: ({ id, message }) => requestsAPI.acceptRequest(id, message),
     onSuccess: () => {
       queryClient.invalidateQueries(["request", id])
-      toast.success("Demande acceptée avec succès")
+      toast.success("Request accepted successfully")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de l'acceptation")
+      toast.error(error.response?.data?.message || "Error accepting request")
     },
   })
 
@@ -38,10 +64,10 @@ const RequestDetailPage = () => {
     mutationFn: ({ id, message }) => requestsAPI.rejectRequest(id, message),
     onSuccess: () => {
       queryClient.invalidateQueries(["request", id])
-      toast.success("Demande refusée")
+      toast.success("Request rejected")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors du refus")
+      toast.error(error.response?.data?.message || "Error rejecting request")
     },
   })
 
@@ -49,10 +75,10 @@ const RequestDetailPage = () => {
     mutationFn: requestsAPI.cancelRequest,
     onSuccess: () => {
       queryClient.invalidateQueries(["request", id])
-      toast.success("Demande annulée")
+      toast.success("Request cancelled")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de l'annulation")
+      toast.error(error.response?.data?.message || "Error cancelling request")
     },
   })
 
@@ -60,10 +86,10 @@ const RequestDetailPage = () => {
     mutationFn: requestsAPI.confirmPickup,
     onSuccess: () => {
       queryClient.invalidateQueries(["request", id])
-      toast.success("Collecte confirmée")
+      toast.success("Pickup confirmed")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la confirmation")
+      toast.error(error.response?.data?.message || "Error confirming pickup")
     },
   })
 
@@ -71,114 +97,61 @@ const RequestDetailPage = () => {
     mutationFn: ({ id, signature }) => requestsAPI.confirmDelivery(id, signature),
     onSuccess: () => {
       queryClient.invalidateQueries(["request", id])
-      toast.success("Livraison confirmée")
+      toast.success("Delivery confirmed")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la confirmation")
+      toast.error(error.response?.data?.message || "Error confirming delivery")
     },
   })
 
   const handleAcceptRequest = () => {
-    const message = prompt("Message d'acceptation (optionnel):")
+    setAcceptDialog(true)
+  }
+
+  const handleConfirmAccept = (message) => {
     acceptRequestMutation.mutate({ id, message: message || "" })
+    setAcceptDialog(false)
   }
 
   const handleRejectRequest = () => {
-    const message = prompt("Raison du refus (optionnel):")
-    if (message !== null) {
-      rejectRequestMutation.mutate({ id, message: message || "" })
-    }
+    setRejectDialog(true)
+  }
+
+  const handleConfirmReject = (message) => {
+    rejectRequestMutation.mutate({ id, message: message || "" })
+    setRejectDialog(false)
   }
 
   const handleCancelRequest = () => {
-    toast((t) => (
-      <span style={{display: 'block', minWidth: 220}}>
-        <span style={{fontWeight: 600, color: '#b91c1c'}}>Annuler cette demande ?</span>
-        <div style={{marginTop: 14, display: 'flex', gap: 12, justifyContent: 'flex-end'}}>
-          <button
-            onClick={() => { toast.dismiss(t.id); cancelRequestMutation.mutate(id); }}
-            style={{
-              background: 'linear-gradient(90deg,#ef4444,#fca5a5)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(239,68,68,0.08)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg,#dc2626,#ef4444)'}
-            onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg,#ef4444,#fca5a5)'}
-          >Oui</button>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{
-              background: '#f3f4f6',
-              color: '#222831',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#e5e7eb'}
-            onMouseOut={e => e.currentTarget.style.background = '#f3f4f6'}
-          >Non</button>
-        </div>
-      </span>
-    ), { duration: 7000 });
+    setCancelDialog(true)
+  }
+
+  const handleConfirmCancel = () => {
+    cancelRequestMutation.mutate(id)
+    setCancelDialog(false)
   }
 
   const handleConfirmPickup = () => {
-    toast((t) => (
-      <span style={{display: 'block', minWidth: 220}}>
-        <span style={{fontWeight: 600, color: '#256029'}}>Confirmer la collecte du colis ?</span>
-        <div style={{marginTop: 14, display: 'flex', gap: 12, justifyContent: 'flex-end'}}>
-          <button
-            onClick={() => { toast.dismiss(t.id); confirmPickupMutation.mutate(id); }}
-            style={{
-              background: 'linear-gradient(90deg,#22c55e,#bbf7d0)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(34,197,94,0.08)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = 'linear-gradient(90deg,#16a34a,#22c55e)'}
-            onMouseOut={e => e.currentTarget.style.background = 'linear-gradient(90deg,#22c55e,#bbf7d0)'}
-          >Oui</button>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{
-              background: '#f3f4f6',
-              color: '#222831',
-              border: 'none',
-              borderRadius: 8,
-              padding: '7px 18px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-              transition: 'background 0.2s',
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#e5e7eb'}
-            onMouseOut={e => e.currentTarget.style.background = '#f3f4f6'}
-          >Non</button>
-        </div>
-      </span>
-    ), { duration: 7000 });
+    setPickupDialog(true)
+  }
+
+  const handleConfirmPickupAction = () => {
+    confirmPickupMutation.mutate(id)
+    setPickupDialog(false)
   }
 
   const handleConfirmDelivery = () => {
-    const signature = prompt("Signature du destinataire (optionnel):")
-    if (signature !== null) {
-      confirmDeliveryMutation.mutate({ id, signature: signature || "" })
-    }
+    setDeliveryDialog(true)
+  }
+
+  const handleConfirmDeliveryAction = () => {
+    setDeliveryDialog(false)
+    setDeliverySignatureDialog(true)
+  }
+
+  const handleConfirmDeliveryWithSignature = (signature) => {
+    confirmDeliveryMutation.mutate({ id, signature: signature || "" })
+    setDeliverySignatureDialog(false)
   }
 
   if (isLoading) {
@@ -192,8 +165,8 @@ const RequestDetailPage = () => {
   if (!requestData?.data?.request) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-4">Demande non trouvée</h1>
-        <Button onClick={() => navigate("/requests")}>Retour aux demandes</Button>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Request not found</h1>
+        <Button onClick={() => navigate("/requests")}>Back to Requests</Button>
       </div>
     )
   }
@@ -209,322 +182,663 @@ const RequestDetailPage = () => {
       case "accepted":
         return <CheckCircle className="w-5 h-5 text-success" />
       case "rejected":
-        return <XCircle className="w-5 h-5 text-error" />
+        return <XCircle className="w-5 h-5 text-destructive" />
       case "in_transit":
-        return <Package className="w-5 h-5 text-info" />
+        return <Truck className="w-5 h-5 text-info" />
       case "delivered":
         return <CheckCircle className="w-5 h-5 text-success" />
       case "cancelled":
-        return <XCircle className="w-5 h-5 text-error" />
+        return <XCircle className="w-5 h-5 text-destructive" />
       default:
-        return <Package className="w-5 h-5 text-text-secondary" />
+        return <Package className="w-5 h-5 text-muted-foreground" />
     }
   }
 
   const getStatusLabel = (status) => {
     switch (status) {
       case "pending":
-        return "En attente"
+        return "Pending"
       case "accepted":
-        return "Acceptée"
+        return "Accepted"
       case "rejected":
-        return "Refusée"
+        return "Rejected"
       case "in_transit":
-        return "En transit"
+        return "In Transit"
       case "delivered":
-        return "Livrée"
+        return "Delivered"
       case "cancelled":
-        return "Annulée"
+        return "Cancelled"
       default:
         return status
     }
   }
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "bg-warning/10 text-warning border-warning/20"
+      case "accepted":
+        return "bg-success/10 text-success border-success/20"
+      case "rejected":
+        return "bg-destructive/10 text-destructive border-destructive/20"
+      case "in_transit":
+        return "bg-info/10 text-info border-info/20"
+      case "delivered":
+        return "bg-success/10 text-success border-success/20"
+      case "cancelled":
+        return "bg-destructive/10 text-destructive border-destructive/20"
+      default:
+        return "bg-muted text-muted-foreground border-border"
+    }
+  }
+
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
-            <ArrowLeft className="w-4 h-4" />
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+      >
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-text-primary">Détails de la demande</h1>
-            <p className="text-text-secondary mt-1">
-              Créée le {new Date(request.createdAt).toLocaleDateString("fr-FR")}
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Request Details</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
+              Created on {new Date(request.createdAt).toLocaleDateString("en-US", { dateStyle: "long" })}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div
+          className={clsx(
+            "flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border font-semibold text-sm sm:text-base flex-shrink-0",
+            getStatusColor(request.status)
+          )}
+        >
           {getStatusIcon(request.status)}
-          <span className="text-lg font-semibold text-text-primary">{getStatusLabel(request.status)}</span>
+          <span>{getStatusLabel(request.status)}</span>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
           {/* Cargo Information */}
-          <Card className="p-6">
-            <div className="flex items-center mb-4">
-              <Package className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-xl font-semibold text-text-primary">Informations du colis</h2>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-medium text-text-primary">Description</h3>
-                <p className="text-text-secondary">{request.cargo.description}</p>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <Package className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">Package Information</h2>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-6">
                 <div>
-                  <h3 className="font-medium text-text-primary">Type</h3>
-                  <p className="text-text-secondary capitalize">{request.cargo.type}</p>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
+                  <p className="text-foreground text-lg">{request.cargo.description}</p>
                 </div>
-                <div>
-                  <h3 className="font-medium text-text-primary">Poids</h3>
-                  <p className="text-text-secondary">{request.cargo.weight} kg</p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-text-primary">Dimensions</h3>
-                  <p className="text-text-secondary">
-                    {request.cargo.dimensions.length} × {request.cargo.dimensions.width} ×{" "}
-                    {request.cargo.dimensions.height} cm
-                  </p>
-                </div>
-                <div>
-                  <h3 className="font-medium text-text-primary">Prix</h3>
-                  <p className="text-primary font-semibold text-lg">{request.price}DH</p>
-                </div>
-              </div>
 
-              {request.cargo.value && (
-                <div>
-                  <h3 className="font-medium text-text-primary">Valeur déclarée</h3>
-                  <p className="text-text-secondary">{request.cargo.value}DH</p>
-                </div>
-              )}
-            </div>
-          </Card>
-
-          
-          <Card className="p-6">
-            <div className="flex items-center mb-4">
-              <MapPin className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-xl font-semibold text-text-primary">Adresses</h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-medium text-text-primary mb-2">Collecte</h3>
-                <p className="text-text-secondary">{request.pickup.address}</p>
-                <p className="text-text-secondary">{request.pickup.city}</p>
-                {request.pickup.contactPerson?.name && (
-                  <div className="mt-2">
-                    <p className="text-sm text-text-secondary">Contact: {request.pickup.contactPerson.name}</p>
-                    {request.pickup.contactPerson.phone && (
-                      <p className="text-sm text-text-secondary">Tél: {request.pickup.contactPerson.phone}</p>
-                    )}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-4 bg-accent rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package className="w-4 h-4 text-muted-foreground" />
+                      <h3 className="text-sm font-medium text-muted-foreground">Type</h3>
+                    </div>
+                    <p className="text-foreground font-semibold capitalize">{request.cargo.type}</p>
                   </div>
-                )}
-              </div>
-
-              <div>
-                <h3 className="font-medium text-text-primary mb-2">Livraison</h3>
-                <p className="text-text-secondary">{request.delivery.address}</p>
-                <p className="text-text-secondary">{request.delivery.city}</p>
-                {request.delivery.contactPerson?.name && (
-                  <div className="mt-2">
-                    <p className="text-sm text-text-secondary">Contact: {request.delivery.contactPerson.name}</p>
-                    {request.delivery.contactPerson.phone && (
-                      <p className="text-sm text-text-secondary">Tél: {request.delivery.contactPerson.phone}</p>
-                    )}
+                  <div className="p-4 bg-accent rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Weight className="w-4 h-4 text-muted-foreground" />
+                      <h3 className="text-sm font-medium text-muted-foreground">Weight</h3>
+                    </div>
+                    <p className="text-foreground font-semibold">{request.cargo.weight} kg</p>
                   </div>
-                )}
-              </div>
-            </div>
-          </Card>
-
-         
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-text-primary mb-4">Trajet associé</h2>
-            <div className="space-y-2">
-              <p className="text-text-secondary">
-                <span className="font-medium">Itinéraire:</span> {request.trip?.departure?.city} →{" "}
-                {request.trip?.destination?.city}
-              </p>
-              <p className="text-text-secondary">
-                <span className="font-medium">Départ:</span>{" "}
-                {new Date(request.trip?.departureDate).toLocaleString("fr-FR")}
-              </p>
-              <p className="text-text-secondary">
-                <span className="font-medium">Arrivée:</span>{" "}
-                {new Date(request.trip?.arrivalDate).toLocaleString("fr-FR")}
-              </p>
-            </div>
-          </Card>
-
-        
-          {(request.message || request.driverResponse?.message) && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-text-primary mb-4">Messages</h2>
-              <div className="space-y-4">
-                {request.message && (
-                  <div>
-                    <h3 className="font-medium text-text-primary">Message de l'expéditeur</h3>
-                    <p className="text-text-secondary">{request.message}</p>
-                  </div>
-                )}
-                {request.driverResponse?.message && (
-                  <div>
-                    <h3 className="font-medium text-text-primary">Réponse du conducteur</h3>
-                    <p className="text-text-secondary">{request.driverResponse.message}</p>
-                    <p className="text-xs text-text-secondary mt-1">
-                      {new Date(request.driverResponse.respondedAt).toLocaleString("fr-FR")}
+                  <div className="p-4 bg-accent rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Ruler className="w-4 h-4 text-muted-foreground" />
+                      <h3 className="text-sm font-medium text-muted-foreground">Dimensions</h3>
+                    </div>
+                    <p className="text-foreground font-semibold text-sm">
+                      {request.cargo.dimensions.length} × {request.cargo.dimensions.width} ×{" "}
+                      {request.cargo.dimensions.height} cm
                     </p>
                   </div>
+                  <div className="p-4 bg-primary/10 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Euro className="w-4 h-4 text-primary" />
+                      <h3 className="text-sm font-medium text-primary">Price</h3>
+                    </div>
+                    <p className="text-primary font-bold text-lg">{request.price}€</p>
+                  </div>
+                </div>
+
+                {request.cargo.value && (
+                  <div className="p-4 bg-accent rounded-lg">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Declared Value</h3>
+                    <p className="text-foreground font-semibold">{request.cargo.value}€</p>
+                  </div>
                 )}
               </div>
             </Card>
-          )}
+          </motion.div>
 
-         
-          {request.status !== "pending" && request.status !== "rejected" && request.status !== "cancelled" && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-text-primary mb-4">Suivi</h2>
-              <div className="space-y-4">
-                <div
-                  className={`flex items-center space-x-3 ${request.tracking?.pickupConfirmed?.confirmed ? "text-success" : "text-text-secondary"}`}
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Collecte confirmée</span>
-                  {request.tracking?.pickupConfirmed?.confirmedAt && (
-                    <span className="text-sm">
-                      - {new Date(request.tracking.pickupConfirmed.confirmedAt).toLocaleString("fr-FR")}
-                    </span>
+          {/* Addresses */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-primary/10 rounded-lg">
+                  <MapPin className="w-6 h-6 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground">Addresses</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                      <Navigation className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">Pickup Location</h3>
+                  </div>
+                  <p className="text-foreground mb-1">{request.pickup.address}</p>
+                  <p className="text-muted-foreground">{request.pickup.city}</p>
+                  {request.pickup.contactPerson?.name && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="flex items-center gap-2 mb-1">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground">
+                          {request.pickup.contactPerson.name}
+                        </span>
+                      </div>
+                      {request.pickup.contactPerson.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {request.pickup.contactPerson.phone}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
 
-                <div
-                  className={`flex items-center space-x-3 ${request.tracking?.inTransit?.confirmed ? "text-success" : "text-text-secondary"}`}
-                >
-                  <Package className="w-5 h-5" />
-                  <span>En transit</span>
-                  {request.tracking?.inTransit?.confirmedAt && (
-                    <span className="text-sm">
-                      - {new Date(request.tracking.inTransit.confirmedAt).toLocaleString("fr-FR")}
-                    </span>
-                  )}
-                </div>
-
-                <div
-                  className={`flex items-center space-x-3 ${request.tracking?.delivered?.confirmed ? "text-success" : "text-text-secondary"}`}
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  <span>Livraison confirmée</span>
-                  {request.tracking?.delivered?.confirmedAt && (
-                    <span className="text-sm">
-                      - {new Date(request.tracking.delivered.confirmedAt).toLocaleString("fr-FR")}
-                    </span>
+                <div className="p-4 bg-accent rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">Delivery Location</h3>
+                  </div>
+                  <p className="text-foreground mb-1">{request.delivery.address}</p>
+                  <p className="text-muted-foreground">{request.delivery.city}</p>
+                  {request.delivery.contactPerson?.name && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="flex items-center gap-2 mb-1">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-foreground">
+                          {request.delivery.contactPerson.name}
+                        </span>
+                      </div>
+                      {request.delivery.contactPerson.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">
+                            {request.delivery.contactPerson.phone}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
             </Card>
+          </motion.div>
+
+          {/* Trip Information */}
+          {request.trip && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <Truck className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-foreground">Associated Trip</h2>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Navigation className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Route</p>
+                      <p className="text-foreground font-semibold">
+                        {request.trip.departure?.city} → {request.trip.destination?.city}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Departure</p>
+                      <p className="text-foreground font-semibold">
+                        {new Date(request.trip.departureDate).toLocaleString("en-US", { dateStyle: "long" })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Arrival</p>
+                      <p className="text-foreground font-semibold">
+                        {new Date(request.trip.arrivalDate).toLocaleString("en-US", { dateStyle: "long" })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
           )}
+
+          {/* Messages */}
+          {(request.message || request.driverResponse?.message) && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-primary/10 rounded-lg">
+                    <MessageCircle className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+                </div>
+                <div className="space-y-4">
+                  {request.message && (
+                    <div className="p-4 bg-accent rounded-lg border border-border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <User className="w-4 h-4 text-primary" />
+                        <h3 className="font-medium text-foreground">From Sender</h3>
+                      </div>
+                      <p className="text-muted-foreground">{request.message}</p>
+                    </div>
+                  )}
+                  {request.driverResponse?.message && (
+                    <div
+                      className={clsx(
+                        "p-4 rounded-lg border",
+                        request.status === "rejected"
+                          ? "bg-destructive/5 border-destructive/20"
+                          : request.status === "accepted"
+                          ? "bg-success/5 border-success/20"
+                          : "bg-accent border-border"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <Truck
+                          className={clsx(
+                            "w-4 h-4",
+                            request.status === "rejected"
+                              ? "text-destructive"
+                              : request.status === "accepted"
+                              ? "text-success"
+                              : "text-primary"
+                          )}
+                        />
+                        <h3 className="font-medium text-foreground">
+                          From Driver
+                          {request.status === "accepted" && (
+                            <span className="ml-2 text-xs font-normal text-success">(Accepted)</span>
+                          )}
+                          {request.status === "rejected" && (
+                            <span className="ml-2 text-xs font-normal text-destructive">(Rejected)</span>
+                          )}
+                        </h3>
+                      </div>
+                      <p className="text-foreground mb-2">{request.driverResponse.message}</p>
+                      {request.driverResponse.respondedAt && (
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(request.driverResponse.respondedAt).toLocaleString("en-US", {
+                            dateStyle: "long",
+                            timeStyle: "short",
+                          })}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Tracking */}
+          {request.status !== "pending" &&
+            request.status !== "rejected" &&
+            request.status !== "cancelled" &&
+            request.tracking && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+              >
+                <Card className="p-4 sm:p-5 md:p-6">
+                  <h2 className="text-xl font-semibold text-foreground mb-6">Tracking Status</h2>
+                  <div className="space-y-4">
+                    <div
+                      className={clsx(
+                        "flex items-center gap-3 p-4 rounded-lg",
+                        request.tracking?.pickupConfirmed?.confirmed
+                          ? "bg-success/10 border border-success/20"
+                          : "bg-accent"
+                      )}
+                    >
+                      <CheckCircle
+                        className={clsx(
+                          "w-5 h-5",
+                          request.tracking?.pickupConfirmed?.confirmed ? "text-success" : "text-muted-foreground"
+                        )}
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-foreground">Pickup Confirmed</span>
+                        {request.tracking?.pickupConfirmed?.confirmedAt && (
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(request.tracking.pickupConfirmed.confirmedAt).toLocaleString("en-US", {
+                              dateStyle: "long",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      className={clsx(
+                        "flex items-center gap-3 p-4 rounded-lg",
+                        request.tracking?.inTransit?.confirmed
+                          ? "bg-info/10 border border-info/20"
+                          : "bg-accent"
+                      )}
+                    >
+                      <Truck
+                        className={clsx(
+                          "w-5 h-5",
+                          request.tracking?.inTransit?.confirmed ? "text-info" : "text-muted-foreground"
+                        )}
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-foreground">In Transit</span>
+                        {request.tracking?.inTransit?.confirmedAt && (
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(request.tracking.inTransit.confirmedAt).toLocaleString("en-US", {
+                              dateStyle: "long",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div
+                      className={clsx(
+                        "flex items-center gap-3 p-4 rounded-lg",
+                        request.tracking?.delivered?.confirmed
+                          ? "bg-success/10 border border-success/20"
+                          : "bg-accent"
+                      )}
+                    >
+                      <CheckCircle
+                        className={clsx(
+                          "w-5 h-5",
+                          request.tracking?.delivered?.confirmed ? "text-success" : "text-muted-foreground"
+                        )}
+                      />
+                      <div className="flex-1">
+                        <span className="font-medium text-foreground">Delivery Confirmed</span>
+                        {request.tracking?.delivered?.confirmedAt && (
+                          <p className="text-sm text-muted-foreground">
+                            {new Date(request.tracking.delivered.confirmedAt).toLocaleString("en-US", {
+                              dateStyle: "long",
+                              timeStyle: "short",
+                            })}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+              </motion.div>
+            )}
         </div>
 
-       
+        {/* Sidebar */}
         <div className="space-y-6">
-          
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-text-primary mb-4">{isDriver ? "Expéditeur" : "Conducteur"}</h2>
+          {/* User Info */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                <User className="w-5 h-5 text-primary" />
+                {isDriver ? "Shipper" : "Driver"}
+              </h2>
 
-            {isDriver ? (
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-white text-xl font-bold">{request.sender?.firstName?.charAt(0)}</span>
+              {isDriver ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {request.sender?.avatar ? (
+                        <img
+                          src={request.sender.avatar}
+                          alt={`${request.sender.firstName} ${request.sender.lastName}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-xl font-bold">
+                          {request.sender?.firstName?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">
+                        {request.sender?.firstName} {request.sender?.lastName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Shipper</p>
+                    </div>
+                  </div>
+                  {request.sender?.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{request.sender.email}</span>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-semibold text-text-primary">
-                    {request.sender?.firstName} {request.sender?.lastName}
-                  </h3>
-                  <p className="text-sm text-text-secondary">Expéditeur</p>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                      {request.trip?.driver?.avatar ? (
+                        <img
+                          src={normalizeAvatarUrl(request.trip.driver.avatar)}
+                          alt={`${request.trip.driver.firstName} ${request.trip.driver.lastName}`}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-xl font-bold">
+                          {request.trip?.driver?.firstName?.charAt(0)}
+                        </span>
+                      )}
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">
+                        {request.trip?.driver?.firstName} {request.trip?.driver?.lastName}
+                      </h3>
+                      <p className="text-sm text-muted-foreground">Driver</p>
+                    </div>
+                  </div>
+                  {request.trip?.driver?.email && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-muted-foreground">{request.trip.driver.email}</span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center space-x-4 mb-4">
-                <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-                  <span className="text-white text-xl font-bold">{request.trip?.driver?.firstName?.charAt(0)}</span>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-text-primary">
-                    {request.trip?.driver?.firstName} {request.trip?.driver?.lastName}
-                  </h3>
-                  <p className="text-sm text-text-secondary">Conducteur</p>
-                </div>
-              </div>
-            )}
+              )}
+            </Card>
+          </motion.div>
 
-          </Card>
+          {/* Actions */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <h2 className="text-lg font-semibold text-foreground mb-4">Actions</h2>
+              <div className="space-y-3">
+                {isDriver && request.status === "pending" && (
+                  <>
+                    <Button
+                      className="w-full bg-gradient-to-r from-success to-success/90"
+                      onClick={handleAcceptRequest}
+                      loading={acceptRequestMutation.isLoading}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Accept Request
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={handleRejectRequest}
+                      loading={rejectRequestMutation.isLoading}
+                    >
+                      <XCircle className="w-4 h-4 mr-2" />
+                      Reject Request
+                    </Button>
+                  </>
+                )}
 
-         
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold text-text-primary mb-4">Actions</h2>
-            <div className="space-y-3">
-              {isDriver && request.status === "pending" && (
-                <>
-                  <Button className="w-full" onClick={handleAcceptRequest} loading={acceptRequestMutation.isLoading}>
-                    Accepter la demande
+                {isDriver && request.status === "accepted" && (
+                  <Button
+                    className="w-full bg-gradient-to-r from-info to-info/90"
+                    onClick={handleConfirmPickup}
+                    loading={confirmPickupMutation.isLoading}
+                  >
+                    <Package className="w-4 h-4 mr-2" />
+                    Confirm Pickup
                   </Button>
+                )}
+
+                {isDriver && request.status === "in_transit" && (
+                  <Button
+                    className="w-full bg-gradient-to-r from-success to-success/90"
+                    onClick={handleConfirmDelivery}
+                    loading={confirmDeliveryMutation.isLoading}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Confirm Delivery
+                  </Button>
+                )}
+
+                {isSender && (request.status === "pending" || request.status === "accepted") && (
                   <Button
                     variant="outline"
-                    className="w-full"
-                    onClick={handleRejectRequest}
-                    loading={rejectRequestMutation.isLoading}
+                    className="w-full border-destructive text-destructive hover:bg-destructive/10"
+                    onClick={handleCancelRequest}
+                    loading={cancelRequestMutation.isLoading}
                   >
-                    Refuser la demande
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Cancel Request
                   </Button>
-                </>
-              )}
+                )}
 
-              {isDriver && request.status === "accepted" && (
-                <Button className="w-full" onClick={handleConfirmPickup} loading={confirmPickupMutation.isLoading}>
-                  Confirmer la collecte
-                </Button>
-              )}
-
-              {isDriver && request.status === "in_transit" && (
-                <Button className="w-full" onClick={handleConfirmDelivery} loading={confirmDeliveryMutation.isLoading}>
-                  Confirmer la livraison
-                </Button>
-              )}
-
-              {isSender && (request.status === "pending" || request.status === "accepted") && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleCancelRequest}
-                  loading={cancelRequestMutation.isLoading}
-                >
-                  Annuler la demande
-                </Button>
-              )}
-
-              {isSender && (request.status === "rejected" || request.status === "cancelled") && request.trip?._id && (
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => navigate(`/requests/create/${request.trip._id}`)}
-                >
-                  Créer une nouvelle demande
-                </Button>
-              )}
-            </div>
-          </Card>
+                {isSender &&
+                  (request.status === "rejected" || request.status === "cancelled") &&
+                  request.trip?._id && (
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => navigate(`/requests/create/${request.trip._id}`)}
+                    >
+                      <Package className="w-4 h-4 mr-2" />
+                      Create New Request
+                    </Button>
+                  )}
+              </div>
+            </Card>
+          </motion.div>
         </div>
       </div>
+
+      {/* Confirmation Dialogs */}
+      <ConfirmationDialog
+        isOpen={cancelDialog}
+        onClose={() => setCancelDialog(false)}
+        onConfirm={handleConfirmCancel}
+        title="Cancel this request?"
+        message="This action cannot be undone. The request will be cancelled and removed from your list."
+        confirmText="Cancel Request"
+        cancelText="Keep Request"
+        variant="danger"
+        loading={cancelRequestMutation.isLoading}
+      />
+
+      <ConfirmationDialog
+        isOpen={pickupDialog}
+        onClose={() => setPickupDialog(false)}
+        onConfirm={handleConfirmPickupAction}
+        title="Confirm package pickup?"
+        message="This will mark the package as picked up. Make sure you have received the package before confirming."
+        confirmText="Confirm Pickup"
+        cancelText="Cancel"
+        variant="success"
+        loading={confirmPickupMutation.isLoading}
+      />
+
+      <ConfirmationDialog
+        isOpen={deliveryDialog}
+        onClose={() => setDeliveryDialog(false)}
+        onConfirm={handleConfirmDeliveryAction}
+        title="Confirm package delivery?"
+        message="This will mark the package as delivered. Make sure the recipient has received the package."
+        confirmText="Continue"
+        cancelText="Cancel"
+        variant="success"
+      />
+
+      <InputDialog
+        isOpen={deliverySignatureDialog}
+        onClose={() => setDeliverySignatureDialog(false)}
+        onConfirm={handleConfirmDeliveryWithSignature}
+        title="Recipient Signature"
+        message="Enter the recipient's signature (optional)"
+        placeholder="Recipient signature (optional)"
+        confirmText="Confirm Delivery"
+        cancelText="Cancel"
+        variant="success"
+        loading={confirmDeliveryMutation.isLoading}
+        type="text"
+      />
+
+      <InputDialog
+        isOpen={acceptDialog}
+        onClose={() => setAcceptDialog(false)}
+        onConfirm={handleConfirmAccept}
+        title="Accept Request"
+        message="Add an optional acceptance message"
+        placeholder="Acceptance message (optional)"
+        confirmText="Accept Request"
+        cancelText="Cancel"
+        variant="success"
+        loading={acceptRequestMutation.isLoading}
+        type="text"
+      />
+
+      <InputDialog
+        isOpen={rejectDialog}
+        onClose={() => setRejectDialog(false)}
+        onConfirm={handleConfirmReject}
+        title="Reject Request"
+        message="Add an optional rejection reason"
+        placeholder="Rejection reason (optional)"
+        confirmText="Reject Request"
+        cancelText="Cancel"
+        variant="danger"
+        loading={rejectRequestMutation.isLoading}
+        type="text"
+      />
     </div>
   )
 }

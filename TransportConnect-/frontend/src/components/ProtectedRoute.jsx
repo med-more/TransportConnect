@@ -1,6 +1,5 @@
 import { Navigate, useLocation } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import Layout from "./Layout"
 import LoadingSpinner from "./ui/LoadingSpinner"
 
 const ProtectedRoute = ({ children, roles = [] }) => {
@@ -23,7 +22,7 @@ const ProtectedRoute = ({ children, roles = [] }) => {
     return <Navigate to="/dashboard" replace />
   }
 
-  return <Layout>{children}</Layout>
+  return children
 }
 
 export default ProtectedRoute

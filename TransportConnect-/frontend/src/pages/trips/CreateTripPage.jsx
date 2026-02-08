@@ -26,17 +26,17 @@ const CreateTripPage = () => {
     mutationFn: tripsAPI.createTrip,
     onSuccess: () => {
       queryClient.invalidateQueries("trips")
-      toast.success("Trajet créé avec succès !")
+      toast.success("Trip created successfully!")
       navigate("/trips")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la création du trajet")
+      toast.error(error.response?.data?.message || "Error creating trip")
     },
   })
 
   const onSubmit = async (data) => {
     if (selectedCargoTypes.length === 0) {
-      toast.error("Veuillez sélectionner au moins un type de cargaison")
+      toast.error("Please select at least one cargo type")
       return
     }
 
@@ -72,185 +72,163 @@ const CreateTripPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-200 via-blue-100 to-f4f4f4 p-0 relative overflow-hidden">
-      {/* Illustration décorative */}
-      <div className="absolute right-0 top-0 w-[420px] h-[420px] pointer-events-none z-0 opacity-10">
-        <svg viewBox="0 0 420 420" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          <ellipse cx="210" cy="210" rx="210" ry="210" fill="#0072bb" fillOpacity="0.15" />
-          <rect x="120" y="120" width="180" height="80" rx="30" fill="#0072bb" fillOpacity="0.18" />
-          <rect x="170" y="200" width="80" height="40" rx="20" fill="#5bc0eb" fillOpacity="0.18" />
-        </svg>
-      </div>
-      <div className="relative z-10 max-w-4xl mx-auto p-6 space-y-8">
-        {/* Header modernisé */}
-        <div className="flex items-center mb-8 gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="mr-2">
-            <ArrowLeft className="w-5 h-5" />
+    <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto space-y-4 md:space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
-        <div>
-            <h1 className="text-4xl font-extrabold text-primary mb-1">Créer un nouveau trajet</h1>
-            <p className="text-lg text-black/60 font-medium mb-1">Remplissez les informations de votre trajet pour connecter expéditeurs et conducteurs partout en France.</p>
-            <p className="text-sm text-primary font-semibold italic">Plateforme sécurisée, rapide et efficace pour tous vos transports</p>
-          </div>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Create New Trip</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Fill in your trip information to connect shippers and drivers</p>
         </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <Card className="p-8">
+      </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <MapPin className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-primary">Itinéraire</h2>
+            <h2 className="text-xl font-semibold text-foreground">Route</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div className="space-y-4">
-                <h3 className="font-semibold text-primary">Départ</h3>
+              <h3 className="font-medium text-foreground">Departure</h3>
               <Input
-                label="Ville de départ"
+                label="Departure city"
                 placeholder="Paris"
                 error={errors.departureCity?.message}
-                {...register("departureCity", { required: "La ville de départ est requise" })}
-                  className="focus:ring-2 focus:ring-primary/60"
+                {...register("departureCity", { required: "Departure city is required" })}
               />
               <Input
-                label="Adresse de départ"
+                label="Departure address"
                 placeholder="123 Rue de la Paix"
                 error={errors.departureAddress?.message}
-                {...register("departureAddress", { required: "L'adresse de départ est requise" })}
-                  className="focus:ring-2 focus:ring-primary/60"
+                {...register("departureAddress", { required: "Departure address is required" })}
               />
             </div>
             <div className="space-y-4">
-                <h3 className="font-semibold text-primary">Destination</h3>
+              <h3 className="font-medium text-foreground">Destination</h3>
               <Input
-                label="Ville de destination"
+                label="Destination city"
                 placeholder="Lyon"
                 error={errors.destinationCity?.message}
-                {...register("destinationCity", { required: "La ville de destination est requise" })}
-                  className="focus:ring-2 focus:ring-primary/60"
+                {...register("destinationCity", { required: "Destination city is required" })}
               />
               <Input
-                label="Adresse de destination"
+                label="Destination address"
                 placeholder="456 Avenue de la République"
                 error={errors.destinationAddress?.message}
-                {...register("destinationAddress", { required: "L'adresse de destination est requise" })}
-                  className="focus:ring-2 focus:ring-primary/60"
+                {...register("destinationAddress", { required: "Destination address is required" })}
               />
             </div>
           </div>
         </Card>
-          <Card className="p-8">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Calendar className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-primary">Horaires</h2>
+            <h2 className="text-xl font-semibold text-foreground">Schedule</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div className="space-y-4">
-                <h3 className="font-semibold text-primary">Départ</h3>
+              <h3 className="font-medium text-foreground">Departure</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Date de départ"
+                  label="Departure date"
                   type="date"
                   error={errors.departureDate?.message}
-                  {...register("departureDate", { required: "La date de départ est requise" })}
-                    className="focus:ring-2 focus:ring-primary/60"
+                  {...register("departureDate", { required: "Departure date is required" })}
                 />
                 <Input
-                  label="Heure de départ"
+                  label="Departure time"
                   type="time"
                   error={errors.departureTime?.message}
-                  {...register("departureTime", { required: "L'heure de départ est requise" })}
-                    className="focus:ring-2 focus:ring-primary/60"
+                  {...register("departureTime", { required: "Departure time is required" })}
                 />
               </div>
             </div>
             <div className="space-y-4">
-                <h3 className="font-semibold text-primary">Arrivée</h3>
+              <h3 className="font-medium text-foreground">Arrival</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Date d'arrivée"
+                  label="Arrival date"
                   type="date"
                   error={errors.arrivalDate?.message}
-                  {...register("arrivalDate", { required: "La date d'arrivée est requise" })}
-                    className="focus:ring-2 focus:ring-primary/60"
+                  {...register("arrivalDate", { required: "Arrival date is required" })}
                 />
                 <Input
-                  label="Heure d'arrivée"
+                  label="Arrival time"
                   type="time"
                   error={errors.arrivalTime?.message}
-                  {...register("arrivalTime", { required: "L'heure d'arrivée est requise" })}
-                    className="focus:ring-2 focus:ring-primary/60"
+                  {...register("arrivalTime", { required: "Arrival time is required" })}
                 />
               </div>
             </div>
           </div>
         </Card>
-          <Card className="p-8">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Weight className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-primary">Capacité disponible</h2>
+            <h2 className="text-xl font-semibold text-foreground">Available Capacity</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div>
               <Input
-                label="Poids maximum (kg)"
+                label="Maximum weight (kg)"
                 type="number"
                 placeholder="500"
                 error={errors.weight?.message}
                 {...register("weight", {
-                  required: "Le poids maximum est requis",
-                  min: { value: 1, message: "Le poids doit être supérieur à 0" },
+                  required: "Maximum weight is required",
+                  min: { value: 1, message: "Weight must be greater than 0" },
                 })}
-                  className="focus:ring-2 focus:ring-primary/60"
               />
             </div>
             <div>
-                <label className="block text-sm font-semibold text-primary mb-2">Dimensions (cm)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm)</label>
               <div className="grid grid-cols-3 gap-2">
                 <Input
-                  placeholder="Longueur"
+                  placeholder="Length"
                   type="number"
                   error={errors.length?.message}
                   {...register("length", {
-                    required: "La longueur est requise",
-                    min: { value: 1, message: "La longueur doit être supérieure à 0" },
+                    required: "Length is required",
+                    min: { value: 1, message: "Length must be greater than 0" },
                   })}
-                    className="focus:ring-2 focus:ring-primary/60"
                 />
                 <Input
-                  placeholder="Largeur"
+                  placeholder="Width"
                   type="number"
                   error={errors.width?.message}
                   {...register("width", {
-                    required: "La largeur est requise",
-                    min: { value: 1, message: "La largeur doit être supérieure à 0" },
+                    required: "Width is required",
+                    min: { value: 1, message: "Width must be greater than 0" },
                   })}
-                    className="focus:ring-2 focus:ring-primary/60"
                 />
                 <Input
-                  placeholder="Hauteur"
+                  placeholder="Height"
                   type="number"
                   error={errors.height?.message}
                   {...register("height", {
-                    required: "La hauteur est requise",
-                    min: { value: 1, message: "La hauteur doit être supérieure à 0" },
+                    required: "Height is required",
+                    min: { value: 1, message: "Height must be greater than 0" },
                   })}
-                    className="focus:ring-2 focus:ring-primary/60"
                 />
               </div>
             </div>
           </div>
         </Card>
-          <Card className="p-8">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Package className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-primary">Types de cargaison acceptés</h2>
+            <h2 className="text-xl font-semibold text-foreground">Accepted Cargo Types</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {CARGO_TYPES.map((type) => (
               <label
                 key={type.value}
-                className={`p-3 border-2 rounded-xl cursor-pointer transition-all text-center ${
+                className={`p-3 border-2 rounded-lg cursor-pointer transition-all text-center ${
                   selectedCargoTypes.includes(type.value)
-                    ? "border-primary bg-input-background"
-                    : "border-border hover:border-primary"
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary hover:bg-accent"
                 }`}
               >
                 <input
@@ -259,49 +237,47 @@ const CreateTripPage = () => {
                   checked={selectedCargoTypes.includes(type.value)}
                   onChange={() => toggleCargoType(type.value)}
                 />
-                <span className="text-sm font-medium text-text-primary">{type.label}</span>
+                <span className="text-sm font-medium text-foreground">{type.label}</span>
               </label>
             ))}
           </div>
         </Card>
-          <Card className="p-8">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Euro className="w-6 h-6 text-primary mr-3" />
-              <h2 className="text-2xl font-bold text-primary">Tarification</h2>
+            <h2 className="text-xl font-semibold text-foreground">Pricing</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <Input
-              label="Prix par kg (DH)"
+              label="Price per kg (€)"
               type="number"
               step="0.01"
               placeholder="2.50"
               error={errors.pricePerKg?.message}
               {...register("pricePerKg", {
-                required: "Le prix par kg est requis",
-                min: { value: 0.01, message: "Le prix doit être supérieur à 0" },
+                required: "Price per kg is required",
+                min: { value: 0.01, message: "Price must be greater than 0" },
               })}
-                className="focus:ring-2 focus:ring-primary/60"
             />
             <div className="space-y-2">
-                <label className="block text-sm font-semibold text-primary">Description (optionnel)</label>
+              <label className="block text-sm font-medium text-foreground">Description (optional)</label>
               <textarea
-                  className="input-field min-h-[100px] resize-none focus:ring-2 focus:ring-primary/60"
-                placeholder="Informations supplémentaires sur votre trajet..."
+                className="input-field min-h-[100px] resize-none"
+                placeholder="Additional information about your trip..."
                 {...register("description")}
               />
             </div>
           </div>
         </Card>
-        <div className="flex items-center justify-end space-x-4">
+        <div className="flex items-center justify-end gap-4">
           <Button variant="outline" onClick={() => navigate(-1)}>
-            Annuler
+            Cancel
           </Button>
           <Button type="submit" loading={createTripMutation.isLoading}>
-            Créer le trajet
+            Create Trip
           </Button>
         </div>
       </form>
-      </div>
     </div>
   )
 }

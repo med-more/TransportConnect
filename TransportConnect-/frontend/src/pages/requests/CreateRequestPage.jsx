@@ -35,11 +35,11 @@ const CreateRequestPage = () => {
     mutationFn: requestsAPI.createRequest,
     onSuccess: () => {
       queryClient.invalidateQueries("requests")
-      toast.success("Demande créée avec succès !")
+      toast.success("Request created successfully!")
       navigate("/requests")
     },
     onError: (error) => {
-      toast.error(error.response?.data?.message || "Erreur lors de la création de la demande")
+      toast.error(error.response?.data?.message || "Error creating request")
     },
   })
 
@@ -95,269 +95,265 @@ const CreateRequestPage = () => {
   if (!trip) {
     return (
       <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-text-primary mb-4">Trajet non trouvé</h1>
-        <Button onClick={() => navigate("/trips")}>Retour aux trajets</Button>
+        <h1 className="text-2xl font-bold text-foreground mb-4">Trip not found</h1>
+        <Button onClick={() => navigate("/trips")}>Back to trips</Button>
       </div>
     )
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto space-y-4 md:space-y-6">
       {/* Header */}
-      <div className="flex items-center mb-8">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="mr-4">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-text-primary">Nouvelle demande de transport</h1>
-          <p className="text-text-secondary mt-1">
-            Pour le trajet {trip.departure.city} → {trip.destination.city}
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">New Transport Request</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            For trip {trip.departure.city} → {trip.destination.city}
           </p>
         </div>
       </div>
 
       {/* Trip Summary */}
-      <Card className="p-6 mb-8">
-        <h2 className="text-xl font-semibold text-text-primary mb-4">Résumé du trajet</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Card className="p-4 sm:p-5 md:p-6">
+        <h2 className="text-xl font-semibold text-foreground mb-4">Trip Summary</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <h3 className="font-medium text-text-primary">Itinéraire</h3>
-            <p className="text-text-secondary">
+            <h3 className="font-medium text-foreground">Route</h3>
+            <p className="text-muted-foreground">
               {trip.departure.city} → {trip.destination.city}
             </p>
           </div>
           <div>
-            <h3 className="font-medium text-text-primary">Départ</h3>
-            <p className="text-text-secondary">{new Date(trip.departureDate).toLocaleDateString("fr-FR")}</p>
+            <h3 className="font-medium text-foreground">Departure</h3>
+            <p className="text-muted-foreground">{new Date(trip.departureDate).toLocaleDateString("en-US")}</p>
           </div>
           <div>
-            <h3 className="font-medium text-text-primary">Prix</h3>
-            <p className="text-primary font-semibold">{trip.pricePerKg}DH/kg</p>
+            <h3 className="font-medium text-foreground">Price</h3>
+            <p className="text-primary font-semibold">{trip.pricePerKg}€/kg</p>
           </div>
         </div>
       </Card>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Cargo Information */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Package className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Informations du colis</h2>
+            <h2 className="text-xl font-semibold text-foreground">Package Information</h2>
           </div>
 
           <div className="space-y-4">
             <Input
-              label="Description du colis"
-              placeholder="Ordinateurs portables, documents, etc."
+              label="Package description"
+              placeholder="Laptops, documents, etc."
               error={errors.description?.message}
               {...register("description", {
-                required: "La description est requise",
-                minLength: { value: 10, message: "La description doit contenir au moins 10 caractères" },
+                required: "Description is required",
+                minLength: { value: 10, message: "Description must be at least 10 characters" },
               })}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-text-primary mb-2">Type de cargaison</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Cargo type</label>
                 <select
                   className="input-field"
-                  {...register("cargoType", { required: "Le type de cargaison est requis" })}
+                  {...register("cargoType", { required: "Cargo type is required" })}
                 >
-                  <option value="">Sélectionner un type</option>
+                  <option value="">Select a type</option>
                   {CARGO_TYPES.filter((type) => trip.acceptedCargoTypes.includes(type.value)).map((type) => (
                     <option key={type.value} value={type.value}>
                       {type.label}
                     </option>
                   ))}
                 </select>
-                {errors.cargoType && <p className="text-sm text-error mt-1">{errors.cargoType.message}</p>}
+                {errors.cargoType && <p className="text-sm text-destructive mt-1">{errors.cargoType.message}</p>}
               </div>
 
               <Input
-                label="Poids (kg)"
+                label="Weight (kg)"
                 type="number"
                 step="0.1"
                 placeholder="25.5"
                 error={errors.weight?.message}
                 {...register("weight", {
-                  required: "Le poids est requis",
-                  min: { value: 0.1, message: "Le poids doit être supérieur à 0" },
+                  required: "Weight is required",
+                  min: { value: 0.1, message: "Weight must be greater than 0" },
                   max: {
                     value: trip.availableCapacity.weight,
-                    message: `Le poids ne peut pas dépasser ${trip.availableCapacity.weight}kg`,
+                    message: `Weight cannot exceed ${trip.availableCapacity.weight}kg`,
                   },
                 })}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-text-primary mb-2">Dimensions (cm)</label>
+              <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm)</label>
               <div className="grid grid-cols-3 gap-4">
                 <Input
-                  placeholder="Longueur"
+                  placeholder="Length"
                   type="number"
                   error={errors.length?.message}
                   {...register("length", {
-                    required: "La longueur est requise",
-                    min: { value: 1, message: "La longueur doit être supérieure à 0" },
+                    required: "Length is required",
+                    min: { value: 1, message: "Length must be greater than 0" },
                   })}
                 />
                 <Input
-                  placeholder="Largeur"
+                  placeholder="Width"
                   type="number"
                   error={errors.width?.message}
                   {...register("width", {
-                    required: "La largeur est requise",
-                    min: { value: 1, message: "La largeur doit être supérieure à 0" },
+                    required: "Width is required",
+                    min: { value: 1, message: "Width must be greater than 0" },
                   })}
                 />
                 <Input
-                  placeholder="Hauteur"
+                  placeholder="Height"
                   type="number"
                   error={errors.height?.message}
                   {...register("height", {
-                    required: "La hauteur est requise",
-                    min: { value: 1, message: "La hauteur doit être supérieure à 0" },
+                    required: "Height is required",
+                    min: { value: 1, message: "Height must be greater than 0" },
                   })}
                 />
               </div>
             </div>
 
             <Input
-              label="Valeur déclarée (DH) - Optionnel"
+              label="Declared value (€) - Optional"
               type="number"
               step="0.01"
               placeholder="500.00"
               error={errors.value?.message}
               {...register("value", {
-                min: { value: 0, message: "La valeur ne peut pas être négative" },
+                min: { value: 0, message: "Value cannot be negative" },
               })}
             />
           </div>
         </Card>
 
-        
-        <Card className="p-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <MapPin className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Informations de collecte</h2>
+            <h2 className="text-xl font-semibold text-foreground">Pickup Information</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Ville de collecte"
+              label="Pickup city"
               placeholder="Paris"
               error={errors.pickupCity?.message}
-              {...register("pickupCity", { required: "La ville de collecte est requise" })}
+              {...register("pickupCity", { required: "Pickup city is required" })}
             />
 
             <Input
-              label="Adresse de collecte"
+              label="Pickup address"
               placeholder="123 Rue de la Paix"
               error={errors.pickupAddress?.message}
-              {...register("pickupAddress", { required: "L'adresse de collecte est requise" })}
+              {...register("pickupAddress", { required: "Pickup address is required" })}
             />
 
             <Input
-              label="Nom du contact"
-              placeholder="Jean Dupont"
+              label="Contact name"
+              placeholder="John Doe"
               error={errors.pickupContactName?.message}
               {...register("pickupContactName")}
             />
 
             <Input
-              label="Téléphone du contact"
-              placeholder="0123456789"
+              label="Contact phone"
+              placeholder="+1234567890"
               error={errors.pickupContactPhone?.message}
               {...register("pickupContactPhone")}
             />
           </div>
         </Card>
 
-        
-        <Card className="p-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <MapPin className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Informations de livraison</h2>
+            <h2 className="text-xl font-semibold text-foreground">Delivery Information</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
-              label="Ville de livraison"
+              label="Delivery city"
               placeholder="Lyon"
               error={errors.deliveryCity?.message}
-              {...register("deliveryCity", { required: "La ville de livraison est requise" })}
+              {...register("deliveryCity", { required: "Delivery city is required" })}
             />
 
             <Input
-              label="Adresse de livraison"
+              label="Delivery address"
               placeholder="456 Avenue de la République"
               error={errors.deliveryAddress?.message}
-              {...register("deliveryAddress", { required: "L'adresse de livraison est requise" })}
+              {...register("deliveryAddress", { required: "Delivery address is required" })}
             />
 
             <Input
-              label="Nom du contact"
-              placeholder="Marie Martin"
+              label="Contact name"
+              placeholder="Jane Smith"
               error={errors.deliveryContactName?.message}
               {...register("deliveryContactName")}
             />
 
             <Input
-              label="Téléphone du contact"
-              placeholder="0987654321"
+              label="Contact phone"
+              placeholder="+0987654321"
               error={errors.deliveryContactPhone?.message}
               {...register("deliveryContactPhone")}
             />
           </div>
         </Card>
 
-     
-        <Card className="p-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <User className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Message au conducteur</h2>
+            <h2 className="text-xl font-semibold text-foreground">Message to Driver</h2>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-text-primary">Message (optionnel)</label>
+            <label className="block text-sm font-medium text-foreground">Message (optional)</label>
             <textarea
               className="input-field min-h-[100px] resize-none"
-              placeholder="Informations supplémentaires pour le conducteur..."
+              placeholder="Additional information for the driver..."
               {...register("message")}
             />
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">
             <Euro className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-text-primary">Résumé des coûts</h2>
+            <h2 className="text-xl font-semibold text-foreground">Cost Summary</h2>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-text-secondary">Poids:</span>
-              <span className="text-text-primary">{watchedWeight || 0} kg</span>
+              <span className="text-muted-foreground">Weight:</span>
+              <span className="text-foreground">{watchedWeight || 0} kg</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-text-secondary">Prix par kg:</span>
-              <span className="text-text-primary">{trip.pricePerKg}DH</span>
+              <span className="text-muted-foreground">Price per kg:</span>
+              <span className="text-foreground">{trip.pricePerKg}€</span>
             </div>
-            <div className="border-t pt-2 flex justify-between">
-              <span className="font-semibold text-text-primary">Total estimé:</span>
-              <span className="font-bold text-primary text-xl">{estimatedPrice}DH</span>
+            <div className="border-t border-border pt-2 flex justify-between">
+              <span className="font-semibold text-foreground">Estimated total:</span>
+              <span className="font-bold text-primary text-xl">{estimatedPrice}€</span>
             </div>
           </div>
         </Card>
 
-       
-        <div className="flex items-center justify-end space-x-4">
+        <div className="flex items-center justify-end gap-4">
           <Button variant="outline" onClick={() => navigate(-1)}>
-            Annuler
+            Cancel
           </Button>
           <Button type="submit" loading={createRequestMutation.isLoading}>
-            Envoyer la demande
+            Send Request
           </Button>
         </div>
       </form>

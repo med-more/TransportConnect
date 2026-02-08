@@ -16,8 +16,14 @@ export const getUserRequests = async (req, res) => {
       }
   
       const requests = await Request.find(filter)
-        .populate("trip", "departure destination departureDate driver")
-        .populate("trip.driver", "firstName lastName avatar stats")
+        .populate({
+          path: "trip",
+          select: "departure destination departureDate driver",
+          populate: {
+            path: "driver",
+            select: "firstName lastName avatar stats",
+          },
+        })
         .sort({ createdAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit)

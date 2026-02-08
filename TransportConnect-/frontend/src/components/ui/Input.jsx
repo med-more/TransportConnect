@@ -1,16 +1,29 @@
 import { forwardRef } from "react"
 import clsx from "clsx"
 
-const Input = forwardRef(({ label, error, className, ...props }, ref) => {
+const Input = forwardRef(({ label, error, helperText, className, ...props }, ref) => {
   return (
     <div className="space-y-2">
-      {label && <label className="block text-sm font-semibold text-text-primary">{label}</label>}
+      {label && (
+        <label className="block text-sm font-medium text-foreground">
+          {label}
+        </label>
+      )}
       <input
         ref={ref}
-        className={clsx("input-field", error && "border-error focus:ring-error", className)}
+        className={clsx(
+          "input-field",
+          error && "border-destructive focus:ring-destructive",
+          className
+        )}
         {...props}
       />
-      {error && <p className="text-sm text-error">{error}</p>}
+      {error && (
+        <p className="text-sm text-destructive">{error}</p>
+      )}
+      {helperText && !error && (
+        <p className="text-sm text-muted-foreground">{helperText}</p>
+      )}
     </div>
   )
 })

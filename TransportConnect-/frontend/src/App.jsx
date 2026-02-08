@@ -4,7 +4,6 @@ import { useAuth } from "./contexts/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import Layout from "./components/Layout"
-import AdminLayout from "./components/AdminLayout"
 
 import WelcomePage from "./pages/auth/WelcomePage"
 import LoginPage from "./pages/auth/LoginPage"
@@ -38,27 +37,144 @@ function AppRoutes() {
       <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
 
       {/* Protected user routes with Layout */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute>
-          {isAuthenticated && user?.role === "admin" ? <Navigate to="/admin" replace /> : <DashboardPage />}
-        </ProtectedRoute>
-      } />
-      <Route path="/trips" element={<ProtectedRoute><TripsPage /></ProtectedRoute>} />
-      <Route path="/trips/create" element={<ProtectedRoute><CreateTripPage /></ProtectedRoute>} />
-      <Route path="/trips/:id" element={<ProtectedRoute><TripDetailPage /></ProtectedRoute>} />
-      <Route path="/requests" element={<ProtectedRoute><RequestsPage /></ProtectedRoute>} />
-      <Route path="/requests/create/:tripId" element={<ProtectedRoute><CreateRequestPage /></ProtectedRoute>} />
-      <Route path="/requests/:id" element={<ProtectedRoute><RequestDetailPage /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              {isAuthenticated && user?.role === "admin" ? (
+                <Navigate to="/admin" replace />
+              ) : (
+                <DashboardPage />
+              )}
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trips"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <TripsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trips/create"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CreateTripPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trips/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <TripDetailPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <RequestsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests/create/:tripId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <CreateRequestPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/requests/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <RequestDetailPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ProfilePage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-      {/* Admin routes with AdminLayout */}
+      {/* Admin routes with Layout */}
       {isAuthenticated && user?.role === "admin" && (
         <>
-          <Route path="/admin" element={<ProtectedRoute><AdminDashboardPage /></ProtectedRoute>} />
-          <Route path="/admin/users" element={<ProtectedRoute><AdminUsersPage /></ProtectedRoute>} />
-          <Route path="/admin/trips" element={<ProtectedRoute><AdminTripsPage /></ProtectedRoute>} />
-          <Route path="/admin/requests" element={<ProtectedRoute><AdminRequestsPage /></ProtectedRoute>} />
-          <Route path="/admin/verifications" element={<ProtectedRoute><AdminVerificationsPage /></ProtectedRoute>} />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminDashboardPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/users"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminUsersPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/trips"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminTripsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/requests"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminRequestsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/verifications"
+            element={
+              <ProtectedRoute>
+                <Layout>
+                  <AdminVerificationsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
         </>
       )}
 
@@ -69,9 +185,34 @@ function AppRoutes() {
 
 function App() {
   return (
-    <div className="min-h-screen bg-background">
-      <AppRoutes />
-    </div>
+    <>
+      <div className="min-h-screen bg-background">
+        <AppRoutes />
+      </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: "#fff",
+            color: "#111827",
+            border: "1px solid #e5e7eb",
+          },
+          success: {
+            iconTheme: {
+              primary: "#10b981",
+              secondary: "#fff",
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#fff",
+            },
+          },
+        }}
+      />
+    </>
   )
 }
 

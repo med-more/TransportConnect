@@ -52,7 +52,7 @@
         sort: { [sortBy]: 1 },
         populate: {
           path: "driver",
-          select: "firstName lastName avatar stats isVerified",
+          select: "firstName lastName avatar stats isVerified vehicleInfo",
         },
       }
 
@@ -82,6 +82,7 @@
       if (status) filter.status = status
 
       const trips = await Trip.find(filter)
+        .populate("driver", "firstName lastName avatar stats isVerified vehicleInfo")
         .populate("requests", "sender cargo status createdAt")
         .populate("acceptedRequests", "sender cargo pickup delivery status")
         .sort({ createdAt: -1 })
@@ -107,7 +108,7 @@
   export const getTripById = async (req, res) => {
     try {
       const trip = await Trip.findById(req.params.id)
-        .populate("driver", "firstName lastName avatar stats isVerified phone")
+        .populate("driver", "firstName lastName avatar stats isVerified phone vehicleInfo")
         .populate({
           path: "requests",
           populate: {

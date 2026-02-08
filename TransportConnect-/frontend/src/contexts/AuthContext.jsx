@@ -70,21 +70,43 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log("Login attempt for:", email)
       const response = await authAPI.login(email, password)
-      const { user, token } = response.data
+      console.log("Login response:", response)
+      
+      // Backend returns: { msg, token, user: { id, firstName, lastName, ... } }
+      const userData = response.data?.user
+      const token = response.data?.token
 
+      if (!userData || !token) {
+        console.error("Invalid response structure:", response.data)
+        toast.error("Invalid response from server")
+        return { success: false, message: "Invalid response from server" }
+      }
+
+      // Convert id to _id for consistency
+      const user = {
+        ...userData,
+        _id: userData.id || userData._id,
+      }
+
+      console.log("Setting user and token in localStorage")
       localStorage.setItem("token", token)
       localStorage.setItem("user", JSON.stringify(user))
 
+      console.log("Dispatching LOGIN_SUCCESS")
       dispatch({
         type: "LOGIN_SUCCESS",
         payload: { user, token },
       })
 
-      toast.success(`Bienvenue ${user.firstName} !`)
-      return { success: true }
+      console.log("Login successful, user:", user)
+      toast.success(`Welcome ${user.firstName}!`)
+      return { success: true, user }
     } catch (error) {
-      const message = error.response?.data?.message || "Erreur de connexion"
+      console.error("Login error:", error)
+      console.error("Error response:", error.response)
+      const message = error.response?.data?.msg || error.response?.data?.message || error.message || "Login failed"
       toast.error(message)
       return { success: false, message }
     }
@@ -93,7 +115,20 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData)
-      const { user, token } = response.data
+      const userDataFromResponse = response.data?.user
+      const token = response.data?.token
+
+      if (!userDataFromResponse || !token) {
+        console.error("Invalid response structure:", response.data)
+        toast.error("Invalid response from server")
+        return { success: false, message: "Invalid response from server" }
+      }
+
+      // Convert id to _id for consistency
+      const user = {
+        ...userDataFromResponse,
+        _id: userDataFromResponse.id || userDataFromResponse._id,
+      }
 
       localStorage.setItem("token", token)
       localStorage.setItem("user", JSON.stringify(user))
@@ -103,10 +138,11 @@ export const AuthProvider = ({ children }) => {
         payload: { user, token },
       })
 
-      toast.success("Inscription réussie ! Bienvenue sur TransportConnect")
+      toast.success("Registration successful! Welcome to TransportConnect")
       return { success: true }
     } catch (error) {
-      const message = error.response?.data?.message || "Erreur d'inscription"
+      console.error("Registration error:", error)
+      const message = error.response?.data?.message || error.message || "Registration failed"
       toast.error(message)
       return { success: false, message }
     }
