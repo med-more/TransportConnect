@@ -6,9 +6,10 @@ const PublicRoute = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useAuth()
   const location = useLocation()
 
-  // Don't redirect if we're on the Google OAuth callback page
-  // Let the callback page handle the redirect
+  // Don't redirect if we're on the Google OAuth callback or role selection page
+  // Let these pages handle their own redirects
   const isGoogleCallback = location.pathname === "/auth/google/callback"
+  const isRoleSelection = location.pathname === "/auth/select-role"
 
   if (isLoading) {
     return (
@@ -18,8 +19,8 @@ const PublicRoute = ({ children }) => {
     )
   }
 
-  // Don't redirect on Google callback page - let it handle its own flow
-  if (isAuthenticated && !isGoogleCallback) {
+  // Don't redirect on Google callback or role selection pages - let them handle their own flow
+  if (isAuthenticated && !isGoogleCallback && !isRoleSelection) {
     // Redirect based on user role
     if (user?.role === "admin") {
       return <Navigate to="/admin" replace />

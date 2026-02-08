@@ -236,11 +236,24 @@ export const googleCallback = async (req, res) => {
     // Generate JWT token
     const token = generateToken(user._id)
 
+    // Check if this is a new Google user (created in the last 2 minutes)
+    // This indicates they just signed up via Google and should select their role
+    const isNewUser = user.googleId && 
+      user.createdAt && 
+      (Date.now() - new Date(user.createdAt).getTime()) < 2 * 60 * 1000 // 2 minutes
+
     // Redirect to frontend with token
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"
-    const redirectUrl = `${frontendUrl}/auth/google/callback?token=${token}&userId=${user._id}`
-
-    res.redirect(redirectUrl)
+    
+    if (isNewUser && user.role === "expediteur") {
+      // New Google user - redirect to role selection
+      const redirectUrl = `${frontendUrl}/auth/select-role?token=${token}&userId=${user._id}`
+      res.redirect(redirectUrl)
+    } else {
+      // Existing user or already selected role - normal callback
+      const redirectUrl = `${frontendUrl}/auth/google/callback?token=${token}&userId=${user._id}`
+      res.redirect(redirectUrl)
+    }
   } catch (error) {
     console.error("Error in Google OAuth callback:", error)
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"

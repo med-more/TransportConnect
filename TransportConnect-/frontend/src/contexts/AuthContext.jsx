@@ -52,6 +52,27 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = localStorage.getItem("token")
       const userData = localStorage.getItem("user")
+      const tempTokenPendingRole = localStorage.getItem("temp_token_pending_role")
+
+      // If there's a temporary token pending role selection, don't log in
+      // User must complete role selection first
+      if (tempTokenPendingRole === "true") {
+        // Clear the token and redirect to role selection if we have the token in sessionStorage
+        const tempToken = sessionStorage.getItem("temp_token")
+        const tempUserId = sessionStorage.getItem("temp_userId")
+        if (tempToken && tempUserId) {
+          // Keep token in localStorage for API calls, but don't set auth state
+          dispatch({ type: "SET_LOADING", payload: false })
+          return
+        } else {
+          // If sessionStorage is cleared but flag is still there, clear everything
+          localStorage.removeItem("token")
+          localStorage.removeItem("user")
+          localStorage.removeItem("temp_token_pending_role")
+          dispatch({ type: "SET_LOADING", payload: false })
+          return
+        }
+      }
 
       if (token && userData) {
         // Try to fetch latest user profile from server to get updated avatar
