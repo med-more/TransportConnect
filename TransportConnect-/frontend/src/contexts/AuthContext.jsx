@@ -84,6 +84,7 @@ export const AuthProvider = ({ children }) => {
               ...serverUser,
               _id: serverUser.id || serverUser._id,
             }
+            console.log("📸 Avatar from profile check:", user.avatar)
             localStorage.setItem("user", JSON.stringify(user))
             dispatch({
               type: "LOGIN_SUCCESS",
@@ -93,6 +94,7 @@ export const AuthProvider = ({ children }) => {
           } else {
             // Fallback to localStorage if profile fetch fails
             const user = JSON.parse(userData)
+            console.log("📸 Avatar from localStorage fallback:", user.avatar)
             dispatch({
               type: "LOGIN_SUCCESS",
               payload: { user, token },
@@ -102,6 +104,7 @@ export const AuthProvider = ({ children }) => {
           // If profile fetch fails, use localStorage data
           console.warn("Could not fetch profile, using cached data:", profileError)
           const user = JSON.parse(userData)
+          console.log("📸 Avatar from localStorage error fallback:", user.avatar)
           dispatch({
             type: "LOGIN_SUCCESS",
             payload: { user, token },
@@ -133,7 +136,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       // Convert id to _id for consistency
-      const user = {
+      let user = {
         ...userData,
         _id: userData.id || userData._id,
       }
@@ -147,6 +150,7 @@ export const AuthProvider = ({ children }) => {
             ...profileUser,
             _id: profileUser.id || profileUser._id,
           }
+          console.log("📸 Profile avatar from server:", fullUser.avatar)
           user = fullUser // Use the full profile data
         }
       } catch (profileError) {
@@ -155,6 +159,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       console.log("Setting user and token in localStorage")
+      console.log("📸 User avatar before saving:", user.avatar)
       localStorage.setItem("token", token)
       localStorage.setItem("user", JSON.stringify(user))
 
@@ -221,6 +226,8 @@ export const AuthProvider = ({ children }) => {
 
   const updateUser = (userData) => {
     const updatedUser = { ...state.user, ...userData }
+    console.log("🔄 Updating user with data:", userData)
+    console.log("📸 Avatar in updateUser:", userData.avatar || updatedUser.avatar)
     localStorage.setItem("user", JSON.stringify(updatedUser))
     dispatch({ type: "UPDATE_USER", payload: userData })
   }

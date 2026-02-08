@@ -113,15 +113,26 @@ export const uploadAvatar = async (req, res) => {
           const publicIdWithExt = urlParts.slice(-2).join("/")
           const publicId = publicIdWithExt.split(".")[0]
           await cloudinary.uploader.destroy(publicId)
+          console.log("✅ Old Cloudinary avatar deleted")
         } catch (error) {
           console.error("Error deleting old avatar from Cloudinary:", error)
         }
-      } else if (user.avatar.includes("/uploads/")) {
+      } else if (user.avatar.includes("/uploads/") || user.avatar.includes("uploads/")) {
         // Delete local file
         try {
-          const filePath = path.join(__dirname, "..", user.avatar.replace(/^\/api\//, ""))
+          // Handle both /uploads/avatars/filename and uploads/avatars/filename
+          let relativePath = user.avatar.replace(/^https?:\/\/[^\/]+/, "") // Remove protocol and host
+          relativePath = relativePath.replace(/^\/api\//, "") // Remove /api/ if present
+          if (!relativePath.startsWith("/")) {
+            relativePath = "/" + relativePath
+          }
+          const filePath = path.join(__dirname, "..", relativePath)
+          console.log("Attempting to delete old avatar:", filePath)
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath)
+            console.log("✅ Old local avatar deleted")
+          } else {
+            console.warn("⚠️ Old avatar file not found:", filePath)
           }
         } catch (error) {
           console.error("Error deleting old local avatar:", error)
@@ -131,10 +142,18 @@ export const uploadAvatar = async (req, res) => {
 
     // Get avatar URL - must be a full HTTP URL
     let avatarUrl
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded"
+      })
+    }
+
     if (req.file.path && (req.file.path.includes("cloudinary") || req.file.path.startsWith("http"))) {
       // Cloudinary URL (already a full URL)
       avatarUrl = req.file.path
-    } else {
+      console.log("📸 Using Cloudinary URL:", avatarUrl)
+    } else if (req.file.path) {
       // Local file - create full HTTP URL
       const fileName = path.basename(req.file.path)
       // Get the base URL from the request
@@ -147,9 +166,24 @@ export const uploadAvatar = async (req, res) => {
       // Ensure we have a proper HTTP URL
       avatarUrl = `${protocol}://${host}/uploads/avatars/${fileName}`
       
-      console.log("Generated avatar URL:", avatarUrl)
-      console.log("Request host:", requestHost)
-      console.log("File path:", req.file.path)
+      console.log("📸 Generated local avatar URL:", avatarUrl)
+      console.log("📸 Request host:", requestHost)
+      console.log("📸 File path:", req.file.path)
+      console.log("📸 File name:", fileName)
+    } else if (req.file.filename) {
+      // Fallback: if only filename is available
+      const fileName = req.file.filename
+      const protocol = req.protocol || "http"
+      const requestHost = req.get("host")
+      const port = process.env.PORT || 7000
+      const host = requestHost || `localhost:${port}`
+      avatarUrl = `${protocol}://${host}/uploads/avatars/${fileName}`
+      console.log("📸 Generated avatar URL from filename:", avatarUrl)
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Failed to determine file location"
+      })
     }
 
     if (!avatarUrl) {
@@ -166,9 +200,15 @@ export const uploadAvatar = async (req, res) => {
       { new: true, runValidators: true }
     ).select("-password")
 
+    console.log("📸 Avatar URL saved to database:", avatarUrl)
+    console.log("📸 Updated user avatar field:", updatedUser.avatar)
+
     res.json({
       success: true,
-      data: updatedUser,
+      data: {
+        ...updatedUser.toObject(),
+        avatar: avatarUrl, // Ensure avatar is explicitly included
+      },
       message: "Avatar uploaded successfully"
     })
   } catch (error) {

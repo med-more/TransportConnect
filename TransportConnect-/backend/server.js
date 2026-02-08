@@ -4,6 +4,7 @@ import cors from "cors"
 import path from "path"
 import { fileURLToPath } from "url"
 import http from "http"
+import fs from "fs"
 
 // Load environment variables FIRST, before importing any modules that use them
 const __filename = fileURLToPath(import.meta.url)
@@ -43,8 +44,20 @@ app.use(passport.initialize())
 // Serve uploaded files statically (for local storage fallback)
 // Use absolute path to ensure it works correctly
 const uploadsPath = path.join(__dirname, "uploads")
+const avatarsPath = path.join(uploadsPath, "avatars")
+
+// Ensure uploads directories exist
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true })
+  console.log("✅ Created uploads directory:", uploadsPath)
+}
+if (!fs.existsSync(avatarsPath)) {
+  fs.mkdirSync(avatarsPath, { recursive: true })
+  console.log("✅ Created avatars directory:", avatarsPath)
+}
+
 app.use("/uploads", express.static(uploadsPath))
-console.log("Serving static files from:", uploadsPath)
+console.log("📁 Serving static files from:", uploadsPath)
 
 app.use("/api/auth", authRoutes)
 app.use("/api/trips", tripsRoutes)
@@ -54,7 +67,13 @@ app.use("/api/admin", adminRoutes)
 
 const server = http.createServer(app)
 
+// Increase timeout for file uploads (30 seconds)
+server.timeout = 30000
+server.keepAliveTimeout = 30000
+server.headersTimeout = 31000
+
 server.listen(PORT, async () => {
   await connectDB()
   console.log(`Serveur en marche sur le port ${PORT}`)
+  console.log(`⏱️  Server timeout set to ${server.timeout}ms for file uploads`)
 })

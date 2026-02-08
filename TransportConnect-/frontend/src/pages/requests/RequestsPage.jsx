@@ -457,6 +457,17 @@ const RequestsPage = () => {
                               src={normalizeAvatarUrl(request.sender.avatar)}
                               alt={`${request.sender.firstName} ${request.sender.lastName}`}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error("Sender avatar failed to load in RequestsPage:", normalizeAvatarUrl(request.sender.avatar))
+                                e.target.style.display = "none"
+                                const parent = e.target.parentElement
+                                if (parent && !parent.querySelector("span")) {
+                                  const initials = document.createElement("span")
+                                  initials.className = "text-white text-xs font-bold"
+                                  initials.textContent = request.sender?.firstName?.charAt(0) || "?"
+                                  parent.appendChild(initials)
+                                }
+                              }}
                             />
                           ) : (
                             <span className="text-white text-xs font-bold">
@@ -468,6 +479,17 @@ const RequestsPage = () => {
                             src={normalizeAvatarUrl(request.trip.driver.avatar)}
                             alt={`${request.trip.driver.firstName} ${request.trip.driver.lastName}`}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              console.error("Driver avatar failed to load in RequestsPage:", normalizeAvatarUrl(request.trip.driver.avatar))
+                              e.target.style.display = "none"
+                              const parent = e.target.parentElement
+                              if (parent && !parent.querySelector("span")) {
+                                const initials = document.createElement("span")
+                                initials.className = "text-white text-xs font-bold"
+                                initials.textContent = request.trip?.driver?.firstName?.charAt(0) || "?"
+                                parent.appendChild(initials)
+                              }
+                            }}
                           />
                         ) : (
                           <span className="text-white text-xs font-bold">

@@ -55,6 +55,7 @@ const RequestDetailPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
       await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
       await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request accepted successfully")
     },
@@ -69,6 +70,7 @@ const RequestDetailPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
       await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
       await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request rejected")
     },
@@ -83,6 +85,7 @@ const RequestDetailPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
       await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
       await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Request cancelled")
     },
@@ -97,6 +100,7 @@ const RequestDetailPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
       await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
       await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Pickup confirmed")
     },
@@ -111,6 +115,7 @@ const RequestDetailPage = () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
       await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
       await queryClient.refetchQueries({ queryKey: ["requests"], exact: false })
       toast.success("Delivery confirmed")
     },
@@ -640,9 +645,20 @@ const RequestDetailPage = () => {
                     <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                       {request.sender?.avatar ? (
                         <img
-                          src={request.sender.avatar}
+                          src={normalizeAvatarUrl(request.sender.avatar)}
                           alt={`${request.sender.firstName} ${request.sender.lastName}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Sender avatar failed to load:", normalizeAvatarUrl(request.sender.avatar))
+                            e.target.style.display = "none"
+                            const parent = e.target.parentElement
+                            if (parent && !parent.querySelector("span")) {
+                              const initials = document.createElement("span")
+                              initials.className = "text-white text-xl font-bold"
+                              initials.textContent = request.sender?.firstName?.charAt(0) || "?"
+                              parent.appendChild(initials)
+                            }
+                          }}
                         />
                       ) : (
                         <span className="text-white text-xl font-bold">
@@ -673,6 +689,17 @@ const RequestDetailPage = () => {
                           src={normalizeAvatarUrl(request.trip.driver.avatar)}
                           alt={`${request.trip.driver.firstName} ${request.trip.driver.lastName}`}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            console.error("Driver avatar failed to load:", normalizeAvatarUrl(request.trip.driver.avatar))
+                            e.target.style.display = "none"
+                            const parent = e.target.parentElement
+                            if (parent && !parent.querySelector("span")) {
+                              const initials = document.createElement("span")
+                              initials.className = "text-white text-xl font-bold"
+                              initials.textContent = request.trip?.driver?.firstName?.charAt(0) || "?"
+                              parent.appendChild(initials)
+                            }
+                          }}
                         />
                       ) : (
                         <span className="text-white text-xl font-bold">

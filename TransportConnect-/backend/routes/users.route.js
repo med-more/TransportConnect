@@ -15,26 +15,49 @@ router.get("/stats", getUserStats)
 router.put("/profile", updateProfile)
 
 // Upload avatar with error handling
-router.post("/avatar", async (req, res, next) => {
-  try {
-    const upload = await uploadSingle("avatar")
-    upload(req, res, (err) => {
-      if (err) {
-        console.error("Multer error:", err)
-        return res.status(400).json({
-          success: false,
-          message: err.message || "Error uploading file"
-        })
-      }
-      next()
+router.post("/avatar", (req, res, next) => {
+  console.log("📤 Avatar upload request received")
+  
+  // Set longer timeout for this specific route
+  req.setTimeout(30000) // 30 seconds
+  
+  const upload = uploadSingle("avatar")
+  console.log("✅ Upload middleware ready")
+  
+  upload(req, res, (err) => {
+    if (err) {
+      console.error("❌ Multer error:", err)
+      console.error("Error details:", {
+        message: err.message,
+        code: err.code,
+        field: err.field,
+        storageErrors: err.storageErrors
+      })
+      return res.status(400).json({
+        success: false,
+        message: err.message || "Error uploading file"
+      })
+    }
+    
+    if (!req.file) {
+      console.error("❌ No file in request after multer processing")
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded"
+      })
+    }
+    
+    console.log("✅ File received:", {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+      path: req.file.path,
+      filename: req.file.filename
     })
-  } catch (error) {
-    console.error("Upload middleware error:", error)
-    return res.status(500).json({
-      success: false,
-      message: "Error initializing upload middleware"
-    })
-  }
+    
+    next()
+  })
 }, uploadAvatar)
 
 export default router 

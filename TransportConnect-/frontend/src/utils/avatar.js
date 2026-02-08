@@ -3,7 +3,9 @@
  * Handles both relative paths and full URLs
  */
 export const normalizeAvatarUrl = (avatarUrl) => {
-  if (!avatarUrl) return null
+  if (!avatarUrl) {
+    return null
+  }
 
   // If it's already a full URL (http/https), return as is
   if (avatarUrl.startsWith("http://") || avatarUrl.startsWith("https://")) {

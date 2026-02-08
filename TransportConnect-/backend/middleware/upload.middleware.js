@@ -78,17 +78,49 @@ async function initializeUpload() {
   return upload
 }
 
-// Initialize immediately
-const uploadMiddleware = initializeUpload().catch(err => {
-  console.error("Failed to initialize upload middleware:", err)
-  // Return a basic multer instance as fallback
-  return multer({ dest: "uploads/" })
+// Initialize immediately with local storage (faster, no async Cloudinary check)
+const uploadsDir = path.join(__dirname, "../uploads/avatars")
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true })
+}
+
+// Create local storage instance immediately (no async wait)
+const localStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    const userId = req.user?._id?.toString() || "unknown"
+    cb(null, `avatar-${userId}-${uniqueSuffix}${path.extname(file.originalname)}`)
+  },
 })
 
-// Export middleware function
-export default async function uploadSingle(fieldName) {
-  const uploadInstance = await uploadMiddleware
-  return uploadInstance.single(fieldName)
+// Start with local storage (always available)
+let uploadMiddleware = multer({
+  storage: localStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    file.mimetype.startsWith("image/") ? cb(null, true) : cb(new Error("Only image files are allowed"))
+  },
+})
+
+console.log("✅ Local storage multer initialized immediately")
+
+// Try to upgrade to Cloudinary in background (non-blocking)
+initializeUpload()
+  .then((uploadInstance) => {
+    if (uploadInstance) {
+      uploadMiddleware = uploadInstance
+      console.log("✅ Upgraded to Cloudinary storage")
+    }
+  })
+  .catch((err) => {
+    console.warn("⚠️  Cloudinary initialization failed, using local storage:", err.message)
+  })
+
+// Export middleware function (synchronous now - no async wait)
+export default function uploadSingle(fieldName) {
+  // uploadMiddleware is always available (local storage at minimum)
+  return uploadMiddleware.single(fieldName)
 }
 
 // For direct use in routes

@@ -211,10 +211,15 @@ const ProfilePage = () => {
 
       const response = await usersAPI.uploadAvatar(formData)
       const updatedUserData = response.data.data || response.data
+      console.log("📸 Avatar upload response:", updatedUserData)
+      console.log("📸 Avatar URL from response:", updatedUserData.avatar)
+      
       // Ensure avatar is included in the update
       if (updatedUserData.avatar) {
+        console.log("📸 Updating user with avatar:", updatedUserData.avatar)
         updateUser({ avatar: updatedUserData.avatar, ...updatedUserData })
       } else {
+        console.warn("⚠️ No avatar in response, updating with full data")
         updateUser(updatedUserData)
       }
       setAvatarPreview(null)

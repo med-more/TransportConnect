@@ -42,6 +42,15 @@ const Layout = ({ children }) => {
   const navigate = useNavigate()
   const notificationRef = useRef(null)
 
+  // Debug: Log user avatar on mount and when user changes
+  useEffect(() => {
+    if (user) {
+      console.log("👤 Layout - User object:", user)
+      console.log("📸 Layout - User avatar:", user.avatar)
+      console.log("📸 Layout - Normalized avatar URL:", user.avatar ? normalizeAvatarUrl(user.avatar) : "No avatar")
+    }
+  }, [user])
+
   // Save sidebar collapsed state to localStorage
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", JSON.stringify(sidebarCollapsed))
@@ -228,7 +237,19 @@ const Layout = ({ children }) => {
                   className="w-full h-full object-cover"
                   onError={(e) => {
                     console.error("Avatar image failed to load:", normalizeAvatarUrl(user.avatar))
+                    console.error("User avatar value:", user.avatar)
                     e.target.style.display = "none"
+                    // Show initials if image fails
+                    const parent = e.target.parentElement
+                    if (parent && !parent.querySelector("span")) {
+                      const initials = document.createElement("span")
+                      initials.className = "text-sm font-semibold text-white"
+                      initials.textContent = `${user?.firstName?.charAt(0)?.toUpperCase() || ""}${user?.lastName?.charAt(0)?.toUpperCase() || ""}`
+                      parent.appendChild(initials)
+                    }
+                  }}
+                  onLoad={() => {
+                    console.log("✅ Avatar loaded successfully:", normalizeAvatarUrl(user.avatar))
                   }}
                 />
               ) : (
@@ -403,7 +424,19 @@ const Layout = ({ children }) => {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       console.error("Avatar image failed to load in header:", normalizeAvatarUrl(user.avatar))
+                      console.error("User avatar value in header:", user.avatar)
                       e.target.style.display = "none"
+                      // Show initials if image fails
+                      const parent = e.target.parentElement
+                      if (parent && !parent.querySelector("span")) {
+                        const initials = document.createElement("span")
+                        initials.className = "text-sm font-semibold text-white"
+                        initials.textContent = `${user?.firstName?.charAt(0)?.toUpperCase() || ""}${user?.lastName?.charAt(0)?.toUpperCase() || ""}`
+                        parent.appendChild(initials)
+                      }
+                    }}
+                    onLoad={() => {
+                      console.log("✅ Avatar loaded successfully in header:", normalizeAvatarUrl(user.avatar))
                     }}
                   />
                 ) : (
