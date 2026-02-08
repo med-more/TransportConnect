@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
@@ -20,6 +21,7 @@ import {
   Award,
   Camera,
   Upload,
+  RefreshCw,
 } from "lucide-react"
 import Card from "../components/ui/Card"
 import Button from "../components/ui/Button"
@@ -30,11 +32,14 @@ import clsx from "clsx"
 import { normalizeAvatarUrl } from "../utils/avatar"
 
 const ProfilePage = () => {
-  const { user, updateUser } = useAuth()
+  const { user, updateUser, setAuthState } = useAuth()
+  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [avatarPreview, setAvatarPreview] = useState(null)
+  const [isChangingRole, setIsChangingRole] = useState(false)
+  const [roleChangeMessage, setRoleChangeMessage] = useState("")
   const fileInputRef = useRef(null)
 
   const { data: statsData } = useQuery({
@@ -78,6 +83,12 @@ const ProfilePage = () => {
       email: user?.email || "",
       phone: user?.phone || "",
       address: formatAddress(user?.address),
+      vehicleType: user?.vehicleInfo?.type || "",
+      vehicleCapacity: user?.vehicleInfo?.capacity || "",
+      vehicleLicensePlate: user?.vehicleInfo?.licensePlate || "",
+      vehicleLength: user?.vehicleInfo?.dimensions?.length || "",
+      vehicleWidth: user?.vehicleInfo?.dimensions?.width || "",
+      vehicleHeight: user?.vehicleInfo?.dimensions?.height || "",
     },
   })
 
@@ -89,6 +100,12 @@ const ProfilePage = () => {
         email: user.email || "",
         phone: user.phone || "",
         address: formatAddress(user.address),
+        vehicleType: user.vehicleInfo?.type || "",
+        vehicleCapacity: user.vehicleInfo?.capacity || "",
+        vehicleLicensePlate: user.vehicleInfo?.licensePlate || "",
+        vehicleLength: user.vehicleInfo?.dimensions?.length || "",
+        vehicleWidth: user.vehicleInfo?.dimensions?.width || "",
+        vehicleHeight: user.vehicleInfo?.dimensions?.height || "",
       })
     }
   }, [user, reset])
@@ -110,6 +127,53 @@ const ProfilePage = () => {
   const handleCancelEdit = () => {
     reset()
     setIsEditing(false)
+  }
+
+  const handleRoleChange = async (newRole) => {
+    if (user?.role === newRole) {
+      toast.info("You are already using this role")
+      return
+    }
+
+    if (user?.role === "admin") {
+      toast.error("Admin role cannot be changed")
+      return
+    }
+
+    setIsChangingRole(true)
+    const roleLabel = newRole === "conducteur" ? "Driver" : "Shipper"
+    setRoleChangeMessage(`Preparing ${roleLabel} mode...`)
+
+    try {
+      const response = await usersAPI.updateProfile({ role: newRole })
+      
+      if (response.data?.data) {
+        const updatedUser = response.data.data
+        const fullUser = {
+          ...updatedUser,
+          _id: updatedUser._id || updatedUser.id,
+        }
+
+        // Update auth state with new role
+        const token = localStorage.getItem("token")
+        localStorage.setItem("user", JSON.stringify(fullUser))
+        setAuthState(fullUser, token)
+
+        toast.success(`Successfully switched to ${roleLabel} mode!`)
+        
+        // Wait a bit to show the success message, then redirect
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true })
+        }, 1500)
+      } else {
+        throw new Error("Failed to update role")
+      }
+    } catch (error) {
+      console.error("Error changing role:", error)
+      toast.error(error.response?.data?.message || "Error changing role. Please try again.")
+      setIsChangingRole(false)
+      setRoleChangeMessage("")
+    }
   }
 
   const handleAvatarClick = () => {
@@ -179,6 +243,24 @@ const ProfilePage = () => {
       default:
         return "User"
     }
+  }
+
+  // Loading overlay when changing role
+  if (isChangingRole) {
+    return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-card p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 text-center"
+        >
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <h3 className="text-2xl font-bold text-foreground mb-2">Switching Role</h3>
+          <p className="text-muted-foreground mb-4">{roleChangeMessage}</p>
+          <p className="text-sm text-muted-foreground">Please wait while we prepare your new dashboard...</p>
+        </motion.div>
+      </div>
+    )
   }
 
   const statsCards = [
@@ -433,40 +515,245 @@ const ProfilePage = () => {
           </Card>
 
           {/* Vehicle Information (for drivers) */}
-          {user?.role === "conducteur" && user?.vehicleInfo && (
+          {user?.role === "conducteur" && (
             <Card className="p-4 sm:p-5 md:p-6">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-                <Truck className="w-5 h-5 text-primary" />
-                Vehicle Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Vehicle Type</p>
-                  <p className="font-medium text-foreground capitalize">
-                    {user.vehicleInfo.type || "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Capacity</p>
-                  <p className="font-medium text-foreground">
-                    {user.vehicleInfo.capacity ? `${user.vehicleInfo.capacity} kg` : "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">License Plate</p>
-                  <p className="font-medium text-foreground">
-                    {user.vehicleInfo.licensePlate || "N/A"}
-                  </p>
-                </div>
-                {user.vehicleInfo.dimensions && (
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-primary" />
+                  Vehicle Information
+                </h3>
+                {!isEditing && (
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    variant="outline"
+                    size="small"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+              </div>
+              {isEditing ? (
+                <form onSubmit={handleSubmit(async (data) => {
+                  setIsLoading(true)
+                  try {
+                    const vehicleInfo = {
+                      type: data.vehicleType,
+                      capacity: Number.parseFloat(data.vehicleCapacity),
+                      licensePlate: data.vehicleLicensePlate,
+                      dimensions: {
+                        length: data.vehicleLength ? Number.parseFloat(data.vehicleLength) : undefined,
+                        width: data.vehicleWidth ? Number.parseFloat(data.vehicleWidth) : undefined,
+                        height: data.vehicleHeight ? Number.parseFloat(data.vehicleHeight) : undefined,
+                      },
+                    }
+                    const response = await usersAPI.updateProfile({ vehicleInfo })
+                    updateUser(response.data.data || response.data)
+                    setIsEditing(false)
+                    toast.success("Vehicle information updated successfully!")
+                  } catch (error) {
+                    toast.error(error.response?.data?.message || "Error updating vehicle information")
+                  } finally {
+                    setIsLoading(false)
+                  }
+                })} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Vehicle Type</label>
+                      <select
+                        className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        {...register("vehicleType", {
+                          required: "Vehicle type is required",
+                        })}
+                        defaultValue={user?.vehicleInfo?.type || ""}
+                      >
+                        <option value="">Select type</option>
+                        <option value="camion">Camion</option>
+                        <option value="camionnette">Camionnette</option>
+                        <option value="voiture">Voiture</option>
+                        <option value="moto">Moto</option>
+                      </select>
+                    </div>
+                    <Input
+                      label="Capacity (kg)"
+                      type="number"
+                      step="0.1"
+                      defaultValue={user?.vehicleInfo?.capacity || ""}
+                      error={errors.vehicleCapacity?.message}
+                      {...register("vehicleCapacity", {
+                        required: "Capacity is required",
+                        min: { value: 0.1, message: "Capacity must be greater than 0" },
+                      })}
+                    />
+                  </div>
+                  <Input
+                    label="License Plate"
+                    defaultValue={user?.vehicleInfo?.licensePlate || ""}
+                    error={errors.vehicleLicensePlate?.message}
+                    {...register("vehicleLicensePlate", {
+                      required: "License plate is required",
+                    })}
+                  />
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Dimensions</p>
-                    <p className="font-medium text-foreground">
-                      {user.vehicleInfo.dimensions.length} × {user.vehicleInfo.dimensions.width} ×{" "}
-                      {user.vehicleInfo.dimensions.height} cm
+                    <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm) - Optional</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        placeholder="Length"
+                        type="number"
+                        step="0.1"
+                        defaultValue={user?.vehicleInfo?.dimensions?.length || ""}
+                        error={errors.vehicleLength?.message}
+                        {...register("vehicleLength")}
+                      />
+                      <Input
+                        placeholder="Width"
+                        type="number"
+                        step="0.1"
+                        defaultValue={user?.vehicleInfo?.dimensions?.width || ""}
+                        error={errors.vehicleWidth?.message}
+                        {...register("vehicleWidth")}
+                      />
+                      <Input
+                        placeholder="Height"
+                        type="number"
+                        step="0.1"
+                        defaultValue={user?.vehicleInfo?.dimensions?.height || ""}
+                        error={errors.vehicleHeight?.message}
+                        {...register("vehicleHeight")}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="submit"
+                      loading={isLoading}
+                      size="small"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setIsEditing(false)}
+                      variant="outline"
+                      size="small"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Vehicle Type</p>
+                    <p className="font-medium text-foreground capitalize">
+                      {user?.vehicleInfo?.type || "Not set"}
                     </p>
                   </div>
-                )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Capacity</p>
+                    <p className="font-medium text-foreground">
+                      {user?.vehicleInfo?.capacity ? `${user.vehicleInfo.capacity} kg` : "Not set"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">License Plate</p>
+                    <p className="font-medium text-foreground">
+                      {user?.vehicleInfo?.licensePlate || "Not set"}
+                    </p>
+                  </div>
+                  {user?.vehicleInfo?.dimensions && (
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Dimensions</p>
+                      <p className="font-medium text-foreground">
+                        {user.vehicleInfo.dimensions.length} × {user.vehicleInfo.dimensions.width} ×{" "}
+                        {user.vehicleInfo.dimensions.height} cm
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Card>
+          )}
+
+          {/* Role Selection */}
+          {user?.role !== "admin" && (
+            <Card className="p-4 sm:p-5 md:p-6">
+              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-primary" />
+                Switch Role
+              </h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Change your role to access different features. You can switch between Shipper and Driver modes.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card
+                    className={clsx(
+                      "p-4 cursor-pointer transition-all border-2",
+                      user?.role === "expediteur"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/30"
+                    )}
+                    onClick={() => handleRoleChange("expediteur")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={clsx(
+                        "p-3 rounded-lg",
+                        user?.role === "expediteur" ? "bg-primary/10" : "bg-accent"
+                      )}>
+                        <Package className={clsx(
+                          "w-6 h-6",
+                          user?.role === "expediteur" ? "text-primary" : "text-muted-foreground"
+                        )} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">Shipper Mode</h4>
+                        <p className="text-xs text-muted-foreground">Send packages and find transport</p>
+                      </div>
+                      {user?.role === "expediteur" && (
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Card
+                    className={clsx(
+                      "p-4 cursor-pointer transition-all border-2",
+                      user?.role === "conducteur"
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/30"
+                    )}
+                    onClick={() => handleRoleChange("conducteur")}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={clsx(
+                        "p-3 rounded-lg",
+                        user?.role === "conducteur" ? "bg-primary/10" : "bg-accent"
+                      )}>
+                        <Truck className={clsx(
+                          "w-6 h-6",
+                          user?.role === "conducteur" ? "text-primary" : "text-muted-foreground"
+                        )} />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-foreground">Driver Mode</h4>
+                        <p className="text-xs text-muted-foreground">Offer transport services</p>
+                      </div>
+                      {user?.role === "conducteur" && (
+                        <div className="w-2 h-2 bg-primary rounded-full"></div>
+                      )}
+                    </div>
+                  </Card>
+                </motion.div>
               </div>
             </Card>
           )}

@@ -42,22 +42,28 @@ export const getUserStats = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user._id
-    const { firstName, lastName, phone, address, role } = req.body
+    const { firstName, lastName, phone, address, role, vehicleInfo } = req.body
 
     // Build update object
     const updateData = { firstName, lastName, phone, address }
     
-    // Only allow role update for Google OAuth users (new users selecting their role)
-    // Regular users cannot change their role (admin must do it)
-    if (role && req.user.googleId) {
-      // Check if user was created recently (within last 5 minutes) - allows role selection
-      const user = await User.findById(userId)
-      const isRecentUser = user.createdAt && 
-        (Date.now() - new Date(user.createdAt).getTime()) < 5 * 60 * 1000 // 5 minutes
-      
-      if (isRecentUser && ["expediteur", "conducteur"].includes(role)) {
+    // Allow role update for all users (except admin role cannot be changed by user)
+    // Users can switch between "expediteur" (shipper) and "conducteur" (driver)
+    if (role && req.user.role !== "admin") {
+      // Only allow switching between shipper and driver roles
+      if (["expediteur", "conducteur"].includes(role)) {
         updateData.role = role
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid role. You can only switch between shipper and driver roles."
+        })
       }
+    }
+
+    // Allow vehicleInfo update for drivers
+    if (vehicleInfo && (req.user.role === "conducteur" || role === "conducteur")) {
+      updateData.vehicleInfo = vehicleInfo
     }
 
     const updatedUser = await User.findByIdAndUpdate(

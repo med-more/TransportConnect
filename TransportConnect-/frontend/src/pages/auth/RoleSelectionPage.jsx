@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { useSearchParams, useNavigate, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
+import { useForm } from "react-hook-form"
 import {
   Truck,
   Package,
@@ -15,12 +16,15 @@ import {
   TrendingUp,
   Check,
   Search,
+  Car,
 } from "lucide-react"
 import { useAuth } from "../../contexts/AuthContext"
 import { usersAPI, authAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
+import Input from "../../components/ui/Input"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import { VEHICLE_TYPES } from "../../config/constants"
 import toast from "react-hot-toast"
 
 const RoleSelectionPage = () => {
@@ -28,10 +32,27 @@ const RoleSelectionPage = () => {
   const navigate = useNavigate()
   const { setAuthState } = useAuth()
   const [selectedRole, setSelectedRole] = useState(null)
+  const [showVehicleForm, setShowVehicleForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const token = searchParams.get("token")
   const userId = searchParams.get("userId")
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+  } = useForm({
+    defaultValues: {
+      vehicleType: "",
+      capacity: "",
+      licensePlate: "",
+      length: "",
+      width: "",
+      height: "",
+    },
+  })
 
   useEffect(() => {
     // Initialize auth state if we have token (but don't store in localStorage yet)
@@ -133,10 +154,31 @@ const RoleSelectionPage = () => {
     },
   ]
 
-  const handleRoleSelection = async () => {
+  const handleRoleClick = (role) => {
+    setSelectedRole(role)
+    if (role === "conducteur") {
+      setShowVehicleForm(true)
+    } else {
+      setShowVehicleForm(false)
+    }
+  }
+
+  const handleRoleSelection = async (vehicleData = null) => {
     if (!selectedRole) {
       toast.error("Please select a role")
       return
+    }
+
+    // If driver role selected, validate vehicle info
+    if (selectedRole === "conducteur" && showVehicleForm) {
+      if (!vehicleData) {
+        toast.error("Please fill in vehicle information")
+        return
+      }
+      if (!vehicleData.vehicleType || !vehicleData.capacity || !vehicleData.licensePlate) {
+        toast.error("Please fill in all required vehicle fields")
+        return
+      }
     }
 
     // Get token from sessionStorage or query params
@@ -149,8 +191,25 @@ const RoleSelectionPage = () => {
 
     setLoading(true)
     try {
-      // Update user role
-      const response = await usersAPI.updateProfile({ role: selectedRole })
+      // Prepare update data
+      const updateData = { role: selectedRole }
+      
+      // Add vehicle info if driver
+      if (selectedRole === "conducteur" && vehicleData) {
+        updateData.vehicleInfo = {
+          type: vehicleData.vehicleType,
+          capacity: Number.parseFloat(vehicleData.capacity),
+          licensePlate: vehicleData.licensePlate,
+          dimensions: {
+            length: vehicleData.length ? Number.parseFloat(vehicleData.length) : undefined,
+            width: vehicleData.width ? Number.parseFloat(vehicleData.width) : undefined,
+            height: vehicleData.height ? Number.parseFloat(vehicleData.height) : undefined,
+          },
+        }
+      }
+
+      // Update user role and vehicle info
+      const response = await usersAPI.updateProfile(updateData)
 
       if (response.data?.data) {
         const updatedUser = response.data.data
@@ -314,7 +373,7 @@ const RoleSelectionPage = () => {
                           ? `${role.borderColor} ${role.bgColor} shadow-lg scale-[1.01] sm:scale-[1.02]`
                           : `border-border hover:border-primary/30 hover:shadow-md`
                       }`}
-                      onClick={() => setSelectedRole(role.value)}
+                      onClick={() => handleRoleClick(role.value)}
                       hover={false}
                     >
                       <div className="flex items-start gap-3 sm:gap-4">
@@ -367,10 +426,105 @@ const RoleSelectionPage = () => {
             </AnimatePresence>
           </div>
 
+          {/* Vehicle Information Form (Driver only) */}
+          <AnimatePresence>
+            {showVehicleForm && selectedRole === "conducteur" && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 space-y-4 p-4 bg-accent rounded-lg border border-border"
+              >
+                <div className="flex items-center gap-2 mb-4">
+                  <Car className="w-5 h-5 text-primary" />
+                  <h3 className="text-lg font-semibold text-foreground">Vehicle Information</h3>
+                </div>
+                <form onSubmit={handleSubmit((data) => handleRoleSelection(data))} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-foreground mb-2">Vehicle Type *</label>
+                      <select
+                        className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        {...register("vehicleType", {
+                          required: "Vehicle type is required",
+                        })}
+                      >
+                        <option value="">Select type</option>
+                        {VEHICLE_TYPES.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.vehicleType && (
+                        <p className="text-sm text-destructive mt-1">{errors.vehicleType.message}</p>
+                      )}
+                    </div>
+                    <Input
+                      label="Capacity (kg) *"
+                      type="number"
+                      step="0.1"
+                      placeholder="1000"
+                      error={errors.capacity?.message}
+                      {...register("capacity", {
+                        required: "Capacity is required",
+                        min: { value: 0.1, message: "Capacity must be greater than 0" },
+                      })}
+                    />
+                  </div>
+                  <Input
+                    label="License Plate *"
+                    placeholder="AB-123-CD"
+                    error={errors.licensePlate?.message}
+                    {...register("licensePlate", {
+                      required: "License plate is required",
+                    })}
+                  />
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm) - Optional</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <Input
+                        placeholder="Length"
+                        type="number"
+                        step="0.1"
+                        error={errors.length?.message}
+                        {...register("length", {
+                          min: { value: 1, message: "Length must be greater than 0" },
+                        })}
+                      />
+                      <Input
+                        placeholder="Width"
+                        type="number"
+                        step="0.1"
+                        error={errors.width?.message}
+                        {...register("width", {
+                          min: { value: 1, message: "Width must be greater than 0" },
+                        })}
+                      />
+                      <Input
+                        placeholder="Height"
+                        type="number"
+                        step="0.1"
+                        error={errors.height?.message}
+                        {...register("height", {
+                          min: { value: 1, message: "Height must be greater than 0" },
+                        })}
+                      />
+                    </div>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Continue Button */}
           <div className="space-y-3 sm:space-y-4">
             <Button
-              onClick={handleRoleSelection}
+              onClick={showVehicleForm && selectedRole === "conducteur" 
+                ? handleSubmit((data) => handleRoleSelection(data))
+                : () => handleRoleSelection()
+              }
               loading={loading}
               disabled={!selectedRole}
               className="w-full bg-primary hover:bg-primary/90 text-white text-sm sm:text-base"
