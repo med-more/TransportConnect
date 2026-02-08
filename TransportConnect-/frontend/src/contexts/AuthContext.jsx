@@ -54,11 +54,37 @@ export const AuthProvider = ({ children }) => {
       const userData = localStorage.getItem("user")
 
       if (token && userData) {
-        const user = JSON.parse(userData)
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: { user, token },
-        })
+        // Try to fetch latest user profile from server to get updated avatar
+        try {
+          const profileResponse = await authAPI.getProfile()
+          if (profileResponse.data?.user) {
+            const serverUser = profileResponse.data.user
+            const user = {
+              ...serverUser,
+              _id: serverUser.id || serverUser._id,
+            }
+            localStorage.setItem("user", JSON.stringify(user))
+            dispatch({
+              type: "LOGIN_SUCCESS",
+              payload: { user, token },
+            })
+          } else {
+            // Fallback to localStorage if profile fetch fails
+            const user = JSON.parse(userData)
+            dispatch({
+              type: "LOGIN_SUCCESS",
+              payload: { user, token },
+            })
+          }
+        } catch (profileError) {
+          // If profile fetch fails, use localStorage data
+          console.warn("Could not fetch profile, using cached data:", profileError)
+          const user = JSON.parse(userData)
+          dispatch({
+            type: "LOGIN_SUCCESS",
+            payload: { user, token },
+          })
+        }
       } else {
         dispatch({ type: "SET_LOADING", payload: false })
       }
@@ -88,6 +114,22 @@ export const AuthProvider = ({ children }) => {
       const user = {
         ...userData,
         _id: userData.id || userData._id,
+      }
+
+      // Fetch full profile to get latest avatar and other data
+      try {
+        const profileResponse = await authAPI.getProfile()
+        if (profileResponse.data?.user) {
+          const profileUser = profileResponse.data.user
+          const fullUser = {
+            ...profileUser,
+            _id: profileUser.id || profileUser._id,
+          }
+          user = fullUser // Use the full profile data
+        }
+      } catch (profileError) {
+        console.warn("Could not fetch profile after login, using login response:", profileError)
+        // Continue with login response data
       }
 
       console.log("Setting user and token in localStorage")

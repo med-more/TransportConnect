@@ -145,7 +145,13 @@ const ProfilePage = () => {
       formData.append("avatar", file)
 
       const response = await usersAPI.uploadAvatar(formData)
-      updateUser(response.data.data || response.data)
+      const updatedUserData = response.data.data || response.data
+      // Ensure avatar is included in the update
+      if (updatedUserData.avatar) {
+        updateUser({ avatar: updatedUserData.avatar, ...updatedUserData })
+      } else {
+        updateUser(updatedUserData)
+      }
       setAvatarPreview(null)
       toast.success("Avatar uploaded successfully!")
     } catch (error) {

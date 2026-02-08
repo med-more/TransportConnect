@@ -53,6 +53,9 @@ export const register = async (req, res) => {
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,
+        avatar: user.avatar,
+        phone: user.phone,
+        address: user.address,
       },
     })
   } catch (error) {
@@ -95,6 +98,9 @@ export const login = async (req, res) => {
         role: user.role,
         isVerified: user.isVerified,
         stats: user.stats,
+        avatar: user.avatar,
+        phone: user.phone,
+        address: user.address,
       },
     });
 
