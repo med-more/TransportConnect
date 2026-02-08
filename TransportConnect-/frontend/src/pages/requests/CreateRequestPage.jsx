@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
@@ -17,6 +18,13 @@ const CreateRequestPage = () => {
   const tripId = queryParams.get("tripId") || tripIdParam
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+
+  // Redirect to trips page if no tripId is provided
+  useEffect(() => {
+    if (!tripId) {
+      navigate("/trips", { replace: true })
+    }
+  }, [tripId, navigate])
 
   const { data: tripData, isLoading: tripLoading } = useQuery({
     queryKey: ["trip", tripId],
@@ -84,15 +92,11 @@ const CreateRequestPage = () => {
     createRequestMutation.mutate(requestData)
   }
 
-  // If no tripId is provided, redirect to trips page to select a trip
+  // If no tripId is provided, show loading while redirecting
   if (!tripId) {
     return (
-      <div className="p-6 text-center max-w-md mx-auto">
-        <h1 className="text-2xl font-bold text-foreground mb-4">Select a Trip</h1>
-        <p className="text-muted-foreground mb-6">
-          Please select a trip first to create a transport request.
-        </p>
-        <Button onClick={() => navigate("/trips")}>Browse Available Trips</Button>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <LoadingSpinner />
       </div>
     )
   }
