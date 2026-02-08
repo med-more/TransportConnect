@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
+import { useState } from "react"
 import {
   Truck,
   MessageCircle,
@@ -28,6 +29,66 @@ import {
 } from "lucide-react"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo.svg"
+
+// Image Card Component for "Our Platform in Action" section
+const ImageCard = ({ item, index }) => {
+  const [imageError, setImageError] = useState(false)
+  const [currentFormat, setCurrentFormat] = useState(0)
+  
+  // Try different image formats: webp, png, jpg, jpeg
+  const formats = ['webp', 'png', 'jpg', 'jpeg']
+  const imagePath = `/home/1/${item}.${formats[currentFormat]}`
+  
+  const handleImageError = () => {
+    if (currentFormat < formats.length - 1) {
+      // Try next format
+      setCurrentFormat(currentFormat + 1)
+    } else {
+      // All formats failed, show fallback
+      setImageError(true)
+    }
+  }
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true }}
+      className="relative group overflow-hidden rounded-xl aspect-[4/3] cursor-pointer"
+    >
+      {!imageError ? (
+        <>
+          {/* Background Image */}
+          <img
+            src={imagePath}
+            alt={`TransportConnect transforming logistics in Morocco ${item}`}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            onError={handleImageError}
+            loading="lazy"
+          />
+          {/* Overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300"></div>
+          {/* Bottom label */}
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/60 via-black/40 to-transparent">
+            <p className="text-white font-semibold text-sm sm:text-base">Transport Service {item}</p>
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Fallback gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-500/20 group-hover:from-primary/30 group-hover:to-blue-500/30 transition-all duration-300"></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Truck className="w-24 h-24 text-primary/40 group-hover:text-primary/60 transition-colors" />
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/60 to-transparent">
+            <p className="text-white font-semibold text-sm sm:text-base">Transport Service {item}</p>
+          </div>
+        </>
+      )}
+    </motion.div>
+  )
+}
 
 const WelcomePage = () => {
   const features = [
@@ -138,15 +199,15 @@ const WelcomePage = () => {
               <div className="min-w-0">
                 <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">TransportConnect</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
-              </div>
+          </div>
             </Link>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               <Link to="/login">
                 <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
-              </Link>
-              <Link to="/register">
+            </Link>
+            <Link to="/register">
                 <Button className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign up</Button>
-              </Link>
+            </Link>
             </div>
           </div>
         </div>
@@ -157,9 +218,9 @@ const WelcomePage = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5"></div>
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               className="space-y-4 sm:space-y-6"
             >
@@ -178,18 +239,18 @@ const WelcomePage = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/register">
+              <Link to="/register">
                   <Button size="large" className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/90">
                     Get started free
-                    <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                </Link>
-                <Link to="/login">
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/login">
                   <Button variant="outline" size="large" className="w-full sm:w-auto">
                     <Play className="w-4 h-4 mr-2" />
                     Watch demo
-                  </Button>
-                </Link>
+                </Button>
+              </Link>
               </div>
 
               <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4">
@@ -206,13 +267,13 @@ const WelcomePage = () => {
                   <p className="text-xs sm:text-sm text-muted-foreground">Verified Drivers</p>
                 </div>
               </div>
-            </motion.div>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative"
+            className="relative"
             >
               <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-primary/10 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16"></div>
@@ -283,7 +344,7 @@ const WelcomePage = () => {
                   </div>
                   <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">{stat.number}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-                </motion.div>
+          </motion.div>
               )
             })}
           </div>
@@ -351,22 +412,7 @@ const WelcomePage = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
             {[1, 2, 3, 4, 5, 6].map((item, index) => (
-              <motion.div
-                key={item}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="relative group overflow-hidden rounded-xl aspect-[4/3]"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-500/20 group-hover:from-primary/30 group-hover:to-blue-500/30 transition-all duration-300"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Truck className="w-24 h-24 text-primary/40 group-hover:text-primary/60 transition-colors" />
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-white font-semibold text-sm sm:text-base">Transport Service {item}</p>
-                </div>
-              </motion.div>
+              <ImageCard key={item} item={item} index={index} />
             ))}
           </div>
         </div>
@@ -383,14 +429,15 @@ const WelcomePage = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-blue-500/30"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center px-4">
-                    <Truck className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 text-white/60 mx-auto mb-2 sm:mb-3 md:mb-4" />
-                    <p className="text-white text-base sm:text-lg md:text-xl font-semibold">Real-time Tracking</p>
-                  </div>
-                </div>
+              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
+                <img
+                  src="/home/2/1.webp"
+                  alt="Real-time tracking system - Track Your Shipments in Real-Time"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                {/* Subtle overlay for better visual integration */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
               </div>
             </motion.div>
             <motion.div
@@ -512,14 +559,15 @@ const WelcomePage = () => {
               viewport={{ once: true }}
               className="relative order-1 lg:order-2"
             >
-              <div className="relative rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center px-4">
-                    <Shield className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 text-white/60 mx-auto mb-2 sm:mb-3 md:mb-4" />
-                    <p className="text-white text-base sm:text-lg md:text-xl font-semibold">Verified & Secure</p>
-                  </div>
-                </div>
+              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
+                <img
+                  src="/home/3/1.webp"
+                  alt="Secure and Verified Transport Network"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                {/* Subtle overlay for better visual integration */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
               </div>
             </motion.div>
           </div>
@@ -598,17 +646,20 @@ const WelcomePage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="relative rounded-2xl overflow-hidden aspect-[16/9] shadow-xl group"
+                className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[16/9] shadow-xl group cursor-pointer"
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${
-                  item === 1 ? "from-primary/40 to-blue-500/40" : "from-green-500/40 to-emerald-500/40"
-                } group-hover:opacity-90 transition-opacity`}></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center p-4 sm:p-6 md:p-8">
-                    <Package className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 text-white/70 mx-auto mb-2 sm:mb-3 md:mb-4" />
-                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">Success Story {item}</h3>
-                    <p className="text-sm sm:text-base text-white/90">Thousands of successful deliveries</p>
-                  </div>
+                <img
+                  src={`/home/4/${item}.webp`}
+                  alt={`Success Story ${item} - TransportConnect`}
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  loading="lazy"
+                />
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300"></div>
+                {/* Bottom content overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-8 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-1 sm:mb-2">Success Story {item}</h3>
+                  <p className="text-sm sm:text-base text-white/90">Thousands of successful deliveries</p>
                 </div>
               </motion.div>
             ))}
