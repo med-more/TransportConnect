@@ -12,13 +12,23 @@ import {
   Trash2,
   Clock,
   DollarSign,
+  Eye,
+  Weight,
+  Ruler,
+  Euro,
+  User,
+  Phone,
+  Mail,
+  Navigation,
+  Truck,
+  MessageCircle,
 } from "lucide-react"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
-import { adminAPI } from "../../services/api"
+import { adminAPI, requestsAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import toast from "react-hot-toast"
 
@@ -27,13 +37,22 @@ const AdminRequestsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all")
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [deleteRequestId, setDeleteRequestId] = useState(null)
+  const [selectedRequestId, setSelectedRequestId] = useState(null)
+  const [showRequestDetails, setShowRequestDetails] = useState(false)
 
   const { data: requestsData, isLoading, refetch } = useQuery({
     queryKey: ["admin-requests"],
     queryFn: adminAPI.getAllRequests,
   })
 
+  const { data: requestDetailData, isLoading: requestDetailLoading } = useQuery({
+    queryKey: ["request", selectedRequestId],
+    queryFn: () => requestsAPI.getRequestById(selectedRequestId),
+    enabled: !!selectedRequestId && showRequestDetails,
+  })
+
   const requests = requestsData?.data || []
+  const requestDetails = requestDetailData?.data?.request
 
   const filterRequests = () => {
     let filtered = requests
@@ -306,6 +325,18 @@ const AdminRequestsPage = () => {
                         <Button
                           size="small"
                           variant="ghost"
+                          onClick={() => {
+                            setSelectedRequestId(request._id)
+                            setShowRequestDetails(true)
+                          }}
+                          className="flex-1 text-primary hover:bg-primary/10"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="ghost"
                           onClick={() => handleDeleteRequest(request._id)}
                           className="flex-1 text-destructive hover:bg-destructive/10"
                         >
@@ -413,6 +444,17 @@ const AdminRequestsPage = () => {
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
+                          <Button
+                            size="small"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedRequestId(request._id)
+                              setShowRequestDetails(true)
+                            }}
+                            className="text-primary hover:bg-primary/10"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
                           {request.status === "pending" && (
                             <>
                               <Button
@@ -456,6 +498,334 @@ const AdminRequestsPage = () => {
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Request Details Modal */}
+      {showRequestDetails && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setShowRequestDetails(false)
+            setSelectedRequestId(null)
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-background rounded-lg p-4 sm:p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Request Details</h2>
+              <Button variant="ghost" size="small" onClick={() => {
+                setShowRequestDetails(false)
+                setSelectedRequestId(null)
+              }}>
+                <XCircle className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {requestDetailLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <LoadingSpinner />
+              </div>
+            ) : requestDetails ? (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Cargo Information */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Package className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">Cargo Information</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Description</p>
+                      <p className="font-medium text-foreground">{requestDetails.cargo?.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Type</p>
+                        <p className="font-medium text-foreground">{requestDetails.cargo?.type}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Weight</p>
+                        <p className="font-medium text-foreground flex items-center gap-1">
+                          <Weight className="w-4 h-4" />
+                          {requestDetails.cargo?.weight} kg
+                        </p>
+                      </div>
+                      {requestDetails.cargo?.dimensions && (
+                        <>
+                          <div>
+                            <p className="text-sm text-muted-foreground mb-1">Dimensions</p>
+                            <p className="font-medium text-foreground text-xs">
+                              {requestDetails.cargo.dimensions.length} × {requestDetails.cargo.dimensions.width} × {requestDetails.cargo.dimensions.height} cm
+                            </p>
+                          </div>
+                          {requestDetails.cargo?.value && (
+                            <div>
+                              <p className="text-sm text-muted-foreground mb-1">Value</p>
+                              <p className="font-medium text-foreground">{requestDetails.cargo.value}€</p>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Pickup & Delivery */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Pickup</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-medium text-foreground">{requestDetails.pickup?.address}</p>
+                      <p className="text-sm text-muted-foreground">{requestDetails.pickup?.city}</p>
+                      {requestDetails.pickup?.contactPerson && (
+                        <div className="mt-3 pt-3 border-t border-border">
+                          <p className="text-xs text-muted-foreground mb-1">Contact Person</p>
+                          <p className="text-sm font-medium text-foreground">{requestDetails.pickup.contactPerson.name}</p>
+                          {requestDetails.pickup.contactPerson.phone && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Phone className="w-3 h-3" />
+                              {requestDetails.pickup.contactPerson.phone}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="w-5 h-5 text-success" />
+                      <h3 className="text-lg font-semibold text-foreground">Delivery</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-medium text-foreground">{requestDetails.delivery?.address}</p>
+                      <p className="text-sm text-muted-foreground">{requestDetails.delivery?.city}</p>
+                      {requestDetails.delivery?.contactPerson && (
+                        <div className="mt-3 pt-3 border-t border-border">
+                          <p className="text-xs text-muted-foreground mb-1">Contact Person</p>
+                          <p className="text-sm font-medium text-foreground">{requestDetails.delivery.contactPerson.name}</p>
+                          {requestDetails.delivery.contactPerson.phone && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                              <Phone className="w-3 h-3" />
+                              {requestDetails.delivery.contactPerson.phone}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Sender Information */}
+                {requestDetails.sender && (
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <User className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Sender Information</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {requestDetails.sender.avatar ? (
+                        <img
+                          src={normalizeAvatarUrl(requestDetails.sender.avatar)}
+                          alt={`${requestDetails.sender.firstName} ${requestDetails.sender.lastName}`}
+                          className="w-16 h-16 rounded-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none"
+                            e.target.nextSibling.style.display = "flex"
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={clsx(
+                          "w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold",
+                          requestDetails.sender.avatar && "hidden"
+                        )}
+                      >
+                        {requestDetails.sender.firstName?.charAt(0)}
+                        {requestDetails.sender.lastName?.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-foreground">
+                          {requestDetails.sender.firstName} {requestDetails.sender.lastName}
+                        </p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                          <Mail className="w-4 h-4" />
+                          <span>{requestDetails.sender.email}</span>
+                        </div>
+                        {requestDetails.sender.phone && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <Phone className="w-4 h-4" />
+                            <span>{requestDetails.sender.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Trip Information */}
+                {requestDetails.trip && (
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Truck className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Trip Information</h3>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Navigation className="w-4 h-4 text-muted-foreground" />
+                        <span className="font-medium text-foreground">
+                          {requestDetails.trip.departure?.city} → {requestDetails.trip.destination?.city}
+                        </span>
+                      </div>
+                      {requestDetails.trip.driver && (
+                        <div className="flex items-center gap-3 pt-2 border-t border-border">
+                          {requestDetails.trip.driver.avatar ? (
+                            <img
+                              src={normalizeAvatarUrl(requestDetails.trip.driver.avatar)}
+                              alt={`${requestDetails.trip.driver.firstName} ${requestDetails.trip.driver.lastName}`}
+                              className="w-10 h-10 rounded-full object-cover"
+                              onError={(e) => {
+                                e.target.style.display = "none"
+                                e.target.nextSibling.style.display = "flex"
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={clsx(
+                              "w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white text-xs font-bold",
+                              requestDetails.trip.driver.avatar && "hidden"
+                            )}
+                          >
+                            {requestDetails.trip.driver.firstName?.charAt(0)}
+                            {requestDetails.trip.driver.lastName?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-foreground text-sm">
+                              {requestDetails.trip.driver.firstName} {requestDetails.trip.driver.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground">Driver</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )}
+
+                {/* Pricing */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Euro className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">Pricing</h3>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Total Price</span>
+                    <span className="font-semibold text-foreground text-xl">{requestDetails.price || "N/A"}€</span>
+                  </div>
+                </Card>
+
+                {/* Messages */}
+                {(requestDetails.message || requestDetails.driverResponse?.message) && (
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageCircle className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Messages</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {requestDetails.message && (
+                        <div className="p-3 bg-accent rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">Message from sender</p>
+                          <p className="text-sm text-foreground">{requestDetails.message}</p>
+                        </div>
+                      )}
+                      {requestDetails.driverResponse?.message && (
+                        <div className={clsx(
+                          "p-3 rounded-lg",
+                          requestDetails.status === "accepted" ? "bg-success/10" : "bg-destructive/10"
+                        )}>
+                          <p className="text-xs text-muted-foreground mb-1">
+                            Driver response ({requestDetails.status === "accepted" ? "Accepted" : "Rejected"})
+                          </p>
+                          <p className="text-sm text-foreground">{requestDetails.driverResponse.message}</p>
+                          {requestDetails.driverResponse.respondedAt && (
+                            <p className="text-xs text-muted-foreground mt-1">
+                              {new Date(requestDetails.driverResponse.respondedAt).toLocaleString("en-US")}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                )}
+
+                {/* Status & Tracking */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Status</p>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(requestDetails.status)}
+                        {getStatusBadge(requestDetails.status)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground mb-1">Created</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {new Date(requestDetails.createdAt).toLocaleDateString("en-US")}
+                      </p>
+                    </div>
+                  </div>
+                  {requestDetails.tracking && (
+                    <div className="mt-4 pt-4 border-t border-border space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Pickup Confirmed</span>
+                        <span className={clsx(
+                          "font-medium",
+                          requestDetails.tracking.pickupConfirmed?.confirmed ? "text-success" : "text-muted-foreground"
+                        )}>
+                          {requestDetails.tracking.pickupConfirmed?.confirmed ? "Yes" : "No"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">In Transit</span>
+                        <span className={clsx(
+                          "font-medium",
+                          requestDetails.tracking.inTransit?.confirmed ? "text-info" : "text-muted-foreground"
+                        )}>
+                          {requestDetails.tracking.inTransit?.confirmed ? "Yes" : "No"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Delivered</span>
+                        <span className={clsx(
+                          "font-medium",
+                          requestDetails.tracking.delivered?.confirmed ? "text-success" : "text-muted-foreground"
+                        )}>
+                          {requestDetails.tracking.delivered?.confirmed ? "Yes" : "No"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Package className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground">Request details not found</p>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
 
       {/* Confirmation Dialog */}
       <ConfirmationDialog

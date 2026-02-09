@@ -2,9 +2,9 @@ import { useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import clsx from "clsx"
-import {
-  Truck,
-  Search,
+import { 
+  Truck, 
+  Search, 
   MapPin,
   Calendar,
   Package,
@@ -14,13 +14,21 @@ import {
   Trash2,
   CheckCircle,
   Clock,
+  Eye,
+  Weight,
+  Ruler,
+  Euro,
+  User,
+  Phone,
+  Mail,
+  Navigation,
 } from "lucide-react"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
-import { adminAPI } from "../../services/api"
+import { adminAPI, tripsAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import toast from "react-hot-toast"
 
@@ -29,13 +37,22 @@ const AdminTripsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all")
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [deleteTripId, setDeleteTripId] = useState(null)
+  const [selectedTripId, setSelectedTripId] = useState(null)
+  const [showTripDetails, setShowTripDetails] = useState(false)
 
   const { data: tripsData, isLoading, refetch } = useQuery({
     queryKey: ["admin-trips"],
     queryFn: adminAPI.getAllTrips,
   })
 
+  const { data: tripDetailData, isLoading: tripDetailLoading } = useQuery({
+    queryKey: ["trip", selectedTripId],
+    queryFn: () => tripsAPI.getTripById(selectedTripId),
+    enabled: !!selectedTripId && showTripDetails,
+  })
+
   const trips = tripsData?.data || []
+  const tripDetails = tripDetailData?.data?.trip
 
   const filterTrips = () => {
     let filtered = trips
@@ -43,10 +60,10 @@ const AdminTripsPage = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (trip) =>
-          (trip.departure?.city || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (trip.destination?.city || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (trip.driver?.firstName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (trip.driver?.lastName || "").toLowerCase().includes(searchTerm.toLowerCase())
+        (trip.departure?.city || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (trip.destination?.city || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (trip.driver?.firstName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (trip.driver?.lastName || "").toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
@@ -96,7 +113,7 @@ const AdminTripsPage = () => {
       cancelled: { color: "bg-destructive/10 text-destructive", label: "Cancelled" },
       paused: { color: "bg-muted text-muted-foreground", label: "Paused" },
     }
-
+    
     const config = statusConfig[status] || statusConfig.pending
     return (
       <span className={clsx("px-2 py-1 text-xs font-medium rounded-md", config.color)}>{config.label}</span>
@@ -151,7 +168,7 @@ const AdminTripsPage = () => {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
-      <motion.div
+      <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -308,6 +325,18 @@ const AdminTripsPage = () => {
                         <Button
                           size="small"
                           variant="ghost"
+                          onClick={() => {
+                            setSelectedTripId(trip._id)
+                            setShowTripDetails(true)
+                          }}
+                          className="flex-1 text-primary hover:bg-primary/10"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="ghost"
                           onClick={() => handleDeleteTrip(trip._id)}
                           className="flex-1 text-destructive hover:bg-destructive/10"
                         >
@@ -406,6 +435,17 @@ const AdminTripsPage = () => {
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
+                          <Button
+                            size="small"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedTripId(trip._id)
+                              setShowTripDetails(true)
+                            }}
+                            className="text-primary hover:bg-primary/10"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
                           {trip.status === "pending" && (
                             <>
                               <Button
@@ -460,6 +500,240 @@ const AdminTripsPage = () => {
         </motion.div>
       </motion.div>
 
+      {/* Trip Details Modal */}
+      {showTripDetails && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => {
+            setShowTripDetails(false)
+            setSelectedTripId(null)
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-background rounded-lg p-4 sm:p-6 md:p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">Trip Details</h2>
+              <Button variant="ghost" size="small" onClick={() => {
+                setShowTripDetails(false)
+                setSelectedTripId(null)
+              }}>
+                <XCircle className="w-5 h-5" />
+              </Button>
+            </div>
+
+            {tripDetailLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <LoadingSpinner />
+              </div>
+            ) : tripDetails ? (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Route Information */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Navigation className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">Route Information</h3>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-primary mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-medium text-foreground">Departure</p>
+                        <p className="text-sm text-muted-foreground">{tripDetails.departure?.address}</p>
+                        <p className="text-sm text-muted-foreground">{tripDetails.departure?.city}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-success mt-1 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-medium text-foreground">Destination</p>
+                        <p className="text-sm text-muted-foreground">{tripDetails.destination?.address}</p>
+                        <p className="text-sm text-muted-foreground">{tripDetails.destination?.city}</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Schedule */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <h3 className="text-lg font-semibold text-foreground">Schedule</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Departure Date</p>
+                      <p className="font-medium text-foreground">
+                        {new Date(tripDetails.departureDate).toLocaleString("en-US")}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Arrival Date</p>
+                      <p className="font-medium text-foreground">
+                        {new Date(tripDetails.arrivalDate).toLocaleString("en-US")}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+
+                {/* Capacity & Pricing */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Package className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Capacity</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Weight className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Available Weight:</span>
+                        <span className="font-medium text-foreground">{tripDetails.availableCapacity?.weight} kg</span>
+                      </div>
+                      {tripDetails.availableCapacity?.dimensions && (
+                        <div className="flex items-center gap-2">
+                          <Ruler className="w-4 h-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">Dimensions:</span>
+                          <span className="font-medium text-foreground">
+                            {tripDetails.availableCapacity.dimensions.length} × {tripDetails.availableCapacity.dimensions.width} × {tripDetails.availableCapacity.dimensions.height} cm
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Euro className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Pricing</h3>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Price per kg:</span>
+                        <span className="font-semibold text-foreground text-lg">{tripDetails.pricePerKg}€</span>
+                      </div>
+                      {tripDetails.totalEarnings > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">Total Earnings:</span>
+                          <span className="font-semibold text-success">{tripDetails.totalEarnings}€</span>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Driver Information */}
+                {tripDetails.driver && (
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <User className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Driver Information</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {tripDetails.driver.avatar ? (
+                        <img
+                          src={normalizeAvatarUrl(tripDetails.driver.avatar)}
+                          alt={`${tripDetails.driver.firstName} ${tripDetails.driver.lastName}`}
+                          className="w-16 h-16 rounded-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = "none"
+                            e.target.nextSibling.style.display = "flex"
+                          }}
+                        />
+                      ) : null}
+                      <div
+                        className={clsx(
+                          "w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl font-bold",
+                          tripDetails.driver.avatar && "hidden"
+                        )}
+                      >
+                        {tripDetails.driver.firstName?.charAt(0)}
+                        {tripDetails.driver.lastName?.charAt(0)}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-foreground">
+                          {tripDetails.driver.firstName} {tripDetails.driver.lastName}
+                        </p>
+                        {tripDetails.driver.phone && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <Phone className="w-4 h-4" />
+                            <span>{tripDetails.driver.phone}</span>
+                          </div>
+                        )}
+                        {tripDetails.driver.vehicleInfo && (
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                            <Truck className="w-4 h-4" />
+                            <span>{tripDetails.driver.vehicleInfo.type} - {tripDetails.driver.vehicleInfo.capacity?.weight}kg</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                )}
+
+                {/* Accepted Cargo Types */}
+                {tripDetails.acceptedCargoTypes && tripDetails.acceptedCargoTypes.length > 0 && (
+                  <Card className="p-4 sm:p-5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Package className="w-5 h-5 text-primary" />
+                      <h3 className="text-lg font-semibold text-foreground">Accepted Cargo Types</h3>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {tripDetails.acceptedCargoTypes.map((type, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 bg-primary/10 text-primary rounded-md text-sm font-medium"
+                        >
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                  </Card>
+                )}
+
+                {/* Description */}
+                {tripDetails.description && (
+                  <Card className="p-4 sm:p-5">
+                    <h3 className="text-lg font-semibold text-foreground mb-2">Description</h3>
+                    <p className="text-sm text-muted-foreground">{tripDetails.description}</p>
+                  </Card>
+                )}
+
+                {/* Status */}
+                <Card className="p-4 sm:p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Status</p>
+                      <div className="flex items-center gap-2">
+                        {getStatusIcon(tripDetails.status)}
+                        {getStatusBadge(tripDetails.status)}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-muted-foreground mb-1">Created</p>
+                      <p className="text-sm font-medium text-foreground">
+                        {new Date(tripDetails.createdAt).toLocaleDateString("en-US")}
+                      </p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Truck className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                <p className="text-muted-foreground">Trip details not found</p>
+              </div>
+            )}
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Confirmation Dialog */}
       <ConfirmationDialog
         isOpen={deleteDialog}
@@ -478,4 +752,4 @@ const AdminTripsPage = () => {
   )
 }
 
-export default AdminTripsPage
+export default AdminTripsPage 
