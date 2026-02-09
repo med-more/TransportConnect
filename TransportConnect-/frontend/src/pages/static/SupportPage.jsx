@@ -4,6 +4,7 @@ import { MessageCircle, Book, HelpCircle, Mail, Phone, Search } from "lucide-rea
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import Input from "../../components/ui/Input"
+import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const SupportPage = () => {
@@ -68,28 +69,43 @@ const SupportPage = () => {
       {/* Hero Section */}
       <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-8 sm:mb-12"
-          >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
-              How Can We Help?
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-              We're here to help you with any questions or issues you may have
-            </p>
-            <div className="max-w-2xl mx-auto">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  placeholder="Search for help..."
-                  className="pl-12 pr-4 py-3 sm:py-4 text-base"
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center mb-8 sm:mb-12">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+                How Can We Help?
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
+                We're here to help you with any questions or issues you may have
+              </p>
+              <div className="max-w-2xl">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    placeholder="Search for help..."
+                    className="pl-12 pr-4 py-3 sm:py-4 text-base"
+                  />
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="w-full h-64 sm:h-80 md:h-96"
+            >
+              <VisualSection
+                type="image"
+                src="/home/1/3.webp"
+                alt="Support Center"
+                className="w-full h-full rounded-lg"
+                fallbackIcon={MessageCircle}
+              />
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -135,6 +151,45 @@ const SupportPage = () => {
                 </motion.div>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Resources Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Helpful Resources
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Everything you need to get started and succeed
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              { title: "Getting Started Guide", desc: "Step-by-step tutorials for new users" },
+              { title: "Video Tutorials", desc: "Watch and learn from our video library" },
+              { title: "Best Practices", desc: "Tips and tricks from experienced users" },
+            ].map((resource, index) => (
+              <motion.div
+                key={resource.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="p-6 sm:p-8 border border-border hover:shadow-lg transition-shadow">
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{resource.title}</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground">{resource.desc}</p>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

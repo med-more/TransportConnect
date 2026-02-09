@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Truck, DollarSign, MapPin, TrendingUp, Clock, CheckCircle, ArrowRight } from "lucide-react"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
+import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const ForDriversPage = () => {
@@ -79,10 +80,14 @@ const ForDriversPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex justify-center"
             >
-              <div className="w-full max-w-md">
-                <div className="p-12 bg-accent/30 rounded-2xl border border-border">
-                  <Truck className="w-32 h-32 text-primary mx-auto opacity-80" />
-                </div>
+              <div className="w-full max-w-md h-64 sm:h-80 md:h-96">
+                <VisualSection
+                  type="image"
+                  src="/home/3/1.webp"
+                  alt="For Drivers"
+                  className="w-full h-full rounded-2xl"
+                  fallbackIcon={Truck}
+                />
               </div>
             </motion.div>
           </div>
@@ -126,6 +131,47 @@ const ForDriversPage = () => {
                 </motion.div>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Earnings Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Maximize Your Earnings
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Set your own rates and get paid directly
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+            {[
+              { value: "100%", label: "Direct Payment" },
+              { value: "0%", label: "Commission Fee" },
+              { value: "24/7", label: "Request Access" },
+              { value: "Flexible", label: "Your Schedule" },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <Card className="p-6 sm:p-8 border border-border">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{stat.value}</div>
+                  <div className="text-sm sm:text-base text-muted-foreground">{stat.label}</div>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -183,6 +229,50 @@ const ForDriversPage = () => {
                 ))}
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Success Stories Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Driver Success Stories
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Join drivers who are growing their business with us
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {[
+              { name: "Mohamed Tazi", earnings: "+40%", quote: "My earnings increased significantly since joining TransportConnect. The platform is easy to use and payments are always on time." },
+              { name: "Hassan Alami", earnings: "500+", quote: "I've completed over 500 successful trips. The steady stream of requests keeps my schedule full." },
+            ].map((story, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2 }}
+              >
+                <Card className="p-6 sm:p-8 border border-border">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="font-semibold text-foreground text-lg">{story.name}</p>
+                      <p className="text-sm text-muted-foreground">Verified Driver</p>
+                    </div>
+                    <div className="text-2xl font-bold text-primary">{story.earnings}</div>
+                  </div>
+                  <p className="text-sm sm:text-base text-muted-foreground italic">"{story.quote}"</p>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

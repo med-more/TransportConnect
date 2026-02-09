@@ -20,6 +20,9 @@ import FeaturesPage from "./pages/static/FeaturesPage"
 import SupportPage from "./pages/static/SupportPage"
 import AboutUsPage from "./pages/static/AboutUsPage"
 import ContactPage from "./pages/static/ContactPage"
+import PrivacyPolicyPage from "./pages/static/PrivacyPolicyPage"
+import TermsOfServicePage from "./pages/static/TermsOfServicePage"
+import CookiePolicyPage from "./pages/static/CookiePolicyPage"
 
 import DashboardPage from "./pages/dashboard/DashboardPage"
 import TripsPage from "./pages/trips/TripsPage"
@@ -58,6 +61,9 @@ function AppRoutes() {
       <Route path="/support" element={<PublicRoute><SupportPage /></PublicRoute>} />
       <Route path="/about-us" element={<PublicRoute><AboutUsPage /></PublicRoute>} />
       <Route path="/contact" element={<PublicRoute><ContactPage /></PublicRoute>} />
+      <Route path="/privacy-policy" element={<PublicRoute><PrivacyPolicyPage /></PublicRoute>} />
+      <Route path="/terms-of-service" element={<PublicRoute><TermsOfServicePage /></PublicRoute>} />
+      <Route path="/cookie-policy" element={<PublicRoute><CookiePolicyPage /></PublicRoute>} />
 
       {/* Protected user routes with Layout */}
       <Route

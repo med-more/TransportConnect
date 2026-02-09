@@ -1,23 +1,21 @@
-import { useState, useEffect } from "react"
+import { useQuery } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
-import { 
-  Users, 
-  Truck, 
-  Package, 
-  Shield, 
-  TrendingUp, 
-  AlertTriangle,
-  CheckCircle,
-  Clock,
+import clsx from "clsx"
+import {
+  Users,
+  Truck,
+  Package,
+  Shield,
+  TrendingUp,
+  ArrowRight,
   BarChart3,
-  Settings,
-  Eye,
-  UserCheck,
-  UserX
 } from "lucide-react"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
+import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import { adminAPI } from "../../services/api"
+import { normalizeAvatarUrl } from "../../utils/avatar"
 import { useNavigate } from "react-router-dom"
 import { Bar } from "react-chartjs-2"
 import {
@@ -33,100 +31,94 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const AdminDashboardPage = () => {
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    totalTrips: 0,
-    totalRequests: 0,
-    pendingVerifications: 0,
-    activeUsers: 0,
-    completedTrips: 0
-  })
-  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
 
-  useEffect(() => {
-    fetchStats()
-  }, [])
+  const { data: statsData, isLoading: statsLoading } = useQuery({
+    queryKey: ["admin-stats"],
+    queryFn: adminAPI.getStats,
+  })
 
-  const fetchStats = async () => {
-    try {
-      const statsRes = await adminAPI.getStats()
-      const statsData = statsRes.data || {}
-      setStats({
-        totalUsers: statsData.totalUsers || 0,
-        totalTrips: statsData.totalTrips || 0,
-        totalRequests: statsData.totalRequests || 0,
-        pendingVerifications: statsData.pendingVerifications || 0,
-        activeUsers: 0,
-        completedTrips: 0
-      })
-    } catch (error) {
-      console.error("Erreur lors du chargement des statistiques:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { data: recentTrips, isLoading: tripsLoading } = useQuery({
+    queryKey: ["admin-recent-trips"],
+    queryFn: () => adminAPI.getAllTrips().then((res) => ({ data: { trips: res.data?.slice(0, 5) || [] } })),
+  })
+
+  const { data: recentRequests, isLoading: requestsLoading } = useQuery({
+    queryKey: ["admin-recent-requests"],
+    queryFn: () => adminAPI.getAllRequests().then((res) => ({ data: { requests: res.data?.slice(0, 5) || [] } })),
+  })
+
+  const { data: recentUsers, isLoading: usersLoading } = useQuery({
+    queryKey: ["admin-recent-users"],
+    queryFn: () => adminAPI.getAllUsers().then((res) => ({ data: { users: res.data?.slice(0, 5) || [] } })),
+  })
+
+  const stats = statsData?.data || {}
 
   const statCards = [
     {
-      title: "Utilisateurs totaux",
-      value: stats.totalUsers,
+      title: "Total Users",
+      value: stats.totalUsers || 0,
       icon: Users,
-      color: "primary",
-      gradient: "from-primary to-blue-600"
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+      change: "+12%",
+      trend: "up",
     },
     {
-      title: "Trajets actifs",
-      value: stats.totalTrips,
+      title: "Active Trips",
+      value: stats.totalTrips || 0,
       icon: Truck,
-      color: "success",
-      gradient: "from-success to-green-600"
+      color: "text-info",
+      bgColor: "bg-info/10",
+      change: "+5%",
+      trend: "up",
     },
     {
-      title: "Demandes en cours",
-      value: stats.totalRequests,
+      title: "Pending Requests",
+      value: recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0,
       icon: Package,
-      color: "warning",
-      gradient: "from-warning to-orange-600"
+      color: "text-warning",
+      bgColor: "bg-warning/10",
+      change: "-3%",
+      trend: "down",
     },
     {
-      title: "Vérifications en attente",
-      value: stats.pendingVerifications,
+      title: "Pending Verifications",
+      value: stats.pendingVerifications || 0,
       icon: Shield,
-      color: "error",
-      gradient: "from-error to-red-600"
-    }
+      color: "text-success",
+      bgColor: "bg-success/10",
+      change: "+2%",
+      trend: "up",
+    },
   ]
 
   const quickActions = [
     {
-      title: "Gérer les utilisateurs",
-      description: "Voir, modifier et vérifier les comptes utilisateurs",
+      title: "Manage Users",
+      description: "View, modify and verify user accounts",
       icon: Users,
       href: "/admin/users",
-      color: "primary"
     },
     {
-      title: "Gérer les trajets",
-      description: "Surveiller et gérer tous les trajets",
+      title: "Manage Trips",
+      description: "Monitor and manage all trips",
       icon: Truck,
       href: "/admin/trips",
-      color: "success"
     },
     {
-      title: "Gérer les demandes",
-      description: "Traiter les demandes de transport",
+      title: "Manage Requests",
+      description: "Process transport requests",
       icon: Package,
       href: "/admin/requests",
-      color: "warning"
     },
     {
-      title: "Vérifications",
-      description: "Approuver les nouveaux utilisateurs",
+      title: "Verifications",
+      description: "Approve new users",
       icon: Shield,
       href: "/admin/verifications",
-      color: "error"
-    }
+    },
   ]
 
   const containerVariants = {
@@ -134,9 +126,9 @@ const AdminDashboardPage = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   }
 
   const itemVariants = {
@@ -145,220 +137,393 @@ const AdminDashboardPage = () => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
-  }
-
-  const chartData = {
-    labels: [
-      "Utilisateurs",
-      "Trajets",
-      "Demandes",
-      "Vérifications en attente"
-    ],
-    datasets: [
-      {
-        label: "Statistiques",
-        data: [
-          stats.totalUsers,
-          stats.totalTrips,
-          stats.totalRequests,
-          stats.pendingVerifications
-        ],
-        backgroundColor: [
-          "#6366f1",
-          "#22c55e",
-          "#f59e42",
-          "#ef4444"
-        ],
-        borderRadius: 8,
-        borderWidth: 1
-      }
-    ]
-  }
-
-  const chartOptions = {
-    responsive: true,
-    plugins: {
-      legend: { display: false },
-      title: { display: true, text: "Statistiques globales" }
+        duration: 0.5,
+      },
     },
-    scales: {
-      y: { beginAtZero: true, ticks: { stepSize: 1 } }
-    }
   }
 
-  if (isLoading) {
+  if (statsLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-3 sm:p-4 md:p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-4 sm:space-y-6 md:space-y-8">
-            <div className="h-24 sm:h-28 md:h-32 bg-gray-200 rounded-2xl sm:rounded-3xl"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 sm:h-28 md:h-32 bg-gray-200 rounded-lg sm:rounded-xl"></div>
-              ))}
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-40 sm:h-44 md:h-48 bg-gray-200 rounded-lg sm:rounded-xl"></div>
-              ))}
-            </div>
-          </div>
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <LoadingSpinner size="large" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-3 sm:p-4 md:p-6">
-      <motion.div 
-        className="max-w-7xl mx-auto space-y-4 sm:space-y-6 md:space-y-8"
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="space-y-6"
       >
-        {/* Hero Header */}
-        <motion.div
-          variants={itemVariants}
-          className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 p-4 sm:p-6 md:p-8 text-white"
-        >
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 bg-white rounded-full -translate-x-8 sm:-translate-x-12 md:-translate-x-16 -translate-y-8 sm:-translate-y-12 md:-translate-y-16"></div>
-            <div className="absolute top-1/2 right-0 w-12 h-12 sm:w-18 sm:h-18 md:w-24 md:h-24 bg-white rounded-full translate-x-6 sm:translate-x-9 md:translate-x-12 -translate-y-6 sm:-translate-y-9 md:-translate-y-12"></div>
-            <div className="absolute bottom-0 left-1/3 w-10 h-10 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-white rounded-full translate-y-5 sm:translate-y-8 md:translate-y-10"></div>
-          </div>
-          
-          <div className="relative z-10 text-center">
-            <motion.h1 
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              Tableau de bord Admin
-            </motion.h1>
-            <motion.p 
-              className="text-sm sm:text-base md:text-lg lg:text-xl opacity-90 max-w-2xl mx-auto px-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              Gérez votre plateforme de transport et surveillez l'activité en temps réel
-            </motion.p>
+        {/* Header */}
+        <motion.div variants={itemVariants}>
+          <div className="mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">Admin Dashboard</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your platform and monitor activity</p>
           </div>
         </motion.div>
 
-        {/* Statistics Cards */}
-        <motion.div 
-          variants={itemVariants}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
-        >
-          {statCards.map((stat, index) => (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="p-4 sm:p-5 md:p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${stat.gradient}`}></div>
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-text-secondary text-xs sm:text-sm font-medium mb-1 truncate">{stat.title}</p>
-                    <p className="text-2xl sm:text-3xl font-bold text-text-primary">{stat.value}</p>
+        {/* Stats Cards */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {statCards.map((stat, index) => {
+            const Icon = stat.icon
+            return (
+              <Card key={index} hover className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
-                  <div className={`p-2 sm:p-3 rounded-lg bg-${stat.color}/10 group-hover:bg-${stat.color}/20 transition-colors duration-300 flex-shrink-0 ml-2`}>
-                    <stat.icon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-${stat.color}`} />
+                  <div
+                    className={clsx(
+                      "flex items-center gap-1 text-xs font-medium",
+                      stat.trend === "up" ? "text-success" : "text-destructive"
+                    )}
+                  >
+                    <TrendingUp className="w-3 h-3" />
+                    {stat.change}
+                  </div>
+                </div>
+                <div>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
+                </div>
+              </Card>
+            )
+          })}
+        </motion.div>
+
+        {/* Statistics Chart */}
+        <motion.div variants={itemVariants}>
+          <Card className="p-4 sm:p-5 md:p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Statistics</h3>
+            </div>
+            <div className="h-48 sm:h-64 md:h-80">
+              <Bar
+                data={{
+                  labels: ["Users", "Trips", "Requests", "Pending Verifications"],
+                  datasets: [
+                    {
+                      label: "Statistics",
+                      data: [
+                        stats.totalUsers || 0,
+                        stats.totalTrips || 0,
+                        stats.totalRequests || 0,
+                        stats.pendingVerifications || 0,
+                      ],
+                      backgroundColor: [
+                        "rgba(239, 68, 68, 0.8)",
+                        "rgba(59, 130, 246, 0.8)",
+                        "rgba(245, 158, 11, 0.8)",
+                        "rgba(34, 197, 94, 0.8)",
+                      ],
+                      borderRadius: 8,
+                      borderWidth: 1,
+                    },
+                  ],
+                }}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: false },
+                    title: { display: false },
+                  },
+                  scales: {
+                    y: {
+                      beginAtZero: true,
+                      ticks: { stepSize: 1 },
+                    },
+                  },
+                }}
+              />
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          {/* Left Column - 2/3 width */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Quick Actions */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Quick Actions</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  {quickActions.map((action, index) => {
+                    const Icon = action.icon
+                    return (
+                      <button
+                        key={action.title}
+                        onClick={() => navigate(action.href)}
+                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 hover:shadow-md transition-all text-left group"
+                      >
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
+                            <Icon className="w-5 h-5 text-primary" />
+                          </div>
+                          <h4 className="font-semibold text-foreground text-sm sm:text-base">{action.title}</h4>
+                        </div>
+                        <p className="text-xs sm:text-sm text-muted-foreground">{action.description}</p>
+                      </button>
+                    )
+                  })}
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Recent Trips */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Recent Trips</h3>
+                  <Link to="/admin/trips">
+                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="space-y-3">
+                  {tripsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : recentTrips?.data?.trips?.length > 0 ? (
+                    recentTrips.data.trips.map((trip) => (
+                      <div
+                        key={trip._id}
+                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2 gap-2">
+                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                              <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-foreground text-sm sm:text-base truncate">
+                                {trip.departure?.city} → {trip.destination?.city}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {trip.driver?.firstName} {trip.driver?.lastName}
+                              </p>
+                            </div>
+                          </div>
+                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0">
+                            {trip.pricePerKg}€/kg
+                          </span>
+                        </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Package className="w-3 h-3" />
+                            {trip.availableCapacity?.weight}kg available
+                          </span>
+                          <span
+                            className={clsx(
+                              "px-2 py-1 rounded-md text-xs font-medium",
+                              trip.status === "active"
+                                ? "bg-success/10 text-success"
+                                : trip.status === "completed"
+                                  ? "bg-primary/10 text-primary"
+                                  : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {trip.status}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">No trips found</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Right Column - 1/3 width */}
+          <div className="space-y-6">
+            {/* Recent Requests */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Recent Requests</h3>
+                  <Link to="/admin/requests">
+                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="space-y-3">
+                  {requestsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : recentRequests?.data?.requests?.length > 0 ? (
+                    recentRequests.data.requests.map((request) => (
+                      <div
+                        key={request._id}
+                        className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                      >
+                        <div className="flex items-start justify-between mb-2 gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-xs sm:text-sm text-foreground truncate">
+                              {request.cargo?.description?.substring(0, 30)}...
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                              {request.pickup?.city} → {request.delivery?.city}
+                            </p>
+                          </div>
+                          <span
+                            className={clsx(
+                              "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium flex-shrink-0",
+                              request.status === "pending"
+                                ? "bg-warning/10 text-warning"
+                                : request.status === "accepted"
+                                  ? "bg-success/10 text-success"
+                                  : request.status === "rejected"
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-muted text-muted-foreground"
+                            )}
+                          >
+                            {request.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{request.cargo?.weight}kg</span>
+                          <span className="font-medium text-foreground">{request.price}€</span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">No requests found</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Pending Verifications */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Pending Verifications</h3>
+                  <Link to="/admin/verifications">
+                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="space-y-3">
+                  {usersLoading ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner />
+                    </div>
+                  ) : recentUsers?.data?.users?.filter((u) => !u.isVerified)?.length > 0 ? (
+                    recentUsers.data.users
+                      .filter((u) => !u.isVerified)
+                      .slice(0, 3)
+                      .map((user) => (
+                        <div
+                          key={user._id}
+                          className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            {user.avatar ? (
+                              <img
+                                src={normalizeAvatarUrl(user.avatar)}
+                                alt={`${user.firstName} ${user.lastName}`}
+                                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                onError={(e) => {
+                                  e.target.style.display = "none"
+                                  e.target.nextSibling.style.display = "flex"
+                                }}
+                              />
+                            ) : null}
+                            <div
+                              className={clsx(
+                                "w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0",
+                                user.avatar && "hidden"
+                              )}
+                            >
+                              <span className="text-white font-bold text-sm">
+                                {user.firstName?.charAt(0)}
+                                {user.lastName?.charAt(0)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground text-sm truncate">
+                                {user.firstName} {user.lastName}
+                              </p>
+                              <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            </div>
+                            <span className="px-2 py-1 bg-warning/10 text-warning rounded-md text-xs font-medium flex-shrink-0">
+                              Pending
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                      <p className="text-sm text-muted-foreground">No pending verifications</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
+
+            {/* Platform Overview */}
+            <motion.div variants={itemVariants}>
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Overview</h3>
+                </div>
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Active Users</span>
+                    <span className="font-medium text-foreground">
+                      {recentUsers?.data?.users?.filter((u) => u.isActive)?.length || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Verified Users</span>
+                    <span className="font-medium text-foreground">
+                      {recentUsers?.data?.users?.filter((u) => u.isVerified)?.length || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Active Trips</span>
+                    <span className="font-medium text-foreground">
+                      {recentTrips?.data?.trips?.filter((t) => t.status === "active")?.length || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Pending Requests</span>
+                    <span className="font-medium text-foreground">
+                      {recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0}
+                    </span>
                   </div>
                 </div>
               </Card>
             </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Ajout du graphique sous les cards */}
-        <motion.div variants={itemVariants} className="my-4 sm:my-6 md:my-8">
-          <Card className="p-3 sm:p-4 md:p-6">
-            <div className="h-48 sm:h-64 md:h-80">
-              <Bar data={chartData} options={chartOptions} />
-            </div>
-          </Card>
-        </motion.div>
-
-        {/* Quick Actions */}
-        <motion.div variants={itemVariants}>
-          <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 sm:mb-4 md:mb-6 flex items-center">
-            <Settings className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary flex-shrink-0" />
-            <span>Actions rapides</span>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
-            {quickActions.map((action, index) => (
-              <motion.div
-                key={action.title}
-                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <Card className="p-4 sm:p-5 md:p-6 relative overflow-hidden group hover:shadow-xl transition-all duration-300 cursor-pointer">
-                  <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-${action.color} to-${action.color}/60`}></div>
-                  <div className="flex items-center space-x-3 sm:space-x-4">
-                    <div className={`p-2 sm:p-3 rounded-lg bg-${action.color}/10 group-hover:bg-${action.color}/20 transition-colors duration-300 flex-shrink-0`}>
-                      <action.icon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-${action.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary mb-1 truncate">{action.title}</h3>
-                      <p className="text-text-secondary text-xs sm:text-sm line-clamp-2">{action.description}</p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="small"
-                      className={`text-${action.color} hover:bg-${action.color}/10 flex-shrink-0`}
-                      onClick={() => navigate(action.href)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
           </div>
-        </motion.div>
-
-        {/* Recent Activity */}
-        <motion.div variants={itemVariants}>
-          <h2 className="text-xl sm:text-2xl font-bold text-text-primary mb-3 sm:mb-4 md:mb-6 flex items-center">
-            <BarChart3 className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3 text-primary flex-shrink-0" />
-            <span>Activité récente</span>
-          </h2>
-          <Card className="p-4 sm:p-5 md:p-6">
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-green-50 rounded-lg">
-                <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-success flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-text-primary text-sm sm:text-base">Nouveau trajet créé</p>
-                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 2 minutes</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-yellow-50 rounded-lg">
-                <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-warning flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-text-primary text-sm sm:text-base">Demande en attente</p>
-                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 15 minutes</p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-blue-50 rounded-lg">
-                <UserCheck className="w-4 h-4 sm:w-5 sm:h-5 text-info flex-shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-text-primary text-sm sm:text-base">Utilisateur vérifié</p>
-                  <p className="text-xs sm:text-sm text-text-secondary">Il y a 1 heure</p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </motion.div>
+        </div>
       </motion.div>
     </div>
   )

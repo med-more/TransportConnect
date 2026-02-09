@@ -15,6 +15,14 @@ export const PublicHeader = () => {
               <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
             </div>
           </Link>
+          <nav className="hidden md:flex items-center gap-4 lg:gap-6 flex-shrink-0">
+            <Link to="/about-us" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
+              About
+            </Link>
+            <Link to="/contact" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
+              Contact
+            </Link>
+          </nav>
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <Link to="/login">
               <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
@@ -151,19 +159,16 @@ export const PublicFooter = () => {
 
         <div className="border-t border-white/10 pt-6 sm:pt-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
-            <p className="text-white/70 text-xs sm:text-sm text-center sm:text-left">
-              &copy; {new Date().getFullYear()} TransportConnect. All rights reserved. Made with ❤️ in Morocco.
-            </p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm">
-              <a href="#" className="text-white/70 hover:text-white transition-colors">
+              <Link to="/privacy-policy" className="text-white/70 hover:text-white transition-colors">
                 Privacy Policy
-              </a>
-              <a href="#" className="text-white/70 hover:text-white transition-colors">
+              </Link>
+              <Link to="/terms-of-service" className="text-white/70 hover:text-white transition-colors">
                 Terms of Service
-              </a>
-              <a href="#" className="text-white/70 hover:text-white transition-colors">
+              </Link>
+              <Link to="/cookie-policy" className="text-white/70 hover:text-white transition-colors">
                 Cookie Policy
-              </a>
+              </Link>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Package, Search, Shield, Clock, TrendingUp, CheckCircle, ArrowRight } from "lucide-react"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
+import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const ForShippersPage = () => {
@@ -79,10 +80,14 @@ const ForShippersPage = () => {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="flex justify-center"
             >
-              <div className="w-full max-w-md">
-                <div className="p-12 bg-accent/30 rounded-2xl border border-border">
-                  <Package className="w-32 h-32 text-primary mx-auto opacity-80" />
-                </div>
+              <div className="w-full max-w-md h-64 sm:h-80 md:h-96">
+                <VisualSection
+                  type="image"
+                  src="/home/2/1.webp"
+                  alt="For Shippers"
+                  className="w-full h-full rounded-2xl"
+                  fallbackIcon={Package}
+                />
               </div>
             </motion.div>
           </div>
@@ -126,6 +131,47 @@ const ForShippersPage = () => {
                 </motion.div>
               )
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              What Shippers Say
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Trusted by businesses across Morocco
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+            {[
+              { name: "Ahmed Benali", company: "Tech Solutions", quote: "TransportConnect has revolutionized how we handle our logistics. Fast, reliable, and cost-effective." },
+              { name: "Fatima Alami", company: "Retail Plus", quote: "The real-time tracking feature gives us complete visibility. Our customers love the transparency." },
+            ].map((testimonial, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.2 }}
+              >
+                <Card className="p-6 sm:p-8 border border-border">
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
+                  <div>
+                    <p className="font-semibold text-foreground">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.company}</p>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -183,6 +229,45 @@ const ForShippersPage = () => {
                 ))}
               </div>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Transparent Pricing
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Compare prices and choose the best deal for your shipment
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {[
+              { title: "No Hidden Fees", desc: "See all costs upfront before booking" },
+              { title: "Competitive Rates", desc: "Compare multiple offers to get the best price" },
+              { title: "Secure Payments", desc: "Pay safely through our secure platform" },
+            ].map((item, index) => (
+              <motion.div
+                key={item.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="p-6 sm:p-8 text-center border border-border">
+                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{item.title}</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

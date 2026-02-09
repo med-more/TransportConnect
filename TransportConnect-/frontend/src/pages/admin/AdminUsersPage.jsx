@@ -1,72 +1,62 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { 
-  Users, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  UserCheck, 
-  UserX, 
-  Edit, 
-  Eye,
-  Shield,
-  Mail,
-  Phone,
+import clsx from "clsx"
+import {
+  Users,
+  Search,
+  UserCheck,
+  UserX,
   Calendar,
+  Shield,
   CheckCircle,
   XCircle,
   Clock,
-  AlertTriangle
+  Eye,
+  Phone,
+  MapPin,
+  Truck,
+  Mail,
 } from "lucide-react"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
+import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI } from "../../services/api"
+import { normalizeAvatarUrl } from "../../utils/avatar"
 import toast from "react-hot-toast"
 
 const AdminUsersPage = () => {
-  const [users, setUsers] = useState([])
-  const [filteredUsers, setFilteredUsers] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [roleFilter, setRoleFilter] = useState("all")
+  const [rejectDialog, setRejectDialog] = useState(false)
+  const [rejectUserId, setRejectUserId] = useState(null)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [showUserDetails, setShowUserDetails] = useState(false)
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
+  const { data: usersData, isLoading, refetch } = useQuery({
+    queryKey: ["admin-users"],
+    queryFn: adminAPI.getAllUsers,
+  })
 
-  useEffect(() => {
-    filterUsers()
-  }, [users, searchTerm, statusFilter, roleFilter])
-
-  const fetchUsers = async () => {
-    try {
-      const response = await adminAPI.getAllUsers()
-      setUsers(response.data || [])
-    } catch (error) {
-      console.error("Erreur lors du chargement des utilisateurs:", error)
-      toast.error("Erreur lors du chargement des utilisateurs")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const users = usersData?.data || []
 
   const filterUsers = () => {
     let filtered = users
 
-    // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(user => 
-        (user.firstName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.lastName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (user.email || "").toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (user) =>
+          (user.firstName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (user.lastName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (user.email || "").toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
-    // Status filter (exclusif)
     if (statusFilter !== "all") {
-      filtered = filtered.filter(user => {
+      filtered = filtered.filter((user) => {
         if (statusFilter === "verified") return user.isVerified && user.isActive
         if (statusFilter === "unverified") return !user.isVerified && user.isActive
         if (statusFilter === "active") return user.isActive
@@ -75,65 +65,75 @@ const AdminUsersPage = () => {
       })
     }
 
-    // Role filter
     if (roleFilter !== "all") {
-      filtered = filtered.filter(user => user.role === roleFilter)
+      filtered = filtered.filter((user) => user.role === roleFilter)
     }
 
-    setFilteredUsers(filtered)
+    return filtered
   }
+
+  const filteredUsers = filterUsers()
 
   const handleVerifyUser = async (userId) => {
     try {
       await adminAPI.verifyUser(userId)
-      toast.success("Utilisateur vérifié avec succès")
-      fetchUsers()
+      toast.success("User verified successfully")
+      refetch()
     } catch (error) {
-      toast.error("Erreur lors de la vérification")
+      toast.error("Error verifying user")
     }
   }
 
-  const handleSuspendUser = async (userId) => {
-    try {
-      await adminAPI.suspendUser(userId)
-      toast.success("Utilisateur suspendu avec succès")
-      fetchUsers()
-    } catch (error) {
-      toast.error("Erreur lors de la suspension")
+  const handleSuspendUser = (userId) => {
+    setRejectUserId(userId)
+    setRejectDialog(true)
+  }
+
+  const handleConfirmSuspend = async () => {
+    if (rejectUserId) {
+      try {
+        await adminAPI.suspendUser(rejectUserId)
+        toast.success("User suspended successfully")
+        refetch()
+      } catch (error) {
+        toast.error("Error suspending user")
+      }
     }
+    setRejectDialog(false)
+    setRejectUserId(null)
   }
 
   const getStatusBadge = (user) => {
     if (!user.isActive) {
       return (
-        <span className="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">
-          Suspendu
+        <span className="px-2 py-1 text-xs font-medium bg-destructive/10 text-destructive rounded-md">
+          Suspended
         </span>
       )
     }
     if (user.isVerified) {
       return (
-        <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">
-          Vérifié
+        <span className="px-2 py-1 text-xs font-medium bg-success/10 text-success rounded-md">
+          Verified
         </span>
       )
     }
     return (
-      <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">
-        En attente
+      <span className="px-2 py-1 text-xs font-medium bg-warning/10 text-warning rounded-md">
+        Pending
       </span>
     )
   }
 
   const getRoleBadge = (role) => {
     const colors = {
-      admin: "bg-purple-100 text-purple-800",
-      conducteur: "bg-blue-100 text-blue-800",
-      expediteur: "bg-gray-100 text-gray-800"
+      admin: "bg-primary/10 text-primary",
+      conducteur: "bg-info/10 text-info",
+      expediteur: "bg-muted text-muted-foreground",
     }
     return (
-      <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[role] || colors.expediteur}`}>
-        {role === "conducteur" ? "Conducteur" : role === "admin" ? "Admin" : "Client"}
+      <span className={clsx("px-2 py-1 text-xs font-medium rounded-md", colors[role] || colors.expediteur)}>
+        {role === "conducteur" ? "Driver" : role === "admin" ? "Admin" : "Shipper"}
       </span>
     )
   }
@@ -143,9 +143,9 @@ const AdminUsersPage = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   }
 
   const itemVariants = {
@@ -154,115 +154,193 @@ const AdminUsersPage = () => {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.6,
-        ease: "easeOut"
-      }
-    }
+        duration: 0.5,
+      },
+    },
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse space-y-8">
-            <div className="h-32 bg-gray-200 rounded-3xl"></div>
-            <div className="h-16 bg-gray-200 rounded-xl"></div>
-            <div className="h-96 bg-gray-200 rounded-xl"></div>
-          </div>
+      <div className="p-3 sm:p-4 md:p-6">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <LoadingSpinner size="large" />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-gray-50 p-6">
-      <motion.div 
-        className="max-w-7xl mx-auto space-y-8"
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
+        className="space-y-6"
       >
         {/* Header */}
-        <motion.div
-          variants={itemVariants}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-text-secondary to-primary p-8 text-white"
-        >
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-16 -translate-y-16"></div>
-            <div className="absolute top-1/2 right-0 w-24 h-24 bg-white rounded-full translate-x-12 -translate-y-12"></div>
-          </div>
-          
-          <div className="relative z-10 text-center">
-            <motion.h1 
-              className="text-5xl font-bold mb-4"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              Gestion des utilisateurs
-            </motion.h1>
-            <motion.p 
-              className="text-xl opacity-90 max-w-2xl mx-auto"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              Gérez les comptes utilisateurs, vérifiez les nouveaux inscrits et surveillez l'activité
-            </motion.p>
+        <motion.div variants={itemVariants}>
+          <div className="mb-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">User Management</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Manage user accounts, verify new users and monitor activity
+            </p>
           </div>
         </motion.div>
 
         {/* Filters */}
         <motion.div variants={itemVariants}>
-          <Card className="p-6">
+          <Card className="p-4 sm:p-5 md:p-6">
             <div className="flex flex-col lg:flex-row gap-4 items-center">
               <div className="flex-1 w-full">
                 <Input
-                  placeholder="Rechercher par nom, email..."
+                  placeholder="Search by name, email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   icon={Search}
                 />
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-3 sm:gap-4 flex-wrap">
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="all">Tous les statuts</option>
-                  <option value="verified">Vérifiés</option>
-                  <option value="unverified">Non vérifiés</option>
-                  <option value="active">Actifs</option>
-                  <option value="suspended">Suspendus</option>
+                  <option value="all">All Status</option>
+                  <option value="verified">Verified</option>
+                  <option value="unverified">Unverified</option>
+                  <option value="active">Active</option>
+                  <option value="suspended">Suspended</option>
                 </select>
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  className="px-3 sm:px-4 py-2 text-sm border border-border rounded-lg bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                 >
-                  <option value="all">Tous les rôles</option>
+                  <option value="all">All Roles</option>
                   <option value="admin">Admin</option>
-                  <option value="conducteur">Conducteur</option>
-                  <option value="expediteur">Client</option>
+                  <option value="conducteur">Driver</option>
+                  <option value="expediteur">Shipper</option>
                 </select>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Users Table */}
-        <motion.div variants={itemVariants}>
-          <Card className="p-6">
+        {/* Users - Mobile Cards View */}
+        <motion.div variants={itemVariants} className="lg:hidden">
+          <div className="space-y-3">
+            {filteredUsers.length === 0 ? (
+              <Card className="p-4 sm:p-5 md:p-6">
+                <div className="text-center py-12">
+                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No users found</p>
+                </div>
+              </Card>
+            ) : (
+              filteredUsers.map((user, index) => (
+                <motion.div
+                  key={user._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card hover className="p-4">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {user.avatar ? (
+                            <img
+                              src={normalizeAvatarUrl(user.avatar)}
+                              alt={`${user.firstName} ${user.lastName}`}
+                              className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = "none"
+                                e.target.nextSibling.style.display = "flex"
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={clsx(
+                              "w-12 h-12 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0",
+                              user.avatar && "hidden"
+                            )}
+                          >
+                            {user.firstName?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-semibold text-foreground text-base truncate">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {getRoleBadge(user.role)}
+                        {getStatusBadge(user)}
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span>Joined {new Date(user.createdAt).toLocaleDateString("en-US")}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-border">
+                        <Button
+                          size="small"
+                          variant="ghost"
+                          onClick={() => {
+                            setSelectedUser(user)
+                            setShowUserDetails(true)
+                          }}
+                          className="flex-1 text-primary hover:bg-primary/10"
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Details
+                        </Button>
+                        {!user.isVerified && user.isActive && (
+                          <Button
+                            size="small"
+                            onClick={() => handleVerifyUser(user._id)}
+                            className="flex-1 bg-success hover:bg-success/90"
+                          >
+                            <UserCheck className="w-4 h-4 mr-1" />
+                            Verify
+                          </Button>
+                        )}
+                        {user.isActive && (
+                          <Button
+                            size="small"
+                            variant="outline"
+                            onClick={() => handleSuspendUser(user._id)}
+                            className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                          >
+                            <UserX className="w-4 h-4 mr-1" />
+                            Suspend
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))
+            )}
+          </div>
+        </motion.div>
+
+        {/* Users - Desktop Table View */}
+        <motion.div variants={itemVariants} className="hidden lg:block">
+          <Card className="p-4 sm:p-5 md:p-6">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-4 px-4 font-semibold text-text-primary">Utilisateur</th>
-                    <th className="text-left py-4 px-4 font-semibold text-text-primary">Rôle</th>
-                    <th className="text-left py-4 px-4 font-semibold text-text-primary">Statut</th>
-                    <th className="text-left py-4 px-4 font-semibold text-text-primary">Date d'inscription</th>
-                    <th className="text-left py-4 px-4 font-semibold text-text-primary">Actions</th>
+                  <tr className="border-b border-border">
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">User</th>
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Role</th>
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Status</th>
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Registration Date</th>
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -272,54 +350,77 @@ const AdminUsersPage = () => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.05 }}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+                      className="border-b border-border hover:bg-accent/50 transition-colors"
                     >
                       <td className="py-4 px-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-primary to-text-secondary rounded-full flex items-center justify-center text-white font-bold">
+                        <div className="flex items-center gap-3">
+                          {user.avatar ? (
+                            <img
+                              src={normalizeAvatarUrl(user.avatar)}
+                              alt={`${user.firstName} ${user.lastName}`}
+                              className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                              onError={(e) => {
+                                e.target.style.display = "none"
+                                e.target.nextSibling.style.display = "flex"
+                              }}
+                            />
+                          ) : null}
+                          <div
+                            className={clsx(
+                              "w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-bold flex-shrink-0",
+                              user.avatar && "hidden"
+                            )}
+                          >
                             {user.firstName?.charAt(0)?.toUpperCase()}
                           </div>
-                          <div>
-                            <p className="font-medium text-text-primary">
+                          <div className="min-w-0">
+                            <p className="font-medium text-foreground text-sm truncate">
                               {user.firstName} {user.lastName}
                             </p>
-                            <p className="text-sm text-text-secondary">{user.email}</p>
+                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                           </div>
                         </div>
                       </td>
+                      <td className="py-4 px-4">{getRoleBadge(user.role)}</td>
+                      <td className="py-4 px-4">{getStatusBadge(user)}</td>
                       <td className="py-4 px-4">
-                        {getRoleBadge(user.role)}
-                      </td>
-                      <td className="py-4 px-4">
-                        {getStatusBadge(user)}
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2 text-sm text-text-secondary">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Calendar className="w-4 h-4" />
-                          <span>{new Date(user.createdAt).toLocaleDateString("fr-FR")}</span>
+                          <span>{new Date(user.createdAt).toLocaleDateString("en-US")}</span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="small"
+                            variant="ghost"
+                            onClick={() => {
+                              setSelectedUser(user)
+                              setShowUserDetails(true)
+                            }}
+                            className="text-primary hover:bg-primary/10"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
                           {!user.isVerified && user.isActive && (
                             <Button
                               size="small"
                               onClick={() => handleVerifyUser(user._id)}
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-success hover:bg-success/90"
                             >
                               <UserCheck className="w-4 h-4" />
                             </Button>
                           )}
-                          {user.isActive ? (
+                          {user.isActive && (
                             <Button
                               size="small"
                               variant="outline"
                               onClick={() => handleSuspendUser(user._id)}
-                              className="border-red-300 text-red-600 hover:bg-red-50"
+                              className="border-destructive text-destructive hover:bg-destructive/10"
                             >
                               <UserX className="w-4 h-4" />
                             </Button>
-                          ) : null}
+                          )}
                         </div>
                       </td>
                     </motion.tr>
@@ -328,16 +429,179 @@ const AdminUsersPage = () => {
               </table>
               {filteredUsers.length === 0 && (
                 <div className="text-center py-12">
-                  <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-text-secondary">Aucun utilisateur trouvé</p>
+                  <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+                  <p className="text-muted-foreground">No users found</p>
                 </div>
               )}
             </div>
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* User Details Modal */}
+      {showUserDetails && selectedUser && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          onClick={() => setShowUserDetails(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-background rounded-lg p-4 sm:p-6 md:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground">User Details</h2>
+              <Button variant="ghost" size="small" onClick={() => setShowUserDetails(false)}>
+                <XCircle className="w-5 h-5" />
+              </Button>
+            </div>
+
+            <div className="space-y-4 sm:space-y-6">
+              <div className="text-center">
+                {selectedUser.avatar ? (
+                  <img
+                    src={normalizeAvatarUrl(selectedUser.avatar)}
+                    alt={`${selectedUser.firstName} ${selectedUser.lastName}`}
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover mx-auto mb-3 sm:mb-4"
+                    onError={(e) => {
+                      e.target.style.display = "none"
+                      e.target.nextSibling.style.display = "flex"
+                    }}
+                  />
+                ) : null}
+                <div
+                  className={clsx(
+                    "w-20 h-20 sm:w-24 sm:h-24 bg-primary rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold mx-auto mb-3 sm:mb-4",
+                    selectedUser.avatar && "hidden"
+                  )}
+                >
+                  {selectedUser.firstName?.charAt(0)?.toUpperCase()}
+                </div>
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">
+                  {selectedUser.firstName} {selectedUser.lastName}
+                </h3>
+                <p className="text-muted-foreground">{selectedUser.email}</p>
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  {getRoleBadge(selectedUser.role)}
+                  {getStatusBadge(selectedUser)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <Users className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-foreground">Role:</span>
+                    {getRoleBadge(selectedUser.role)}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-foreground">Joined:</span>
+                    <span className="text-muted-foreground">
+                      {new Date(selectedUser.createdAt).toLocaleDateString("en-US")}
+                    </span>
+                  </div>
+                  {selectedUser.phone && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-5 h-5 text-primary" />
+                      <span className="font-medium text-foreground">Phone:</span>
+                      <span className="text-muted-foreground">{selectedUser.phone}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-foreground">Email:</span>
+                    <span className="text-muted-foreground text-sm truncate">{selectedUser.email}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {selectedUser.address && typeof selectedUser.address === "object" && (
+                    <div className="flex items-start gap-3">
+                      <MapPin className="w-5 h-5 text-primary mt-1" />
+                      <div>
+                        <span className="font-medium text-foreground">Address:</span>
+                        <p className="text-muted-foreground text-sm">
+                          {selectedUser.address.street ? selectedUser.address.street + ", " : ""}
+                          {selectedUser.address.city ? selectedUser.address.city + ", " : ""}
+                          {selectedUser.address.postalCode ? selectedUser.address.postalCode + ", " : ""}
+                          {selectedUser.address.country || ""}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {selectedUser.role === "conducteur" && selectedUser.vehicleInfo && (
+                    <div className="flex items-center gap-3">
+                      <Truck className="w-5 h-5 text-primary" />
+                      <div>
+                        <span className="font-medium text-foreground">Vehicle:</span>
+                        <p className="text-muted-foreground text-sm">
+                          {selectedUser.vehicleInfo.type} - {selectedUser.vehicleInfo.capacity?.weight}kg
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-foreground">Status:</span>
+                    {getStatusBadge(selectedUser)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-border">
+                {!selectedUser.isVerified && selectedUser.isActive && (
+                  <Button
+                    onClick={() => {
+                      handleVerifyUser(selectedUser._id)
+                      setShowUserDetails(false)
+                    }}
+                    className="flex-1 bg-success hover:bg-success/90"
+                  >
+                    <UserCheck className="w-4 h-4 mr-2" />
+                    Verify User
+                  </Button>
+                )}
+                {selectedUser.isActive && (
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      handleSuspendUser(selectedUser._id)
+                      setShowUserDetails(false)
+                    }}
+                    className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    Suspend User
+                  </Button>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={rejectDialog}
+        onClose={() => {
+          setRejectDialog(false)
+          setRejectUserId(null)
+        }}
+        onConfirm={handleConfirmSuspend}
+        title="Suspend this user?"
+        message="Are you sure you want to suspend this user? This action can be reversed."
+        confirmText="Suspend"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   )
 }
 
-export default AdminUsersPage 
+export default AdminUsersPage

@@ -164,29 +164,6 @@ const WelcomePage = () => {
     { number: "500+", label: "Verified Drivers", icon: Shield },
   ]
 
-  const testimonials = [
-    {
-      name: "Ahmed Benali",
-      role: "Business Owner",
-      image: "AB",
-      rating: 5,
-      text: "TransportConnect has revolutionized how I ship my products. Fast, reliable, and affordable!",
-    },
-    {
-      name: "Fatima Alami",
-      role: "E-commerce Manager",
-      image: "FA",
-      rating: 5,
-      text: "The real-time tracking feature is amazing. I always know where my packages are.",
-    },
-    {
-      name: "Youssef Idrissi",
-      role: "Professional Driver",
-      image: "YI",
-      rating: 5,
-      text: "As a driver, I've found so many great opportunities. The platform is easy to use and pays well.",
-    },
-  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -201,6 +178,14 @@ const WelcomePage = () => {
                 <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
           </div>
             </Link>
+            <nav className="hidden md:flex items-center gap-4 lg:gap-6 flex-shrink-0">
+              <Link to="/about-us" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
+                About
+              </Link>
+              <Link to="/contact" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
+                Contact
+              </Link>
+            </nav>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               <Link to="/login">
                 <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
@@ -574,53 +559,6 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/30">
-        <div className="container mx-auto max-w-7xl">
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-12 md:mb-16"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">What Our Users Say</h2>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto px-4">
-              Join thousands of satisfied customers who trust TransportConnect
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={testimonial.name}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <div className="bg-card border border-border rounded-xl p-4 sm:p-5 md:p-6 h-full">
-                  <div className="flex items-center gap-1 mb-3 sm:mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-warning fill-warning" />
-                    ))}
-                  </div>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-5 md:mb-6 italic">"{testimonial.text}"</p>
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-sm sm:text-base">{testimonial.image}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold text-foreground text-sm sm:text-base">{testimonial.name}</p>
-                      <p className="text-xs sm:text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Image Gallery Section 2 */}
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
@@ -663,8 +601,8 @@ const WelcomePage = () => {
                 </div>
               </motion.div>
             ))}
-          </div>
-        </div>
+                </div>
+              </div>
       </section>
 
       {/* CTA Section */}

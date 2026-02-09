@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { Target, Users, Award, Heart, CheckCircle, ArrowRight } from "lucide-react"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
+import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const AboutUsPage = () => {
@@ -43,19 +44,98 @@ const AboutUsPage = () => {
       {/* Hero Section */}
       <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
         <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+                About TransportConnect
+              </h1>
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
+                Connecting shippers and drivers across Morocco with innovative logistics solutions
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="w-full h-64 sm:h-80 md:h-96"
+            >
+              <VisualSection
+                type="image"
+                src="/home/4/1.webp"
+                alt="About TransportConnect"
+                className="w-full h-full rounded-lg"
+                fallbackIcon={Users}
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Timeline Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+        <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
-              About TransportConnect
-            </h1>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Connecting shippers and drivers across Morocco with innovative logistics solutions
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Our Journey
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Building the future of logistics in Morocco
             </p>
           </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
+            <div className="lg:col-span-2 space-y-8 sm:space-y-12">
+              {[
+                { year: "2020", title: "Founded", desc: "Started with a vision to transform logistics" },
+                { year: "2021", title: "First 1000 Users", desc: "Reached our first milestone" },
+                { year: "2023", title: "National Expansion", desc: "Covering all major cities in Morocco" },
+                { year: "2024", title: "10,000+ Users", desc: "Continuing to grow and serve more customers" },
+              ].map((milestone, index) => (
+                <motion.div
+                  key={milestone.year}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: index * 0.2 }}
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                >
+                  <div className="flex-shrink-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <span className="text-lg sm:text-xl font-bold text-primary">{milestone.year}</span>
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{milestone.title}</h3>
+                    <p className="text-sm sm:text-base text-muted-foreground">{milestone.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="w-full lg:w-auto"
+            >
+              <div className="w-full aspect-square rounded-lg overflow-hidden max-w-md mx-auto lg:max-w-none">
+                <VisualSection
+                  type="image"
+                  src="/home/4/2.webp"
+                  alt="Our Journey"
+                  className="w-full h-full"
+                  fallbackIcon={Target}
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
@@ -86,6 +166,41 @@ const AboutUsPage = () => {
               our community of shippers and drivers.
             </p>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Partners Section */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+        <div className="container mx-auto max-w-6xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+              Trusted Partners
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Working with leading companies across Morocco
+            </p>
+          </motion.div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+            {["Partner 1", "Partner 2", "Partner 3", "Partner 4"].map((partner, index) => (
+              <motion.div
+                key={partner}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.1 }}
+                className="text-center"
+              >
+                <Card className="p-6 sm:p-8 border border-border">
+                  <div className="text-sm sm:text-base font-medium text-muted-foreground">{partner}</div>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
