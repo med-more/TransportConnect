@@ -111,11 +111,14 @@ const tripSchema = new mongoose.Schema(
 
 
 tripSchema.pre("save", function (next) {
-  if (this.departureDate <= new Date()) {
-    return next(new Error("La date de départ doit être dans le futur"))
-  }
-  if (this.arrivalDate <= this.departureDate) {
-    return next(new Error("La date d'arrivée doit être après la date de départ"))
+  // Ne valider les dates que si c'est un nouveau document ou si les dates ont été modifiées
+  if (this.isNew || this.isModified("departureDate") || this.isModified("arrivalDate")) {
+    if (this.departureDate <= new Date()) {
+      return next(new Error("La date de départ doit être dans le futur"))
+    }
+    if (this.arrivalDate <= this.departureDate) {
+      return next(new Error("La date d'arrivée doit être après la date de départ"))
+    }
   }
   next()
 })

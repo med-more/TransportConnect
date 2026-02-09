@@ -83,13 +83,34 @@ export const getAdminStats = async (req, res) => {
 // Changer le statut d'un trajet
 export const updateTripStatus = async (req, res) => {
   try {
-    const trip = await Trip.findById(req.params.id)
-    if (!trip) return res.status(404).json({ message: "Trajet non trouvé" })
-    if (req.body.status) trip.status = req.body.status
-    await trip.save()
+    const { status } = req.body
+    
+    // Valider le statut
+    const validStatuses = ["pending", "active", "completed", "cancelled", "paused"]
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        message: "Statut invalide. Statuts valides: " + validStatuses.join(", ") 
+      })
+    }
+
+    // Utiliser findByIdAndUpdate pour éviter les validations du pre-save hook
+    const trip = await Trip.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: false }
+    )
+    
+    if (!trip) {
+      return res.status(404).json({ message: "Trajet non trouvé" })
+    }
+    
     res.json({ message: "Statut du trajet mis à jour", trip })
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la mise à jour du statut du trajet" })
+    console.error("Error updating trip status:", error)
+    res.status(500).json({ 
+      message: "Erreur lors de la mise à jour du statut du trajet",
+      error: error.message 
+    })
   }
 }
 
@@ -107,13 +128,34 @@ export const deleteTrip = async (req, res) => {
 // Changer le statut d'une demande
 export const updateRequestStatus = async (req, res) => {
   try {
-    const request = await Request.findById(req.params.id)
-    if (!request) return res.status(404).json({ message: "Demande non trouvée" })
-    if (req.body.status) request.status = req.body.status
-    await request.save()
+    const { status } = req.body
+    
+    // Valider le statut
+    const validStatuses = ["pending", "accepted", "rejected", "completed", "cancelled", "in_transit"]
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ 
+        message: "Statut invalide. Statuts valides: " + validStatuses.join(", ") 
+      })
+    }
+
+    // Utiliser findByIdAndUpdate pour éviter les validations du pre-save hook
+    const request = await Request.findByIdAndUpdate(
+      req.params.id,
+      { status },
+      { new: true, runValidators: false }
+    )
+    
+    if (!request) {
+      return res.status(404).json({ message: "Demande non trouvée" })
+    }
+    
     res.json({ message: "Statut de la demande mis à jour", request })
   } catch (error) {
-    res.status(500).json({ message: "Erreur lors de la mise à jour du statut de la demande" })
+    console.error("Error updating request status:", error)
+    res.status(500).json({ 
+      message: "Erreur lors de la mise à jour du statut de la demande",
+      error: error.message 
+    })
   }
 }
 
