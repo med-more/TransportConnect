@@ -118,7 +118,7 @@ const DashboardPage = () => {
         className="space-y-6"
       >
         {/* Stats Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {statsCards.map((stat, index) => {
             const Icon = stat.icon
             return (
