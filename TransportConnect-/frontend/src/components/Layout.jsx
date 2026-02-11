@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
 import {
   Home,
@@ -22,11 +23,14 @@ import {
   TrendingUp,
   ChevronLeft,
   ChevronRight,
+  MapPin,
+  ArrowRight,
 } from "lucide-react"
 import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
+import { tripsAPI, requestsAPI } from "../services/api"
 
 const Layout = ({ children }) => {
   // Load sidebar collapsed state from localStorage
@@ -37,10 +41,13 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile sidebar
   const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [showSearchResults, setShowSearchResults] = useState(false)
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const notificationRef = useRef(null)
+  const searchRef = useRef(null)
 
   // Debug: Log user avatar on mount and when user changes
   useEffect(() => {
@@ -87,14 +94,61 @@ const Layout = ({ children }) => {
 
   const currentNavigationItems = user?.role === "admin" ? [...adminNavigationItems] : [...navigationItems]
 
+  // Fetch trips and requests for search
+  const { data: tripsData } = useQuery({
+    queryKey: ["search-trips"],
+    queryFn: () => (user?.role === "conducteur" ? tripsAPI.getMyTrips({ limit: 50 }) : tripsAPI.getTrips({ limit: 50 })),
+    enabled: !!user && searchQuery.length >= 2,
+  })
+
+  const { data: requestsData } = useQuery({
+    queryKey: ["search-requests"],
+    queryFn: () =>
+      user?.role === "conducteur"
+        ? requestsAPI.getReceivedRequests({ limit: 50 })
+        : requestsAPI.getRequests({ limit: 50 }),
+    enabled: !!user && searchQuery.length >= 2,
+  })
+
+  const trips = tripsData?.data?.trips || []
+  const requests = requestsData?.data?.requests || []
+
+  // Filter search results
+  const searchResults = {
+    trips: searchQuery.length >= 2
+      ? trips.filter(
+          (trip) =>
+            (trip.departure?.city || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (trip.destination?.city || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (trip.driver?.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (trip.driver?.lastName || "").toLowerCase().includes(searchQuery.toLowerCase())
+        ).slice(0, 5)
+      : [],
+    requests: searchQuery.length >= 2
+      ? requests.filter(
+          (request) =>
+            (request.pickup?.city || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (request.delivery?.city || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (request.cargo?.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (request.sender?.firstName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (request.sender?.lastName || "").toLowerCase().includes(searchQuery.toLowerCase())
+        ).slice(0, 5)
+      : [],
+  }
+
+  const totalResults = searchResults.trips.length + searchResults.requests.length
+
   // Close notification popup when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (notificationRef.current && !notificationRef.current.contains(event.target)) {
         setShowNotifications(false)
       }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false)
+      }
     }
-    if (showNotifications) {
+    if (showNotifications || showSearchResults) {
       document.addEventListener("mousedown", handleClickOutside)
     } else {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -102,7 +156,22 @@ const Layout = ({ children }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [showNotifications])
+  }, [showNotifications, showSearchResults])
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      // Navigate to trips page with search query
+      navigate(`/trips?search=${encodeURIComponent(searchQuery)}`)
+      setSearchQuery("")
+      setShowSearchResults(false)
+    }
+  }
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value)
+    setShowSearchResults(e.target.value.length >= 2)
+  }
 
   const handleLogout = () => {
     logout()
@@ -342,14 +411,91 @@ const Layout = ({ children }) => {
                 </p>
               </div>
               <div className="hidden md:flex max-w-md w-full min-w-0">
-                <div className="relative w-full">
+                <form onSubmit={handleSearchSubmit} className="relative w-full" ref={searchRef}>
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search..."
+                    placeholder="Search trips, requests..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
                     className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                   />
-                </div>
+                  
+                  {/* Search Results Dropdown */}
+                  {showSearchResults && searchQuery.length >= 2 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                      {totalResults === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No results found</p>
+                        </div>
+                      ) : (
+                        <>
+                          {searchResults.trips.length > 0 && (
+                            <div className="p-2">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Trips</p>
+                              {searchResults.trips.map((trip) => (
+                                <Link
+                                  key={trip._id}
+                                  to={`/trips/${trip._id}`}
+                                  onClick={() => {
+                                    setSearchQuery("")
+                                    setShowSearchResults(false)
+                                  }}
+                                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                                >
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Truck className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {trip.departure?.city} → {trip.destination?.city}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {trip.driver?.firstName} {trip.driver?.lastName}
+                                    </p>
+                                  </div>
+                                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {searchResults.requests.length > 0 && (
+                            <div className="p-2 border-t border-border">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Requests</p>
+                              {searchResults.requests.map((request) => (
+                                <Link
+                                  key={request._id}
+                                  to={`/requests/${request._id}`}
+                                  onClick={() => {
+                                    setSearchQuery("")
+                                    setShowSearchResults(false)
+                                  }}
+                                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                                >
+                                  <div className="p-2 bg-info/10 rounded-lg">
+                                    <Package className="w-4 h-4 text-info" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {request.pickup?.city} → {request.delivery?.city}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {request.cargo?.description?.substring(0, 30)}...
+                                    </p>
+                                  </div>
+                                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </form>
               </div>
             </div>
 
