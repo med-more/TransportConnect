@@ -1,163 +1,366 @@
-import { useState, useRef, useEffect } from "react"
-import { NavLink, useLocation } from "react-router-dom"
+import { useState, useEffect, useRef } from "react"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
-import { 
-  Home, 
-  Truck, 
-  Package, 
-  User, 
-  LogOut, 
-  Menu, 
-  X, 
-  Shield, 
-  BarChart3, 
-  Users, 
-  FileText 
+import {
+  BarChart3,
+  Truck,
+  Package,
+  Shield,
+  Users,
+  LogOut,
+  Menu,
+  X,
+  Bell,
+  Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react"
 import clsx from "clsx"
-import toast from "react-hot-toast"
+import Button from "./ui/Button"
+import logo from "../assets/logo.svg"
+import { normalizeAvatarUrl } from "../utils/avatar"
 
 const AdminLayout = ({ children }) => {
+  // Load sidebar collapsed state from localStorage
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem("sidebarCollapsed")
+    return saved ? JSON.parse(saved) : false
+  })
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile sidebar
+  const [notifications, setNotifications] = useState([])
+  const [showNotifications, setShowNotifications] = useState(false)
   const { user, logout } = useAuth()
   const location = useLocation()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const navigate = useNavigate()
   const notificationRef = useRef(null)
 
+  // Save sidebar collapsed state to localStorage
+  useEffect(() => {
+    localStorage.setItem("sidebarCollapsed", JSON.stringify(sidebarCollapsed))
+  }, [sidebarCollapsed])
+
   const adminNavigationItems = [
-    { name: "Admin Dashboard", href: "/admin", icon: BarChart3 },
+    { name: "Dashboard", href: "/admin", icon: BarChart3 },
     { name: "Utilisateurs", href: "/admin/users", icon: Users },
     { name: "Trajets", href: "/admin/trips", icon: Truck },
     { name: "Demandes", href: "/admin/requests", icon: Package },
     { name: "Vérifications", href: "/admin/verifications", icon: Shield },
   ]
 
+  // Close notification popup when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotifications(false)
+      }
+    }
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside)
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [showNotifications])
+
   const handleLogout = () => {
     logout()
-    toast.success("Déconnexion réussie")
+    navigate("/login")
   }
 
-  const unreadCount = (notifications || []).filter(n => !n.read).length
+  const unreadNotifications = notifications.filter((n) => !n.read).length
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar */}
-      <div
+    <div className="min-h-screen bg-background flex relative">
+      {/* Mobile Sidebar Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
         className={clsx(
-          "fixed inset-0 z-50 lg:hidden",
-          sidebarOpen ? "block" : "hidden"
+          "fixed inset-y-0 left-0 z-50 bg-white border-r border-border flex flex-col transition-transform duration-300 ease-in-out",
+          "lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          sidebarCollapsed ? "lg:w-20" : "lg:w-64"
         )}
       >
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white shadow-xl">
-          <div className="flex h-16 items-center justify-between px-4">
-            <h1 className="text-xl font-bold text-primary">TransportConnect</h1>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="text-gray-400 hover:text-gray-600"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          <nav className="mt-4">
-            {adminNavigationItems.map((item) => {
-              const Icon = item.icon
-              return (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={({ isActive }) =>
-                    `flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
-                      isActive
-                        ? "bg-primary text-white shadow-lg"
-                        : "text-text-secondary hover:text-text-primary hover:bg-gray-100"
-                    }`
-                  }
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                </NavLink>
-              )
-            })}
-          </nav>
-          <div className="mt-auto p-4">
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-text-secondary hover:bg-gray-100 hover:text-text-primary transition-colors duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Déconnexion</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white shadow-xl">
-          <div className="flex h-16 items-center px-4">
-            <h1 className="text-xl font-bold text-primary">TransportConnect</h1>
-          </div>
-          <nav className="mt-6 flex-1">
-            {adminNavigationItems.map((item) => {
-              const Icon = item.icon
-              const isActive = location.pathname === item.href
-              return (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  className={clsx(
-                    "flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200",
-                    isActive
-                      ? "bg-primary text-white shadow-lg"
-                      : "text-text-secondary hover:text-text-primary hover:bg-gray-100"
-                  )}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
-                </NavLink>
-              )
-            })}
-          </nav>
-          <div className="p-4">
-            <button
-              onClick={handleLogout}
-              className="flex w-full items-center space-x-3 rounded-lg px-4 py-3 text-text-secondary hover:bg-gray-100 hover:text-text-primary transition-colors duration-200"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Déconnexion</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-40 flex h-16 items-center justify-between bg-white px-4 shadow-sm lg:px-6">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="lg:hidden text-gray-400 hover:text-gray-600"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-text-secondary rounded-full flex items-center justify-center text-white text-sm font-bold">
-                {user?.firstName?.charAt(0)?.toUpperCase()}
+        {/* Logo */}
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className={clsx("flex items-center gap-3", sidebarCollapsed && "justify-center w-full")}>
+            <img src={logo} alt="TransportConnect" className="h-16 w-auto flex-shrink-0" />
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <h1 className="text-lg font-bold text-foreground truncate">TransportConnect</h1>
+                <p className="text-xs text-muted-foreground truncate">Admin Panel</p>
               </div>
-              <div className="hidden md:block">
-                <p className="text-sm font-medium text-text-primary">
+            )}
+          </div>
+          {/* Mobile Close Button */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5 text-foreground" />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto p-2 space-y-1 scrollbar-hide">
+          {adminNavigationItems.map((item) => {
+            const Icon = item.icon
+            const isActive = location.pathname === item.href
+
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className={clsx(
+                  "flex items-center rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                  sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5",
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                )}
+                title={sidebarCollapsed ? item.name : ""}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {!sidebarCollapsed && <span className="truncate">{item.name}</span>}
+                {/* Tooltip for collapsed state */}
+                {sidebarCollapsed && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                    {item.name}
+                  </div>
+                )}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* User Profile Section */}
+        <div className={clsx("p-2 border-t border-border space-y-2", sidebarCollapsed && "px-2")}>
+          {/* User Info */}
+          <div
+            className={clsx(
+              "flex items-center rounded-lg bg-accent/50 group relative",
+              sidebarCollapsed ? "justify-center p-2" : "gap-3 p-3"
+            )}
+            title={sidebarCollapsed ? `${user?.firstName} ${user?.lastName}` : ""}
+          >
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+              {user?.avatar ? (
+                <img
+                  src={normalizeAvatarUrl(user.avatar)}
+                  alt={`${user.firstName} ${user.lastName}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none"
+                    // Show initials if image fails
+                    const parent = e.target.parentElement
+                    if (parent && !parent.querySelector("span")) {
+                      const initials = document.createElement("span")
+                      initials.className = "text-sm font-semibold text-white"
+                      initials.textContent = `${user?.firstName?.charAt(0)?.toUpperCase() || ""}${user?.lastName?.charAt(0)?.toUpperCase() || ""}`
+                      parent.appendChild(initials)
+                    }
+                  }}
+                />
+              ) : (
+                <span className="text-sm font-semibold text-white">
+                  {user?.firstName?.charAt(0)?.toUpperCase()}
+                  {user?.lastName?.charAt(0)?.toUpperCase()}
+                </span>
+              )}
+            </div>
+            {!sidebarCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-text-secondary">Administrateur</p>
+                <p className="text-xs text-muted-foreground capitalize truncate">Admin</p>
+              </div>
+            )}
+            {/* Tooltip for collapsed state */}
+            {sidebarCollapsed && (
+              <div className="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                {user?.firstName} {user?.lastName}
+                <br />
+                <span className="text-xs opacity-90">Admin</span>
+              </div>
+            )}
+          </div>
+
+          {/* Logout Button */}
+          <button
+            onClick={handleLogout}
+            className={clsx(
+              "w-full flex items-center rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-accent transition-colors",
+              sidebarCollapsed ? "justify-center px-3 py-2" : "gap-2 px-3 py-2"
+            )}
+            title={sidebarCollapsed ? "Logout" : ""}
+          >
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            {!sidebarCollapsed && <span>Logout</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div
+        className={clsx(
+          "flex-1 flex flex-col w-full relative z-0",
+          sidebarCollapsed ? "lg:pl-20" : "lg:pl-64",
+          "transition-[padding-left] duration-300 ease-in-out"
+        )}
+      >
+        {/* Top Header */}
+        <header className="sticky top-0 z-20 bg-white border-b border-border">
+          <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
+            {/* Left: Sidebar Toggle */}
+            <div className="flex-shrink-0">
+              {/* Desktop Sidebar Toggle */}
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                className="hidden lg:flex p-2 hover:bg-accent rounded-lg transition-colors"
+                title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              >
+                <Menu className="w-5 h-5 text-foreground" />
+              </button>
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+              >
+                <Menu className="w-5 h-5 text-foreground" />
+              </button>
+            </div>
+
+            {/* Center: Welcome & Search */}
+            <div className="flex-1 flex items-center justify-center gap-4 min-w-0">
+              <div className="hidden lg:block text-center min-w-0">
+                <h2 className="text-base lg:text-lg font-semibold text-foreground">
+                  Welcome back, {user?.firstName}!
+                </h2>
+                <p className="text-xs lg:text-sm text-muted-foreground hidden xl:block">
+                  {new Date().toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div className="hidden md:flex max-w-md w-full min-w-0">
+                <div className="relative w-full">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Notifications & User Menu */}
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Notifications */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-foreground" />
+                  {unreadNotifications > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                  )}
+                </button>
+
+                {/* Notifications Dropdown */}
+                {showNotifications && (
+                  <div
+                    ref={notificationRef}
+                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[calc(100vh-120px)] overflow-hidden"
+                  >
+                    <div className="p-4 border-b border-border">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground">Notifications</h3>
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="text-muted-foreground hover:text-foreground"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-muted-foreground">
+                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No notifications</p>
+                        </div>
+                      ) : (
+                        <div className="divide-y divide-border">
+                          {notifications.map((notif, idx) => (
+                            <div
+                              key={idx}
+                              className={clsx(
+                                "p-4 hover:bg-accent transition-colors cursor-pointer",
+                                !notif.read && "bg-accent/50"
+                              )}
+                            >
+                              <p className="text-sm font-medium text-foreground">{notif.title}</p>
+                              <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                {new Date(notif.date).toLocaleString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* User Avatar */}
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                {user?.avatar ? (
+                  <img
+                    src={normalizeAvatarUrl(user.avatar)}
+                    alt={`${user.firstName} ${user.lastName}`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = "none"
+                      // Show initials if image fails
+                      const parent = e.target.parentElement
+                      if (parent && !parent.querySelector("span")) {
+                        const initials = document.createElement("span")
+                        initials.className = "text-sm font-semibold text-white"
+                        initials.textContent = `${user?.firstName?.charAt(0)?.toUpperCase() || ""}${user?.lastName?.charAt(0)?.toUpperCase() || ""}`
+                        parent.appendChild(initials)
+                      }
+                    }}
+                  />
+                ) : (
+                  <span className="text-sm font-semibold text-white">
+                    {user?.firstName?.charAt(0)?.toUpperCase()}
+                    {user?.lastName?.charAt(0)?.toUpperCase()}
+                  </span>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Page content */}
-        <main className="flex-1">
+        {/* Main Content Area */}
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
@@ -165,4 +368,4 @@ const AdminLayout = ({ children }) => {
   )
 }
 
-export default AdminLayout 
+export default AdminLayout

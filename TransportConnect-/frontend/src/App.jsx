@@ -4,6 +4,7 @@ import { useAuth } from "./contexts/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
 import Layout from "./components/Layout"
+import AdminLayout from "./components/AdminLayout"
 
 import WelcomePage from "./pages/auth/WelcomePage"
 import LoginPage from "./pages/auth/LoginPage"
@@ -161,61 +162,57 @@ function AppRoutes() {
         }
       />
 
-      {/* Admin routes with Layout */}
-      {isAuthenticated && user?.role === "admin" && (
-        <>
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminDashboardPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminUsersPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/trips"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminTripsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/requests"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminRequestsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/verifications"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <AdminVerificationsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-        </>
-      )}
+      {/* Admin routes with AdminLayout */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminDashboardPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminUsersPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/trips"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminTripsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/requests"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminRequestsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/verifications"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminVerificationsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
 
       
     </Routes>
