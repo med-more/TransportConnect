@@ -30,7 +30,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    // Only redirect if it's not a login request (to avoid redirecting during login errors)
+    if (error.response?.status === 401 && !error.config?.url?.includes("/auth/login")) {
       // Token expiré ou invalide
       localStorage.removeItem("token")
       localStorage.removeItem("user")

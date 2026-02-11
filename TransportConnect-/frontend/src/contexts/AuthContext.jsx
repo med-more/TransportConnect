@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Login error:", error)
       console.error("Error response:", error.response)
       const message = error.response?.data?.msg || error.response?.data?.message || error.message || "Login failed"
-      toast.error(message)
+      // Don't show toast here - let the LoginPage handle it
       return { success: false, message }
     }
   }

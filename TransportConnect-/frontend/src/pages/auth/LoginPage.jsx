@@ -11,6 +11,7 @@ import toast from "react-hot-toast"
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState("")
   const { login, isAuthenticated, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -34,36 +35,99 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm()
 
-  // Redirect when authenticated (fallback)
+  // Redirect when authenticated (fallback) - only if not loading and no error
   useEffect(() => {
-    if (isAuthenticated && user && !loading) {
+    if (isAuthenticated && user && !loading && !loginError) {
       const redirectPath = user.role === "admin" ? "/admin" : from
       console.log("Redirecting authenticated user to:", redirectPath)
       navigate(redirectPath, { replace: true })
     }
-  }, [isAuthenticated, user, navigate, from, loading])
+  }, [isAuthenticated, user, navigate, from, loading, loginError])
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data, e) => {
+    if (e) {
+      e.preventDefault() // Prevent form default submission
+    }
     setLoading(true)
+    setLoginError("") // Clear previous errors
+    
     try {
-      console.log("Attempting login...")
+      console.log("Attempting login with:", data.email)
       const result = await login(data.email, data.password)
       console.log("Login result:", result)
       
-      if (result && result.success) {
+      // Check if login was successful
+      if (result && result.success === true) {
         console.log("Login successful, user:", result.user)
+        // Wait a bit before redirecting to ensure state is updated
         setTimeout(() => {
           const redirectPath = result.user?.role === "admin" ? "/admin" : from
           console.log("Navigating to:", redirectPath)
           navigate(redirectPath, { replace: true })
-        }, 200)
+        }, 500)
       } else {
-        console.error("Login failed:", result?.message)
+        // Login failed - show error
+        const errorMessage = result?.message || "Email or password is incorrect"
+        console.log("Login failed, error message:", errorMessage)
+        console.log("Result object:", result)
+        
+        // Set error state immediately
+        setLoginError(errorMessage)
+        console.log("loginError state set to:", errorMessage)
+        
+        // Force a re-render by using setTimeout
+        setTimeout(() => {
+          // Show toast error
+          toast.error(errorMessage, {
+            duration: 5000,
+            style: {
+              background: "#fee2e2",
+              color: "#991b1b",
+              border: "2px solid #fca5a5",
+            },
+            iconTheme: {
+              primary: "#ef4444",
+              secondary: "#fff",
+            },
+          })
+        }, 50)
+        
+        setLoading(false) // Stop loading immediately on error
       }
     } catch (error) {
-      console.error("Login error:", error)
-    } finally {
-      setLoading(false)
+      console.error("Login catch error:", error)
+      console.error("Error response:", error?.response)
+      console.error("Error response data:", error?.response?.data)
+      
+      // Extract error message from various possible locations
+      const errorMessage = 
+        error?.response?.data?.msg || 
+        error?.response?.data?.message || 
+        error?.message || 
+        "Email or password is incorrect"
+      
+      console.log("Setting login error from catch:", errorMessage)
+      
+      // Set error state
+      setLoginError(errorMessage)
+      
+      // Show toast error
+      setTimeout(() => {
+        toast.error(errorMessage, {
+          duration: 5000,
+          style: {
+            background: "#fee2e2",
+            color: "#991b1b",
+            border: "2px solid #fca5a5",
+          },
+          iconTheme: {
+            primary: "#ef4444",
+            secondary: "#fff",
+          },
+        })
+      }, 100)
+      
+      setLoading(false) // Stop loading immediately on error
     }
   }
 
@@ -132,7 +196,7 @@ const LoginPage = () => {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 max-w-md mx-auto w-full">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6 max-w-md mx-auto w-full" noValidate>
             <div>
               <Input
                 type="email"
@@ -181,6 +245,17 @@ const LoginPage = () => {
                 Forgot password?
               </Link>
             </div>
+
+            {/* Error Message */}
+            {loginError ? (
+              <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 border-2 border-red-300 shadow-sm animate-in fade-in slide-in-from-top-2">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-red-800 mb-1">Login Failed</p>
+                  <p className="text-sm text-red-700">{loginError}</p>
+                </div>
+              </div>
+            ) : null}
 
             {/* Separator */}
             <div className="relative my-6">
