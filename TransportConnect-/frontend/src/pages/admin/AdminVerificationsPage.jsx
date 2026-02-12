@@ -149,13 +149,18 @@ const AdminVerificationsPage = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">
-              Pending Verifications
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Approve or reject new platform users
-            </p>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="p-3 bg-success/10 rounded-xl">
+              <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-success" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                Pending Verifications
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Review and validate new user registrations. Verify identity documents, approve accounts, or reject incomplete applications to maintain platform security
+              </p>
+            </div>
           </div>
         </motion.div>
 

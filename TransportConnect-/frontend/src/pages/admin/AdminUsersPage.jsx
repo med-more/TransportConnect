@@ -179,11 +179,18 @@ const AdminUsersPage = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">User Management</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Manage user accounts, verify new users and monitor activity
-            </p>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Users className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                User Management
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Oversee all platform users, verify new registrations, manage account status, and track user activity across the system
+              </p>
+            </div>
           </div>
         </motion.div>
 

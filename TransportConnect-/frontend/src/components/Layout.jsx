@@ -43,11 +43,13 @@ const Layout = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const notificationRef = useRef(null)
   const searchRef = useRef(null)
+  const mobileSearchRef = useRef(null)
 
   // Debug: Log user avatar on mount and when user changes
   useEffect(() => {
@@ -147,8 +149,11 @@ const Layout = ({ children }) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowSearchResults(false)
       }
+      if (mobileSearchRef.current && !mobileSearchRef.current.contains(event.target)) {
+        setShowMobileSearch(false)
+      }
     }
-    if (showNotifications || showSearchResults) {
+    if (showNotifications || showSearchResults || showMobileSearch) {
       document.addEventListener("mousedown", handleClickOutside)
     } else {
       document.removeEventListener("mousedown", handleClickOutside)
@@ -156,7 +161,7 @@ const Layout = ({ children }) => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
     }
-  }, [showNotifications, showSearchResults])
+  }, [showNotifications, showSearchResults, showMobileSearch])
 
   const handleSearchSubmit = (e) => {
     e.preventDefault()
@@ -499,8 +504,16 @@ const Layout = ({ children }) => {
               </div>
             </div>
 
-            {/* Right: Notifications & User Menu */}
+            {/* Right: Search (Mobile), Notifications & User Menu */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Mobile Search Icon */}
+              <button
+                onClick={() => setShowMobileSearch(true)}
+                className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
+                aria-label="Search"
+              >
+                <Search className="w-5 h-5 text-foreground" />
+              </button>
 
               {/* Notifications */}
               <div className="relative">
@@ -601,6 +614,122 @@ const Layout = ({ children }) => {
           {children}
         </main>
       </div>
+
+      {/* Mobile Search Modal */}
+      {showMobileSearch && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowMobileSearch(false)}
+          />
+          {/* Search Modal */}
+          <div 
+            ref={mobileSearchRef}
+            className="absolute top-0 left-0 right-0 bg-white border-b border-border shadow-lg"
+          >
+            <div className="p-4">
+              <div className="flex items-center gap-3 mb-4">
+                <form onSubmit={handleSearchSubmit} className="flex-1 relative" ref={searchRef}>
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Search trips, requests..."
+                    value={searchQuery}
+                    onChange={handleSearchChange}
+                    onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
+                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-base focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoFocus
+                  />
+                  
+                  {/* Search Results Dropdown */}
+                  {showSearchResults && searchQuery.length >= 2 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[60vh] overflow-y-auto">
+                      {totalResults === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p>No results found</p>
+                        </div>
+                      ) : (
+                        <>
+                          {searchResults.trips.length > 0 && (
+                            <div className="p-2">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Trips</p>
+                              {searchResults.trips.map((trip) => (
+                                <Link
+                                  key={trip._id}
+                                  to={`/trips/${trip._id}`}
+                                  onClick={() => {
+                                    setSearchQuery("")
+                                    setShowSearchResults(false)
+                                    setShowMobileSearch(false)
+                                  }}
+                                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                                >
+                                  <div className="p-2 bg-primary/10 rounded-lg">
+                                    <Truck className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {trip.departure?.city} → {trip.destination?.city}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {trip.driver?.firstName} {trip.driver?.lastName}
+                                    </p>
+                                  </div>
+                                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                          
+                          {searchResults.requests.length > 0 && (
+                            <div className="p-2 border-t border-border">
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Requests</p>
+                              {searchResults.requests.map((request) => (
+                                <Link
+                                  key={request._id}
+                                  to={`/requests/${request._id}`}
+                                  onClick={() => {
+                                    setSearchQuery("")
+                                    setShowSearchResults(false)
+                                    setShowMobileSearch(false)
+                                  }}
+                                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-accent transition-colors"
+                                >
+                                  <div className="p-2 bg-info/10 rounded-lg">
+                                    <Package className="w-4 h-4 text-info" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">
+                                      {request.pickup?.city} → {request.delivery?.city}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {request.cargo?.description?.substring(0, 30)}...
+                                    </p>
+                                  </div>
+                                  <ArrowRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </form>
+                <button
+                  onClick={() => setShowMobileSearch(false)}
+                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  aria-label="Close search"
+                >
+                  <X className="w-5 h-5 text-foreground" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

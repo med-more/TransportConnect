@@ -177,11 +177,18 @@ const AdminRequestsPage = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">Request Management</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Process and manage all transport requests
-            </p>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="p-3 bg-warning/10 rounded-xl">
+              <Package className="w-6 h-6 sm:w-7 sm:h-7 text-warning" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                Request Management
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                Handle all shipping requests, track delivery statuses, resolve disputes, and ensure timely processing of customer orders
+              </p>
+            </div>
           </div>
         </motion.div>
 

@@ -176,11 +176,18 @@ const AdminTripsPage = () => {
       >
         {/* Header */}
         <motion.div variants={itemVariants}>
-          <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">Trip Management</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Monitor and manage all trips on the platform
-            </p>
+          <div className="flex items-start gap-4 mb-6">
+            <div className="p-3 bg-info/10 rounded-xl">
+              <Truck className="w-6 h-6 sm:w-7 sm:h-7 text-info" />
+            </div>
+            <div className="flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                Trip Management
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                View, monitor, and control all transportation trips. Update statuses, manage schedules, and ensure smooth operations across the network
+              </p>
+            </div>
           </div>
         </motion.div>
 

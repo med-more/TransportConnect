@@ -17,18 +17,31 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import { adminAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import { useNavigate } from "react-router-dom"
-import { Bar } from "react-chartjs-2"
+import { Bar, Line, Doughnut } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
   Title,
   Tooltip,
   Legend,
 } from "chart.js"
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend
+)
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate()
@@ -39,21 +52,35 @@ const AdminDashboardPage = () => {
   })
 
   const { data: recentTrips, isLoading: tripsLoading } = useQuery({
-    queryKey: ["admin-recent-trips"],
-    queryFn: () => adminAPI.getAllTrips().then((res) => ({ data: { trips: res.data?.slice(0, 5) || [] } })),
+    queryKey: ["admin-all-trips"],
+    queryFn: () => adminAPI.getAllTrips(),
   })
 
   const { data: recentRequests, isLoading: requestsLoading } = useQuery({
-    queryKey: ["admin-recent-requests"],
-    queryFn: () => adminAPI.getAllRequests().then((res) => ({ data: { requests: res.data?.slice(0, 5) || [] } })),
+    queryKey: ["admin-all-requests"],
+    queryFn: () => adminAPI.getAllRequests(),
   })
 
   const { data: recentUsers, isLoading: usersLoading } = useQuery({
-    queryKey: ["admin-recent-users"],
-    queryFn: () => adminAPI.getAllUsers().then((res) => ({ data: { users: res.data?.slice(0, 5) || [] } })),
+    queryKey: ["admin-all-users"],
+    queryFn: () => adminAPI.getAllUsers(),
   })
 
   const stats = statsData?.data || {}
+  
+  // Calculate activity statistics from recent data
+  const allTrips = recentTrips?.data || []
+  const allRequests = recentRequests?.data || []
+  const allUsers = recentUsers?.data || []
+  
+  const activityStats = {
+    activeTrips: allTrips.filter(t => t.status === "active").length,
+    completedTrips: allTrips.filter(t => t.status === "completed").length,
+    pendingRequests: allRequests.filter(r => r.status === "pending").length,
+    acceptedRequests: allRequests.filter(r => r.status === "accepted").length,
+    activeUsers: allUsers.filter(u => u.isActive !== false).length,
+    verifiedUsers: allUsers.filter(u => u.isVerified === true).length,
+  }
 
   const statCards = [
     {
@@ -76,7 +103,7 @@ const AdminDashboardPage = () => {
     },
     {
       title: "Pending Requests",
-      value: recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0,
+      value: (recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0,
       icon: Package,
       color: "text-warning",
       bgColor: "bg-warning/10",
@@ -163,13 +190,25 @@ const AdminDashboardPage = () => {
         {/* Header */}
         <motion.div variants={itemVariants}>
           <div className="mb-2">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">Admin Dashboard</h1>
+            <div className="flex items-start gap-4">
+              <div className="p-3 bg-primary/10 rounded-xl">
+                <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                  Admin Dashboard
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                  Comprehensive overview of platform performance, user activity, trip statistics, and system-wide metrics at a glance
+                </p>
+              </div>
+            </div>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your platform and monitor activity</p>
           </div>
         </motion.div>
 
         {/* Stats Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {statCards.map((stat, index) => {
             const Icon = stat.icon
             return (
@@ -197,55 +236,114 @@ const AdminDashboardPage = () => {
           })}
         </motion.div>
 
-        {/* Statistics Chart */}
-        <motion.div variants={itemVariants}>
-          <Card className="p-4 sm:p-5 md:p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <BarChart3 className="w-5 h-5 text-primary" />
-              <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Statistics</h3>
-            </div>
-            <div className="h-48 sm:h-64 md:h-80">
-              <Bar
-                data={{
-                  labels: ["Users", "Trips", "Requests", "Pending Verifications"],
-                  datasets: [
-                    {
-                      label: "Statistics",
-                      data: [
-                        stats.totalUsers || 0,
-                        stats.totalTrips || 0,
-                        stats.totalRequests || 0,
-                        stats.pendingVerifications || 0,
-                      ],
-                      backgroundColor: [
-                        "rgba(239, 68, 68, 0.8)",
-                        "rgba(59, 130, 246, 0.8)",
-                        "rgba(245, 158, 11, 0.8)",
-                        "rgba(34, 197, 94, 0.8)",
-                      ],
-                      borderRadius: 8,
-                      borderWidth: 1,
+        {/* Statistics Charts - Two Sections */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+          {/* Platform Overview Statistics */}
+          <motion.div variants={itemVariants}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart3 className="w-5 h-5 text-primary" />
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Overview</h3>
+              </div>
+              <div className="h-48 sm:h-64 md:h-80">
+                <Bar
+                  data={{
+                    labels: ["Users", "Trips", "Requests", "Pending Verifications"],
+                    datasets: [
+                      {
+                        label: "Statistics",
+                        data: [
+                          stats.totalUsers || 0,
+                          stats.totalTrips || 0,
+                          stats.totalRequests || 0,
+                          stats.pendingVerifications || 0,
+                        ],
+                        backgroundColor: [
+                          "rgba(239, 68, 68, 0.8)",
+                          "rgba(59, 130, 246, 0.8)",
+                          "rgba(245, 158, 11, 0.8)",
+                          "rgba(34, 197, 94, 0.8)",
+                        ],
+                        borderRadius: 8,
+                        borderWidth: 1,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: { display: false },
+                      title: { display: false },
                     },
-                  ],
-                }}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: { display: false },
-                    title: { display: false },
-                  },
-                  scales: {
-                    y: {
-                      beginAtZero: true,
-                      ticks: { stepSize: 1 },
+                    scales: {
+                      y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 },
+                      },
                     },
-                  },
-                }}
-              />
-            </div>
-          </Card>
-        </motion.div>
+                  }}
+                />
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Activity Statistics */}
+          <motion.div variants={itemVariants}>
+            <Card className="p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp className="w-5 h-5 text-info" />
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Activity Distribution</h3>
+              </div>
+              <div className="h-48 sm:h-64 md:h-80">
+                <Doughnut
+                  data={{
+                    labels: ["Active Trips", "Completed Trips", "Pending Requests", "Accepted Requests"],
+                    datasets: [
+                      {
+                        label: "Activity",
+                        data: [
+                          activityStats.activeTrips,
+                          activityStats.completedTrips,
+                          activityStats.pendingRequests,
+                          activityStats.acceptedRequests,
+                        ],
+                        backgroundColor: [
+                          "rgba(59, 130, 246, 0.8)",
+                          "rgba(34, 197, 94, 0.8)",
+                          "rgba(245, 158, 11, 0.8)",
+                          "rgba(168, 85, 247, 0.8)",
+                        ],
+                        borderColor: [
+                          "rgba(59, 130, 246, 1)",
+                          "rgba(34, 197, 94, 1)",
+                          "rgba(245, 158, 11, 1)",
+                          "rgba(168, 85, 247, 1)",
+                        ],
+                        borderWidth: 2,
+                      },
+                    ],
+                  }}
+                  options={{
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      legend: {
+                        display: true,
+                        position: "bottom",
+                        labels: {
+                          padding: 15,
+                          usePointStyle: true,
+                        },
+                      },
+                      title: { display: false },
+                    },
+                  }}
+                />
+              </div>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
@@ -297,8 +395,8 @@ const AdminDashboardPage = () => {
                     <div className="flex justify-center py-8">
                       <LoadingSpinner />
                     </div>
-                  ) : recentTrips?.data?.trips?.length > 0 ? (
-                    recentTrips.data.trips.map((trip) => (
+                  ) : (recentTrips?.data || []).length > 0 ? (
+                    (recentTrips.data || []).slice(0, 5).map((trip) => (
                       <div
                         key={trip._id}
                         className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
@@ -371,8 +469,8 @@ const AdminDashboardPage = () => {
                     <div className="flex justify-center py-8">
                       <LoadingSpinner />
                     </div>
-                  ) : recentRequests?.data?.requests?.length > 0 ? (
-                    recentRequests.data.requests.map((request) => (
+                  ) : (recentRequests?.data || []).length > 0 ? (
+                    (recentRequests.data || []).slice(0, 3).map((request) => (
                       <div
                         key={request._id}
                         className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
@@ -434,11 +532,8 @@ const AdminDashboardPage = () => {
                     <div className="flex justify-center py-8">
                       <LoadingSpinner />
                     </div>
-                  ) : recentUsers?.data?.users?.filter((u) => !u.isVerified)?.length > 0 ? (
-                    recentUsers.data.users
-                      .filter((u) => !u.isVerified)
-                      .slice(0, 3)
-                      .map((user) => (
+                  ) : (recentUsers?.data || []).filter((u) => !u.isVerified)?.length > 0 ? (
+                    (recentUsers.data || []).filter((u) => !u.isVerified).slice(0, 3).map((user) => (
                         <div
                           key={user._id}
                           className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
@@ -498,25 +593,25 @@ const AdminDashboardPage = () => {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Active Users</span>
                     <span className="font-medium text-foreground">
-                      {recentUsers?.data?.users?.filter((u) => u.isActive)?.length || 0}
+                      {(recentUsers?.data || []).filter((u) => u.isActive)?.length || 0}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Verified Users</span>
                     <span className="font-medium text-foreground">
-                      {recentUsers?.data?.users?.filter((u) => u.isVerified)?.length || 0}
+                      {(recentUsers?.data || []).filter((u) => u.isVerified)?.length || 0}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Active Trips</span>
                     <span className="font-medium text-foreground">
-                      {recentTrips?.data?.trips?.filter((t) => t.status === "active")?.length || 0}
+                      {(recentTrips?.data || []).filter((t) => t.status === "active")?.length || 0}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Pending Requests</span>
                     <span className="font-medium text-foreground">
-                      {recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0}
+                      {(recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0}
                     </span>
                   </div>
                 </div>
