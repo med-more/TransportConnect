@@ -19,7 +19,7 @@ import {
   Phone,
   Mail,
   Navigation,
-} from "lucide-react"
+} from "../../utils/icons"
 import { requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"

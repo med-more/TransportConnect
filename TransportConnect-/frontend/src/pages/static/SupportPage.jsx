@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { MessageCircle, Book, HelpCircle, Mail, Phone, Search } from "lucide-react"
+import { MessageCircle, Book, HelpCircle, Mail, Phone, Search } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import Input from "../../components/ui/Input"

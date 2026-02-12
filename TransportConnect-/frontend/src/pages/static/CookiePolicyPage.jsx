@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Cookie, Settings, BarChart3, Shield } from "lucide-react"
+import { Cookie, Settings, BarChart3, Shield } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 

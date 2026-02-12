@@ -10,7 +10,7 @@ import {
   TrendingUp,
   ArrowRight,
   BarChart3,
-} from "lucide-react"
+} from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"

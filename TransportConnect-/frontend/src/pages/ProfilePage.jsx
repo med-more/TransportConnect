@@ -22,7 +22,7 @@ import {
   Camera,
   Upload,
   RefreshCw,
-} from "lucide-react"
+} from "../utils/icons"
 import Card from "../components/ui/Card"
 import Button from "../components/ui/Button"
 import Input from "../components/ui/Input"

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useForm } from "react-hook-form"
-import { ArrowLeft, MapPin, Calendar, Weight, Euro, Package } from "lucide-react"
+import { ArrowLeft, MapPin, Calendar, Weight, Euro, Package } from "../../utils/icons"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { tripsAPI } from "../../services/api"
 import Button from "../../components/ui/Button"

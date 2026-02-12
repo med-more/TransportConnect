@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
-} from "lucide-react"
+} from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"

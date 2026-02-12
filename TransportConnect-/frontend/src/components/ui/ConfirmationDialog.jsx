@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X, AlertTriangle, CheckCircle, Info, AlertCircle } from "lucide-react"
+import { X, AlertTriangle, CheckCircle, Info, AlertCircle } from "../../utils/icons"
 import Button from "./Button"
 import Card from "./Card"
 import clsx from "clsx"

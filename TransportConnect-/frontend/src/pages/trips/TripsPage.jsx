@@ -22,7 +22,7 @@ import {
   ArrowUpDown,
   TrendingUp,
   Sparkles,
-} from "lucide-react"
+} from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { tripsAPI, requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
@@ -520,10 +520,21 @@ const TripsPage = () => {
                               src={normalizeAvatarUrl(trip.driver.avatar)}
                               alt={`${trip.driver.firstName} ${trip.driver.lastName}`}
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error("Driver avatar failed to load in TripsPage:", normalizeAvatarUrl(trip.driver.avatar))
+                                e.target.style.display = "none"
+                                const parent = e.target.parentElement
+                                if (parent && !parent.querySelector("span")) {
+                                  const initials = document.createElement("span")
+                                  initials.className = "text-white text-xs font-bold"
+                                  initials.textContent = `${trip.driver?.firstName?.charAt(0) || ""}${trip.driver?.lastName?.charAt(0) || ""}`
+                                  parent.appendChild(initials)
+                                }
+                              }}
                             />
                           ) : (
                             <span className="text-white text-xs font-bold">
-                              {trip.driver?.firstName?.charAt(0)}
+                              {trip.driver?.firstName?.charAt(0) || ""}{trip.driver?.lastName?.charAt(0) || ""}
                             </span>
                           )}
                         </div>

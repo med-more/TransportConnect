@@ -19,7 +19,7 @@ import {
   ArrowRight,
   Plus,
   TrendingUp,
-} from "lucide-react"
+} from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"

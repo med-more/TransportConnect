@@ -1,6 +1,6 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { Package, Truck, Shield, MapPin, Clock, TrendingUp, CheckCircle, ArrowRight } from "lucide-react"
+import { Package, Truck, Shield, MapPin, Clock, TrendingUp, CheckCircle, ArrowRight } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import VisualSection from "../../components/ui/VisualSection"

@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { Mail, Phone, MapPin, Send, MessageSquare } from "lucide-react"
+import { Mail, Phone, MapPin, Send, MessageSquare } from "../../utils/icons"
 import { useForm } from "react-hook-form"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"

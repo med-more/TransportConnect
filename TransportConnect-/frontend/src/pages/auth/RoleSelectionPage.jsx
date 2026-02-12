@@ -17,7 +17,7 @@ import {
   Check,
   Search,
   Car,
-} from "lucide-react"
+} from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { usersAPI, authAPI } from "../../services/api"
 import Button from "../../components/ui/Button"

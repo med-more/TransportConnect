@@ -58,7 +58,14 @@ export const getReceivedRequests = async (req, res) => {
   
       const requests = await Request.find(filter)
         .populate("sender", "firstName lastName avatar stats phone")
-        .populate("trip", "departure destination departureDate availableCapacity")
+        .populate({
+          path: "trip",
+          select: "departure destination departureDate availableCapacity driver",
+          populate: {
+            path: "driver",
+            select: "firstName lastName avatar stats",
+          },
+        })
         .sort({ createdAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit)

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { Shield, Lock, Eye, FileText } from "lucide-react"
+import { Shield, Lock, Eye, FileText } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 

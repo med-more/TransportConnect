@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { X } from "lucide-react"
+import { X } from "../../utils/icons"
 import Button from "./Button"
 import Card from "./Card"
 import Input from "./Input"

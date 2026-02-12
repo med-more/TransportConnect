@@ -20,7 +20,7 @@ import {
   MessageSquare,
   Send,
   Paperclip,
-} from "lucide-react"
+} from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { tripsAPI, requestsAPI, usersAPI } from "../../services/api"
 import Card from "../../components/ui/Card"

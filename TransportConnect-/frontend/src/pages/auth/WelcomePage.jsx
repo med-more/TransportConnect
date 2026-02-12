@@ -26,7 +26,7 @@ import {
   Youtube,
   Play,
   User,
-} from "lucide-react"
+} from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo.svg"
 

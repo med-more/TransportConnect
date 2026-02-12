@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { FileText, Scale, AlertTriangle, CheckCircle } from "lucide-react"
+import { FileText, Scale, AlertTriangle, CheckCircle } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 

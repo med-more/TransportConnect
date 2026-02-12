@@ -20,7 +20,7 @@ import {
   Clock,
   XCircle,
   Eye,
-} from "lucide-react"
+} from "../../utils/icons"
 import { tripsAPI, requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
@@ -421,16 +421,27 @@ const TripDetailPage = () => {
                 Driver
               </h2>
               <div className="flex flex-col items-center text-center space-y-4">
-                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center">
+                <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                   {trip.driver?.avatar ? (
                     <img
-                      src={trip.driver.avatar}
-                      alt="Driver avatar"
-                      className="w-20 h-20 rounded-full object-cover"
+                      src={normalizeAvatarUrl(trip.driver.avatar)}
+                      alt={`${trip.driver.firstName} ${trip.driver.lastName}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.error("Driver avatar failed to load in TripDetailPage:", normalizeAvatarUrl(trip.driver.avatar))
+                        e.target.style.display = "none"
+                        const parent = e.target.parentElement
+                        if (parent && !parent.querySelector("span")) {
+                          const initials = document.createElement("span")
+                          initials.className = "text-white text-xl font-bold"
+                          initials.textContent = `${trip.driver?.firstName?.charAt(0) || ""}${trip.driver?.lastName?.charAt(0) || ""}`
+                          parent.appendChild(initials)
+                        }
+                      }}
                     />
                   ) : (
-                    <span className="text-white text-2xl font-bold">
-                      {trip.driver?.firstName?.charAt(0)?.toUpperCase()}
+                    <span className="text-white text-xl font-bold">
+                      {trip.driver?.firstName?.charAt(0) || ""}{trip.driver?.lastName?.charAt(0) || ""}
                     </span>
                   )}
                 </div>
