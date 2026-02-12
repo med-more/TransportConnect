@@ -280,14 +280,14 @@ const ProfilePage = () => {
     },
     {
       title: "Average Rating",
-      value: stats.averageRating ? stats.averageRating.toFixed(1) : "N/A",
+      value: stats.averageRating && stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "0.0",
       icon: Star,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
       title: "Total Reviews",
-      value: stats.totalReviews || 0,
+      value: stats.totalReviews || stats.totalRatings || 0,
       icon: Award,
       color: "text-info",
       bgColor: "bg-info/10",

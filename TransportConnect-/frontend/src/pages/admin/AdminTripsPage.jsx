@@ -676,7 +676,10 @@ const AdminTripsPage = () => {
                         {tripDetails.driver.vehicleInfo && (
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                             <Truck className="w-4 h-4" />
-                            <span>{tripDetails.driver.vehicleInfo.type} - {tripDetails.driver.vehicleInfo.capacity?.weight}kg</span>
+                            <span>
+                              {tripDetails.driver.vehicleInfo.type}
+                              {tripDetails.driver.vehicleInfo.capacity && ` - ${tripDetails.driver.vehicleInfo.capacity}kg`}
+                            </span>
                           </div>
                         )}
                       </div>

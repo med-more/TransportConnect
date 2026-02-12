@@ -486,17 +486,23 @@ const AdminDashboardPage = () => {
                           </div>
                           <span
                             className={clsx(
-                              "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium flex-shrink-0",
+                              "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium flex-shrink-0 capitalize",
                               request.status === "pending"
                                 ? "bg-warning/10 text-warning"
                                 : request.status === "accepted"
                                   ? "bg-success/10 text-success"
                                   : request.status === "rejected"
                                     ? "bg-destructive/10 text-destructive"
-                                    : "bg-muted text-muted-foreground"
+                                    : request.status === "delivered"
+                                      ? "bg-success/10 text-success"
+                                      : request.status === "in_transit"
+                                        ? "bg-info/10 text-info"
+                                        : request.status === "cancelled"
+                                          ? "bg-muted text-muted-foreground"
+                                          : "bg-muted text-muted-foreground"
                             )}
                           >
-                            {request.status}
+                            {request.status === "in_transit" ? "In Transit" : request.status}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">

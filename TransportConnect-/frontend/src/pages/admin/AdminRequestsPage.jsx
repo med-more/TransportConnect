@@ -113,11 +113,12 @@ const AdminRequestsPage = () => {
       completed: { color: "bg-primary/10 text-primary", label: "Completed" },
       cancelled: { color: "bg-muted text-muted-foreground", label: "Cancelled" },
       in_transit: { color: "bg-info/10 text-info", label: "In Transit" },
+      delivered: { color: "bg-success/10 text-success", label: "Delivered" },
     }
 
     const config = statusConfig[status] || statusConfig.pending
     return (
-      <span className={clsx("px-2 py-1 text-xs font-medium rounded-md", config.color)}>{config.label}</span>
+      <span className={clsx("px-2 py-1 text-xs font-medium rounded-md capitalize", config.color)}>{config.label}</span>
     )
   }
 
@@ -131,6 +132,10 @@ const AdminRequestsPage = () => {
         return <CheckCircle className="w-4 h-4 text-primary" />
       case "cancelled":
         return <XCircle className="w-4 h-4 text-muted-foreground" />
+      case "delivered":
+        return <CheckCircle className="w-4 h-4 text-success" />
+      case "in_transit":
+        return <Truck className="w-4 h-4 text-info" />
       default:
         return <Clock className="w-4 h-4 text-warning" />
     }
@@ -792,33 +797,47 @@ const AdminRequestsPage = () => {
                     </div>
                   </div>
                   {requestDetails.tracking && (
-                    <div className="mt-4 pt-4 border-t border-border space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Pickup Confirmed</span>
-                        <span className={clsx(
-                          "font-medium",
-                          requestDetails.tracking.pickupConfirmed?.confirmed ? "text-success" : "text-muted-foreground"
-                        )}>
-                          {requestDetails.tracking.pickupConfirmed?.confirmed ? "Yes" : "No"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">In Transit</span>
-                        <span className={clsx(
-                          "font-medium",
-                          requestDetails.tracking.inTransit?.confirmed ? "text-info" : "text-muted-foreground"
-                        )}>
-                          {requestDetails.tracking.inTransit?.confirmed ? "Yes" : "No"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Delivered</span>
-                        <span className={clsx(
-                          "font-medium",
-                          requestDetails.tracking.delivered?.confirmed ? "text-success" : "text-muted-foreground"
-                        )}>
-                          {requestDetails.tracking.delivered?.confirmed ? "Yes" : "No"}
-                        </span>
+                    <div className="mt-4 pt-4 border-t border-border space-y-3">
+                      <h4 className="text-sm font-semibold text-foreground mb-3">Tracking Information</h4>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm p-2 rounded-lg bg-accent">
+                          <span className="text-muted-foreground">Pickup Confirmed</span>
+                          <span className={clsx(
+                            "font-medium px-2 py-1 rounded",
+                            requestDetails.tracking?.pickupConfirmed?.confirmed === true
+                              ? "text-success bg-success/10"
+                              : "text-muted-foreground bg-muted/10"
+                          )}>
+                            {requestDetails.tracking?.pickupConfirmed?.confirmed === true ? "Yes" : "No"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm p-2 rounded-lg bg-accent">
+                          <span className="text-muted-foreground">In Transit</span>
+                          <span className={clsx(
+                            "font-medium px-2 py-1 rounded",
+                            requestDetails.tracking?.inTransit?.confirmed === true
+                              ? "text-info bg-info/10"
+                              : "text-muted-foreground bg-muted/10"
+                          )}>
+                            {requestDetails.tracking?.inTransit?.confirmed === true ? "Yes" : "No"}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm p-2 rounded-lg bg-accent">
+                          <span className="text-muted-foreground">Delivered</span>
+                          <span className={clsx(
+                            "font-medium px-2 py-1 rounded",
+                            requestDetails.tracking?.delivered?.confirmed === true
+                              ? "text-success bg-success/10"
+                              : "text-muted-foreground bg-muted/10"
+                          )}>
+                            {requestDetails.tracking?.delivered?.confirmed === true ? "Yes" : "No"}
+                          </span>
+                        </div>
+                        {requestDetails.tracking?.delivered?.confirmedAt && (
+                          <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+                            Delivered on: {new Date(requestDetails.tracking.delivered.confirmedAt).toLocaleString("en-US")}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

@@ -89,12 +89,12 @@ export const getReceivedRequests = async (req, res) => {
 export const getRequestById = async (req, res) => {
     try {
       const request = await Request.findById(req.params.id)
-        .populate("sender", "firstName lastName avatar stats phone")
+        .populate("sender", "firstName lastName avatar stats phone email")
         .populate({
           path: "trip",
           populate: {
             path: "driver",
-            select: "firstName lastName avatar stats phone",
+            select: "firstName lastName avatar stats phone email",
           },
         })
   
@@ -542,6 +542,108 @@ export const acceptRequest = async (req, res) => {
     } catch (error) {
       console.error("Erreur confirmation livraison:", error)
       res.status(500).json({ message: "Erreur lors de la confirmation de livraison" })
+    }
+  }
+
+  // Submit rating for a delivered request
+  export const submitRating = async (req, res) => {
+    try {
+      const { rating, comment } = req.body
+      const { id } = req.params
+
+      // Validate rating
+      if (!rating || rating < 1 || rating > 5) {
+        return res.status(400).json({ message: "La note doit être entre 1 et 5" })
+      }
+
+      // Find the request with populated trip and sender
+      const request = await Request.findById(id)
+        .populate("trip", "driver")
+        .populate("sender", "_id")
+
+      if (!request) {
+        return res.status(404).json({ message: "Demande non trouvée" })
+      }
+
+      // Check if request is delivered
+      if (request.status !== "delivered") {
+        return res.status(400).json({ message: "Vous ne pouvez noter que les demandes livrées" })
+      }
+
+      const userId = req.user._id.toString()
+      const driverId = request.trip.driver.toString()
+      const senderId = request.sender._id.toString()
+
+      // Determine if user is driver or sender
+      const isDriver = userId === driverId
+      const isSender = userId === senderId
+
+      if (!isDriver && !isSender) {
+        return res.status(403).json({ message: "Non autorisé à noter cette demande" })
+      }
+
+      // Determine which rating to update and who is being rated
+      let ratingField, ratedUserId
+      if (isDriver) {
+        // Driver is rating the sender
+        if (request.ratings.driverRating.rating) {
+          return res.status(400).json({ message: "Vous avez déjà noté cet utilisateur pour cette demande" })
+        }
+        ratingField = "ratings.driverRating"
+        ratedUserId = senderId
+      } else {
+        // Sender is rating the driver
+        if (request.ratings.senderRating.rating) {
+          return res.status(400).json({ message: "Vous avez déjà noté ce conducteur pour cette demande" })
+        }
+        ratingField = "ratings.senderRating"
+        ratedUserId = driverId
+      }
+
+      // Update the request with the rating
+      const updateData = {
+        [`${ratingField}.rating`]: rating,
+        [`${ratingField}.ratedAt`]: new Date(),
+        [`${ratingField}.ratedBy`]: req.user._id,
+      }
+
+      if (comment) {
+        updateData[`${ratingField}.comment`] = comment
+      }
+
+      await Request.findByIdAndUpdate(id, { $set: updateData })
+
+      // Update the rated user's stats
+      const ratedUser = await User.findById(ratedUserId)
+      if (ratedUser) {
+        const currentTotalRatings = ratedUser.stats.totalRatings || 0
+        const currentAverageRating = ratedUser.stats.averageRating || 0
+
+        // Calculate new average rating
+        const newTotalRatings = currentTotalRatings + 1
+        const newAverageRating = 
+          (currentAverageRating * currentTotalRatings + rating) / newTotalRatings
+
+        await User.findByIdAndUpdate(ratedUserId, {
+          $set: {
+            "stats.totalRatings": newTotalRatings,
+            "stats.averageRating": Math.round(newAverageRating * 10) / 10, // Round to 1 decimal
+          },
+        })
+      }
+
+      // Fetch updated request
+      const updatedRequest = await Request.findById(id)
+        .populate("trip", "driver")
+        .populate("sender", "firstName lastName avatar")
+
+      res.json({
+        message: "Note enregistrée avec succès",
+        request: updatedRequest,
+      })
+    } catch (error) {
+      console.error("Erreur soumission note:", error)
+      res.status(500).json({ message: "Erreur lors de l'enregistrement de la note" })
     }
   }
   

@@ -74,6 +74,7 @@ export const requestsAPI = {
   cancelRequest: (id) => api.put(`/requests/${id}/cancel`),
   confirmPickup: (id) => api.put(`/requests/${id}/pickup-confirm`),
   confirmDelivery: (id, signature) => api.put(`/requests/${id}/delivery-confirm`, { signature }),
+  submitRating: (id, rating, comment) => api.post(`/requests/${id}/rating`, { rating, comment }),
 }
 
 // API des évaluations

@@ -8,6 +8,7 @@ export const getAllUsers = async (req, res) => {
     const users = await User.find().select("-password");
     res.json({ users });
   } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs:", error);
     res.status(500).json({ message: "Erreur lors de la récupération des utilisateurs" });
   }
 };
@@ -28,9 +29,58 @@ export const toggleUserActive = async (req, res) => {
 // Lister tous les trajets
 export const getAllTrips = async (req, res) => {
   try {
-    const trips = await Trip.find().populate("driver", "firstName lastName");
-    res.json({ trips });
+    const trips = await Trip.find()
+      .populate("driver", "firstName lastName avatar stats phone email")
+      .populate({
+        path: "requests",
+        select: "ratings status sender",
+        populate: {
+          path: "sender",
+          select: "firstName lastName avatar",
+        },
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    // Calculate average rating for each trip from its requests
+    const tripsWithRatings = trips.map(trip => {
+      const requestsWithRatings = trip.requests?.filter(req => 
+        req.ratings?.driverRating?.rating || req.ratings?.senderRating?.rating
+      ) || [];
+      
+      const allRatings = [];
+      requestsWithRatings.forEach(req => {
+        if (req.ratings?.driverRating?.rating) {
+          allRatings.push(req.ratings.driverRating.rating);
+        }
+        if (req.ratings?.senderRating?.rating) {
+          allRatings.push(req.ratings.senderRating.rating);
+        }
+      });
+      
+      const averageRating = allRatings.length > 0
+        ? allRatings.reduce((sum, rating) => sum + rating, 0) / allRatings.length
+        : 0;
+      
+      return {
+        ...trip,
+        ratings: {
+          average: Math.round(averageRating * 10) / 10,
+          total: allRatings.length,
+          requests: requestsWithRatings.map(req => ({
+            id: req._id,
+            driverRating: req.ratings?.driverRating,
+            senderRating: req.ratings?.senderRating,
+            sender: req.sender,
+            status: req.status,
+          })),
+        },
+      };
+    });
+    
+    res.json({ trips: tripsWithRatings });
   } catch (error) {
+    console.error("Erreur lors de la récupération des trajets:", error);
     res.status(500).json({ message: "Erreur lors de la récupération des trajets" });
   }
 };
@@ -38,9 +88,21 @@ export const getAllTrips = async (req, res) => {
 // Lister toutes les demandes
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await Request.find().populate("sender", "firstName lastName").populate("trip");
+    const requests = await Request.find()
+      .populate("sender", "firstName lastName avatar stats phone email")
+      .populate({
+        path: "trip",
+        select: "departure destination departureDate arrivalDate availableCapacity driver status pricePerKg description",
+        populate: {
+          path: "driver",
+          select: "firstName lastName avatar stats phone email",
+        },
+      })
+      .sort({ createdAt: -1 });
+    
     res.json({ requests });
   } catch (error) {
+    console.error("Erreur lors de la récupération des demandes:", error);
     res.status(500).json({ message: "Erreur lors de la récupération des demandes" });
   }
 };

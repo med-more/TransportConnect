@@ -17,6 +17,8 @@ import {
   MapPin,
   Truck,
   Mail,
+  Star,
+  Award,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -548,7 +550,8 @@ const AdminUsersPage = () => {
                       <div>
                         <span className="font-medium text-foreground">Vehicle:</span>
                         <p className="text-muted-foreground text-sm">
-                          {selectedUser.vehicleInfo.type} - {selectedUser.vehicleInfo.capacity?.weight}kg
+                          {selectedUser.vehicleInfo.type}
+                          {selectedUser.vehicleInfo.capacity && ` - ${selectedUser.vehicleInfo.capacity}kg`}
                         </p>
                       </div>
                     </div>
@@ -560,6 +563,71 @@ const AdminUsersPage = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Ratings Section */}
+              {selectedUser.stats && (
+                <Card className="p-4 sm:p-5 bg-accent/30">
+                  <h4 className="text-base sm:text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+                    <Star className="w-5 h-5 text-warning" />
+                    User Ratings
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-warning/10 rounded-lg">
+                          <Star className="w-5 h-5 text-warning" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Average Rating</p>
+                          <p className="text-lg font-semibold text-foreground">
+                            {selectedUser.stats?.averageRating
+                              ? selectedUser.stats.averageRating.toFixed(1)
+                              : "0.0"}
+                            <span className="text-sm text-muted-foreground ml-1">/ 5.0</span>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= Math.round(selectedUser.stats?.averageRating || 0)
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-muted-foreground/30 fill-muted-foreground/10"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-background border border-border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-info/10 rounded-lg">
+                          <Award className="w-5 h-5 text-info" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Total Reviews</p>
+                          <p className="text-lg font-semibold text-foreground">
+                            {selectedUser.stats?.totalRatings || 0}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {selectedUser.stats?.averageRating > 0 && (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <CheckCircle className="w-4 h-4 text-success" />
+                        <span>
+                          This user has received {selectedUser.stats.totalRatings || 0} review
+                          {selectedUser.stats.totalRatings !== 1 ? "s" : ""} with an average rating of{" "}
+                          {selectedUser.stats.averageRating.toFixed(1)} out of 5.0
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </Card>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-border">
                 {!selectedUser.isVerified && selectedUser.isActive && (

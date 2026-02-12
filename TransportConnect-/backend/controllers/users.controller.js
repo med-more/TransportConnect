@@ -13,6 +13,9 @@ export const getUserStats = async (req, res) => {
   try {
     const userId = req.user._id
 
+    // Get user with stats
+    const user = await User.findById(userId).select("stats")
+    
     let totalTrips = 0
     let totalRequests = 0
 
@@ -27,7 +30,10 @@ export const getUserStats = async (req, res) => {
       success: true,
       data: {
         totalTrips,
-        totalRequests
+        totalRequests,
+        averageRating: user?.stats?.averageRating || 0,
+        totalRatings: user?.stats?.totalRatings || 0,
+        totalReviews: user?.stats?.totalRatings || 0, // Alias for frontend compatibility
       }
     })
   } catch (error) {

@@ -112,6 +112,34 @@ const requestSchema = new mongoose.Schema(
           signature: String,
         },
       },
+      ratings: {
+        driverRating: {
+          rating: {
+            type: Number,
+            min: [1, "La note doit être entre 1 et 5"],
+            max: [5, "La note doit être entre 1 et 5"],
+          },
+          comment: {
+            type: String,
+            maxlength: [500, "Le commentaire ne peut pas dépasser 500 caractères"],
+          },
+          ratedAt: Date,
+          ratedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        },
+        senderRating: {
+          rating: {
+            type: Number,
+            min: [1, "La note doit être entre 1 et 5"],
+            max: [5, "La note doit être entre 1 et 5"],
+          },
+          comment: {
+            type: String,
+            maxlength: [500, "Le commentaire ne peut pas dépasser 500 caractères"],
+          },
+          ratedAt: Date,
+          ratedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+        },
+      },
     },
     {
       timestamps: true,

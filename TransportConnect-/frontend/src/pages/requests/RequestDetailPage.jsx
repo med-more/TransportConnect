@@ -19,6 +19,7 @@ import {
   Phone,
   Mail,
   Navigation,
+  Star,
 } from "../../utils/icons"
 import { requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
@@ -27,6 +28,7 @@ import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import InputDialog from "../../components/ui/InputDialog"
+import RatingDialog from "../../components/ui/RatingDialog"
 import toast from "react-hot-toast"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import clsx from "clsx"
@@ -42,6 +44,7 @@ const RequestDetailPage = () => {
   const [acceptDialog, setAcceptDialog] = useState(false)
   const [rejectDialog, setRejectDialog] = useState(false)
   const [deliverySignatureDialog, setDeliverySignatureDialog] = useState(false)
+  const [ratingDialog, setRatingDialog] = useState(false)
 
   const { data: requestData, isLoading } = useQuery({
     queryKey: ["request", id],
@@ -124,6 +127,21 @@ const RequestDetailPage = () => {
     },
   })
 
+  const submitRatingMutation = useMutation({
+    mutationFn: ({ id, rating, comment }) => requestsAPI.submitRating(id, rating, comment),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["request", id] })
+      await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
+      await queryClient.invalidateQueries({ queryKey: ["user-requests"], exact: false })
+      await queryClient.refetchQueries({ queryKey: ["request", id] })
+      setRatingDialog(false)
+      toast.success("Rating submitted successfully")
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || "Error submitting rating")
+    },
+  })
+
   const handleAcceptRequest = () => {
     setAcceptDialog(true)
   }
@@ -174,6 +192,14 @@ const RequestDetailPage = () => {
     setDeliverySignatureDialog(false)
   }
 
+  const handleOpenRatingDialog = () => {
+    setRatingDialog(true)
+  }
+
+  const handleSubmitRating = ({ rating, comment }) => {
+    submitRatingMutation.mutate({ id, rating, comment })
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -192,8 +218,22 @@ const RequestDetailPage = () => {
   }
 
   const request = requestData.data.request
-  const isDriver = user?.role === "conducteur" && user?.id === request.trip?.driver?._id
-  const isSender = user?.id === request.sender?._id
+  const userId = user?._id || user?.id
+  const driverId = request.trip?.driver?._id || request.trip?.driver?.id
+  const senderId = request.sender?._id || request.sender?.id
+  
+  const isDriver = user?.role === "conducteur" && userId && driverId && userId.toString() === driverId.toString()
+  const isSender = userId && senderId && userId.toString() === senderId.toString()
+  
+  // Check if user can rate (request is delivered and user hasn't rated yet)
+  const canRateAsDriver = isDriver && request.status === "delivered" && !request.ratings?.driverRating?.rating
+  const canRateAsSender = isSender && request.status === "delivered" && !request.ratings?.senderRating?.rating
+  const hasRatedAsDriver = isDriver && request.ratings?.driverRating?.rating
+  const hasRatedAsSender = isSender && request.ratings?.senderRating?.rating
+  
+  // Check if the other party has rated (to display their rating)
+  const senderHasRated = request.ratings?.senderRating?.rating // Driver sees this
+  const driverHasRated = request.ratings?.driverRating?.rating // Sender sees this
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -679,6 +719,35 @@ const RequestDetailPage = () => {
                       <span className="text-muted-foreground">{request.sender.email}</span>
                     </div>
                   )}
+                  {/* Show rating received from sender (if they rated the driver) */}
+                  {senderHasRated && (
+                    <div className="p-3 bg-info/10 border border-info/20 rounded-lg mt-4">
+                      <div className="flex items-center gap-2 text-info mb-2">
+                        <Star className="w-4 h-4" />
+                        <span className="text-sm font-medium">Rating from Shipper</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= request.ratings.senderRating.rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-sm font-medium text-foreground ml-2">
+                          {request.ratings.senderRating.rating}/5
+                        </span>
+                      </div>
+                      {request.ratings.senderRating.comment && (
+                        <p className="text-xs text-muted-foreground mt-2 italic">
+                          "{request.ratings.senderRating.comment}"
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -718,6 +787,35 @@ const RequestDetailPage = () => {
                     <div className="flex items-center gap-2 text-sm">
                       <Mail className="w-4 h-4 text-muted-foreground" />
                       <span className="text-muted-foreground">{request.trip.driver.email}</span>
+                    </div>
+                  )}
+                  {/* Show rating received from driver (if they rated the sender) */}
+                  {driverHasRated && (
+                    <div className="p-3 bg-info/10 border border-info/20 rounded-lg mt-4">
+                      <div className="flex items-center gap-2 text-info mb-2">
+                        <Star className="w-4 h-4" />
+                        <span className="text-sm font-medium">Rating from Driver</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-4 h-4 ${
+                              star <= request.ratings.driverRating.rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-muted-foreground/30"
+                            }`}
+                          />
+                        ))}
+                        <span className="text-sm font-medium text-foreground ml-2">
+                          {request.ratings.driverRating.rating}/5
+                        </span>
+                      </div>
+                      {request.ratings.driverRating.comment && (
+                        <p className="text-xs text-muted-foreground mt-2 italic">
+                          "{request.ratings.driverRating.comment}"
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -798,6 +896,134 @@ const RequestDetailPage = () => {
                       Create New Request
                     </Button>
                   )}
+
+                {/* Rating Section - Show when delivered */}
+                {request.status === "delivered" && (
+                  <>
+                    {canRateAsDriver && (
+                      <Card className="p-4 border-2 border-warning/30 bg-warning/5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-warning/10 rounded-lg">
+                            <Star className="w-5 h-5 text-warning fill-warning" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-foreground text-sm">Rate Your Experience</h4>
+                            <p className="text-xs text-muted-foreground">Share your feedback about this shipper</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="primary"
+                          className="w-full"
+                          onClick={handleOpenRatingDialog}
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          Rate Shipper
+                        </Button>
+                      </Card>
+                    )}
+                    {canRateAsSender && (
+                      <Card className="p-4 border-2 border-warning/30 bg-warning/5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-warning/10 rounded-lg">
+                            <Star className="w-5 h-5 text-warning fill-warning" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-foreground text-sm">Rate Your Experience</h4>
+                            <p className="text-xs text-muted-foreground">Share your feedback about this driver</p>
+                          </div>
+                        </div>
+                        <Button
+                          variant="primary"
+                          className="w-full"
+                          onClick={handleOpenRatingDialog}
+                        >
+                          <Star className="w-4 h-4 mr-2" />
+                          Rate Driver
+                        </Button>
+                      </Card>
+                    )}
+                    {hasRatedAsDriver && (
+                      <Card className="p-4 border-2 border-success/30 bg-success/5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-success/10 rounded-lg">
+                            <CheckCircle className="w-5 h-5 text-success fill-success" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-foreground text-sm">Rating Submitted</h4>
+                            <p className="text-xs text-muted-foreground">You've rated this shipper</p>
+                          </div>
+                        </div>
+                        {request.ratings?.driverRating?.rating && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={clsx(
+                                    "w-5 h-5 transition-colors",
+                                    star <= request.ratings.driverRating.rating
+                                      ? "text-warning fill-warning"
+                                      : "text-muted-foreground/30"
+                                  )}
+                                />
+                              ))}
+                              <span className="text-sm font-medium text-foreground ml-2">
+                                {request.ratings.driverRating.rating}/5
+                              </span>
+                            </div>
+                            {request.ratings.driverRating.comment && (
+                              <div className="p-3 bg-accent rounded-lg mt-2">
+                                <p className="text-sm text-foreground italic">
+                                  "{request.ratings.driverRating.comment}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Card>
+                    )}
+                    {hasRatedAsSender && (
+                      <Card className="p-4 border-2 border-success/30 bg-success/5">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="p-2 bg-success/10 rounded-lg">
+                            <CheckCircle className="w-5 h-5 text-success fill-success" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-foreground text-sm">Rating Submitted</h4>
+                            <p className="text-xs text-muted-foreground">You've rated this driver</p>
+                          </div>
+                        </div>
+                        {request.ratings?.senderRating?.rating && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2">
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                  key={star}
+                                  className={clsx(
+                                    "w-5 h-5 transition-colors",
+                                    star <= request.ratings.senderRating.rating
+                                      ? "text-warning fill-warning"
+                                      : "text-muted-foreground/30"
+                                  )}
+                                />
+                              ))}
+                              <span className="text-sm font-medium text-foreground ml-2">
+                                {request.ratings.senderRating.rating}/5
+                              </span>
+                            </div>
+                            {request.ratings.senderRating.comment && (
+                              <div className="p-3 bg-accent rounded-lg mt-2">
+                                <p className="text-sm text-foreground italic">
+                                  "{request.ratings.senderRating.comment}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Card>
+                    )}
+                  </>
+                )}
               </div>
             </Card>
           </motion.div>
@@ -880,6 +1106,24 @@ const RequestDetailPage = () => {
         variant="danger"
         loading={rejectRequestMutation.isLoading}
         type="text"
+      />
+
+      <RatingDialog
+        isOpen={ratingDialog}
+        onClose={() => setRatingDialog(false)}
+        onConfirm={handleSubmitRating}
+        title={canRateAsDriver ? "Rate Shipper" : canRateAsSender ? "Rate Driver" : "Rate Delivery"}
+        message={
+          canRateAsDriver
+            ? "How would you rate your experience with this shipper?"
+            : canRateAsSender
+            ? "How would you rate your experience with this driver?"
+            : "How would you rate this delivery?"
+        }
+        confirmText="Submit Rating"
+        cancelText="Cancel"
+        loading={submitRatingMutation.isLoading}
+        existingRating={null}
       />
     </div>
   )
