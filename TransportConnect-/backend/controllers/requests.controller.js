@@ -177,7 +177,14 @@ export const createRequest = async (req, res) => {
 
     await request.populate([
       { path: "sender", select: "firstName lastName avatar" },
-      { path: "trip", select: "departure destination departureDate driver" },
+      { 
+        path: "trip", 
+        select: "departure destination departureDate driver",
+        populate: {
+          path: "driver",
+          select: "_id firstName lastName email",
+        },
+      },
     ])
 
     const chat = new Chat({
@@ -200,24 +207,45 @@ export const createRequest = async (req, res) => {
 
     // Create notification for driver
     try {
-      const driverId = trip.driver._id || trip.driver
-      const { title, message } = getNotificationMessages("request_created", {
-        shipperName: `${req.user.firstName} ${req.user.lastName}`,
-        tripRoute: `${trip.departure.city} → ${trip.destination.city}`,
-      })
-      console.log("🔔 Creating notification for driver:", driverId)
-      const notification = await createNotification({
-        recipientId: driverId,
-        senderId: req.user._id,
-        type: "request_created",
-        title,
-        message,
-        relatedRequestId: request._id,
-        relatedTripId: tripId,
-      })
-      console.log("✅ Notification created successfully:", notification._id)
+      // Ensure trip.driver is populated
+      if (!trip.driver || !trip.driver._id) {
+        console.error("❌ Cannot create notification: trip.driver is not populated")
+        // Try to populate it
+        await trip.populate("driver", "_id firstName lastName")
+      }
+      
+      const driverId = trip.driver?._id || trip.driver
+      if (!driverId) {
+        console.error("❌ Cannot create notification: driverId is missing", {
+          tripDriver: trip.driver,
+          tripId: trip._id,
+        })
+      } else {
+        const { title, message } = getNotificationMessages("request_created", {
+          shipperName: `${req.user.firstName} ${req.user.lastName}`,
+          tripRoute: `${trip.departure.city} → ${trip.destination.city}`,
+        })
+        console.log("🔔 Creating notification for driver:", {
+          recipientId: driverId,
+          senderId: req.user._id,
+          type: "request_created",
+          requestId: request._id,
+          tripId: tripId,
+        })
+        const notification = await createNotification({
+          recipientId: driverId,
+          senderId: req.user._id,
+          type: "request_created",
+          title,
+          message,
+          relatedRequestId: request._id,
+          relatedTripId: tripId,
+        })
+        console.log("✅ Notification created successfully:", notification._id)
+      }
     } catch (notifError) {
       console.error("❌ Error creating notification:", notifError)
+      console.error("❌ Error stack:", notifError.stack)
     }
 
     const io = req.app.get("io")
@@ -478,21 +506,36 @@ export const acceptRequest = async (req, res) => {
       
       // Create notification for shipper
       try {
-        const { title, message } = getNotificationMessages("request_rejected", {
-          driverName: `${req.user.firstName} ${req.user.lastName}`,
-          requestDescription: request.cargo?.description,
-        })
-        await createNotification({
-          recipientId: request.sender._id,
-          senderId: req.user._id,
-          type: "request_rejected",
-          title,
-          message,
-          relatedRequestId: request._id,
-          relatedTripId: request.trip._id,
-        })
+        const senderId = request.sender?._id || request.sender
+        if (!senderId) {
+          console.error("❌ Cannot create notification: senderId is missing")
+        } else {
+          const { title, message } = getNotificationMessages("request_rejected", {
+            driverName: `${req.user.firstName} ${req.user.lastName}`,
+            requestDescription: request.cargo?.description,
+          })
+          
+          console.log("🔔 Creating rejection notification:", {
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "request_rejected",
+          })
+          
+          await createNotification({
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "request_rejected",
+            title,
+            message,
+            relatedRequestId: request._id,
+            relatedTripId: request.trip._id,
+          })
+          
+          console.log("✅ Rejection notification created successfully")
+        }
       } catch (notifError) {
-        console.error("Error creating notification:", notifError)
+        console.error("❌ Error creating rejection notification:", notifError)
+        console.error("❌ Error stack:", notifError.stack)
       }
 
       io.to(`user_${request.sender._id}`).emit("request_rejected", {
@@ -534,24 +577,45 @@ export const acceptRequest = async (req, res) => {
       await request.save()
 
       // Populate trip to get driver info
-      await request.populate("trip", "driver")
+      await request.populate({
+        path: "trip",
+        populate: {
+          path: "driver",
+          select: "_id firstName lastName",
+        },
+      })
 
       // Create notification for driver
       try {
-        const { title, message } = getNotificationMessages("request_cancelled", {
-          shipperName: `${req.user.firstName} ${req.user.lastName}`,
-        })
-        await createNotification({
-          recipientId: request.trip.driver._id,
-          senderId: req.user._id,
-          type: "request_cancelled",
-          title,
-          message,
-          relatedRequestId: request._id,
-          relatedTripId: request.trip._id,
-        })
+        const driverId = request.trip?.driver?._id || request.trip?.driver
+        if (!driverId) {
+          console.error("❌ Cannot create notification: driverId is missing")
+        } else {
+          const { title, message } = getNotificationMessages("request_cancelled", {
+            shipperName: `${req.user.firstName} ${req.user.lastName}`,
+          })
+          
+          console.log("🔔 Creating cancellation notification:", {
+            recipientId: driverId,
+            senderId: req.user._id,
+            type: "request_cancelled",
+          })
+          
+          await createNotification({
+            recipientId: driverId,
+            senderId: req.user._id,
+            type: "request_cancelled",
+            title,
+            message,
+            relatedRequestId: request._id,
+            relatedTripId: request.trip._id,
+          })
+          
+          console.log("✅ Cancellation notification created successfully")
+        }
       } catch (notifError) {
-        console.error("Error creating notification:", notifError)
+        console.error("❌ Error creating cancellation notification:", notifError)
+        console.error("❌ Error stack:", notifError.stack)
       }
   
    
@@ -601,33 +665,55 @@ export const acceptRequest = async (req, res) => {
 
       // Create notifications for shipper
       try {
-        const { title: pickupTitle, message: pickupMessage } = getNotificationMessages("pickup_confirmed", {
-          driverName: `${req.user.firstName} ${req.user.lastName}`,
-        })
-        await createNotification({
-          recipientId: request.sender._id,
-          senderId: req.user._id,
-          type: "pickup_confirmed",
-          title: pickupTitle,
-          message: pickupMessage,
-          relatedRequestId: request._id,
-          relatedTripId: request.trip._id,
-        })
+        const senderId = request.sender?._id || request.sender
+        if (!senderId) {
+          console.error("❌ Cannot create notification: senderId is missing")
+        } else {
+          const { title: pickupTitle, message: pickupMessage } = getNotificationMessages("pickup_confirmed", {
+            driverName: `${req.user.firstName} ${req.user.lastName}`,
+          })
+          
+          console.log("🔔 Creating pickup notification:", {
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "pickup_confirmed",
+          })
+          
+          await createNotification({
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "pickup_confirmed",
+            title: pickupTitle,
+            message: pickupMessage,
+            relatedRequestId: request._id,
+            relatedTripId: request.trip._id,
+          })
 
-        const { title: transitTitle, message: transitMessage } = getNotificationMessages("in_transit", {
-          driverName: `${req.user.firstName} ${req.user.lastName}`,
-        })
-        await createNotification({
-          recipientId: request.sender._id,
-          senderId: req.user._id,
-          type: "in_transit",
-          title: transitTitle,
-          message: transitMessage,
-          relatedRequestId: request._id,
-          relatedTripId: request.trip._id,
-        })
+          const { title: transitTitle, message: transitMessage } = getNotificationMessages("in_transit", {
+            driverName: `${req.user.firstName} ${req.user.lastName}`,
+          })
+          
+          console.log("🔔 Creating in-transit notification:", {
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "in_transit",
+          })
+          
+          await createNotification({
+            recipientId: senderId,
+            senderId: req.user._id,
+            type: "in_transit",
+            title: transitTitle,
+            message: transitMessage,
+            relatedRequestId: request._id,
+            relatedTripId: request.trip._id,
+          })
+          
+          console.log("✅ Pickup and in-transit notifications created successfully")
+        }
       } catch (notifError) {
-        console.error("Error creating notification:", notifError)
+        console.error("❌ Error creating pickup/in-transit notifications:", notifError)
+        console.error("❌ Error stack:", notifError.stack)
       }
   
       res.json({
@@ -673,21 +759,36 @@ export const acceptRequest = async (req, res) => {
       // Create notification for shipper (if driver confirmed) or driver (if shipper confirmed)
       try {
         if (isDriver) {
-          const { title, message } = getNotificationMessages("delivered", {
-            driverName: `${req.user.firstName} ${req.user.lastName}`,
-          })
-          await createNotification({
-            recipientId: request.sender._id,
-            senderId: req.user._id,
-            type: "delivered",
-            title,
-            message,
-            relatedRequestId: request._id,
-            relatedTripId: request.trip._id,
-          })
+          const senderId = request.sender?._id || request.sender
+          if (!senderId) {
+            console.error("❌ Cannot create notification: senderId is missing")
+          } else {
+            const { title, message } = getNotificationMessages("delivered", {
+              driverName: `${req.user.firstName} ${req.user.lastName}`,
+            })
+            
+            console.log("🔔 Creating delivery notification:", {
+              recipientId: senderId,
+              senderId: req.user._id,
+              type: "delivered",
+            })
+            
+            await createNotification({
+              recipientId: senderId,
+              senderId: req.user._id,
+              type: "delivered",
+              title,
+              message,
+              relatedRequestId: request._id,
+              relatedTripId: request.trip._id,
+            })
+            
+            console.log("✅ Delivery notification created successfully")
+          }
         }
       } catch (notifError) {
-        console.error("Error creating notification:", notifError)
+        console.error("❌ Error creating delivery notification:", notifError)
+        console.error("❌ Error stack:", notifError.stack)
       }
   
       
@@ -792,6 +893,35 @@ export const acceptRequest = async (req, res) => {
             "stats.averageRating": Math.round(newAverageRating * 10) / 10, // Round to 1 decimal
           },
         })
+      }
+
+      // Create notification for the rated user
+      try {
+        const raterName = `${req.user.firstName} ${req.user.lastName}`
+        const { title, message } = getNotificationMessages("rating_received", {
+          raterName,
+          rating,
+        })
+        
+        console.log("🔔 Creating rating notification:", {
+          recipientId: ratedUserId,
+          senderId: req.user._id,
+          type: "rating_received",
+        })
+        
+        await createNotification({
+          recipientId: ratedUserId,
+          senderId: req.user._id,
+          type: "rating_received",
+          title,
+          message,
+          relatedRequestId: id,
+        })
+        
+        console.log("✅ Rating notification created successfully")
+      } catch (notifError) {
+        console.error("❌ Error creating rating notification:", notifError)
+        console.error("❌ Error stack:", notifError.stack)
       }
 
       // Fetch updated request

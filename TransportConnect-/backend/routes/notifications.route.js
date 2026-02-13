@@ -13,8 +13,9 @@ const router = express.Router()
 router.use(authenticateToken)
 
 router.get("/", getNotifications)
-router.put("/:id/read", validateObjectId("id"), markAsRead)
+// IMPORTANT: Put specific routes BEFORE parameterized routes
 router.put("/all/read", markAllAsRead)
+router.put("/:id/read", validateObjectId("id"), markAsRead)
 router.delete("/:id", validateObjectId("id"), deleteNotification)
 
 export default router

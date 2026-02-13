@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
 import {
   Home,
@@ -30,6 +30,7 @@ import {
   Clock,
   Star,
   Trash2,
+  AlertCircle,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
@@ -53,6 +54,7 @@ const Layout = ({ children }) => {
   const { user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const notificationRef = useRef(null)
   const searchRef = useRef(null)
   const mobileSearchRef = useRef(null)
@@ -125,11 +127,26 @@ const Layout = ({ children }) => {
       try {
         const response = await notificationsAPI.getNotifications({ limit: 50 })
         console.log("📬 Notifications response:", response)
-        console.log("📬 Notifications data:", response.data)
-        return response.data
+        console.log("📬 Notifications response.data:", response.data)
+        console.log("📬 Notifications response.data.notifications:", response.data?.notifications)
+        console.log("📬 Notifications response.data.unreadCount:", response.data?.unreadCount)
+        
+        // Handle different response structures
+        const data = response.data?.data || response.data
+        const notifications = data?.notifications || []
+        const unreadCount = data?.unreadCount || 0
+        
+        console.log("📬 Final notifications array:", notifications)
+        console.log("📬 Final unreadCount:", unreadCount)
+        
+        return {
+          notifications,
+          unreadCount,
+        }
       } catch (error) {
         console.error("❌ Error fetching notifications:", error)
         console.error("❌ Error response:", error.response)
+        console.error("❌ Error response data:", error.response?.data)
         return { notifications: [], unreadCount: 0 }
       }
     },
@@ -139,26 +156,47 @@ const Layout = ({ children }) => {
 
   const notifications = notificationsData?.notifications || []
   const unreadCount = notificationsData?.unreadCount || 0
+  
+  // Debug: Log notifications state
+  useEffect(() => {
+    console.log("🔔 Current user._id:", user?._id)
+    console.log("🔔 Current notificationsData:", notificationsData)
+    console.log("🔔 Current notifications state:", notifications)
+    console.log("🔔 Current unreadCount:", unreadCount)
+    console.log("🔔 Notifications length:", notifications.length)
+    if (notifications.length > 0) {
+      console.log("🔔 First notification:", notifications[0])
+    }
+  }, [notifications, unreadCount, notificationsData, user?._id])
 
   // Get notification icon based on type
   const getNotificationIcon = (type) => {
     switch (type) {
       case "request_created":
-        return <Package className="w-5 h-5 text-info" />
+        return <Package className="w-4 h-4 text-info" />
       case "request_accepted":
-        return <CheckCircle className="w-5 h-5 text-success" />
+        return <CheckCircle className="w-4 h-4 text-success" />
       case "request_rejected":
-        return <XCircle className="w-5 h-5 text-destructive" />
+        return <XCircle className="w-4 h-4 text-destructive" />
       case "pickup_confirmed":
-        return <Truck className="w-5 h-5 text-primary" />
       case "in_transit":
-        return <Truck className="w-5 h-5 text-info" />
+        return <Truck className="w-4 h-4 text-primary" />
       case "delivered":
-        return <CheckCircle className="w-5 h-5 text-success" />
+        return <CheckCircle className="w-4 h-4 text-success" />
       case "request_cancelled":
-        return <XCircle className="w-5 h-5 text-warning" />
+        return <XCircle className="w-4 h-4 text-warning" />
+      case "trip_created":
+        return <Truck className="w-4 h-4 text-info" />
+      case "rating_received":
+        return <Star className="w-4 h-4 text-warning" />
+      case "account_verified":
+        return <Shield className="w-4 h-4 text-success" />
+      case "account_suspended":
+        return <AlertCircle className="w-4 h-4 text-destructive" />
+      case "account_reactivated":
+        return <CheckCircle className="w-4 h-4 text-success" />
       default:
-        return <Bell className="w-5 h-5 text-muted-foreground" />
+        return <Bell className="w-4 h-4 text-muted-foreground" />
     }
   }
 
@@ -179,6 +217,16 @@ const Layout = ({ children }) => {
         return "bg-success/10 border-success/20"
       case "request_cancelled":
         return "bg-warning/10 border-warning/20"
+      case "trip_created":
+        return "bg-info/10 border-info/20"
+      case "rating_received":
+        return "bg-warning/10 border-warning/20"
+      case "account_verified":
+        return "bg-success/10 border-success/20"
+      case "account_suspended":
+        return "bg-destructive/10 border-destructive/20"
+      case "account_reactivated":
+        return "bg-success/10 border-success/20"
       default:
         return "bg-accent border-border"
     }
@@ -206,7 +254,9 @@ const Layout = ({ children }) => {
     e.stopPropagation()
     try {
       await notificationsAPI.deleteNotification(notificationId)
-      refetchNotifications()
+      // Invalidate and refetch notifications
+      await queryClient.invalidateQueries({ queryKey: ["notifications", user?._id] })
+      await refetchNotifications()
       toast.success("Notification deleted")
     } catch (error) {
       console.error("Error deleting notification:", error)
@@ -660,12 +710,18 @@ const Layout = ({ children }) => {
                                 onClick={async (e) => {
                                   e.stopPropagation()
                                   try {
-                                    await notificationsAPI.markAllAsRead()
-                                    refetchNotifications()
-                                    toast.success("All marked as read")
+                                    const response = await notificationsAPI.markAllAsRead()
+                                    console.log("✅ Mark all as read response:", response.data)
+                                    // Force immediate refetch by invalidating and refetching
+                                    await queryClient.invalidateQueries({ queryKey: ["notifications", user?._id] })
+                                    // Use refetch with force option
+                                    const refetched = await refetchNotifications({ cancelRefetch: false })
+                                    console.log("✅ Refetched notifications data:", refetched.data)
+                                    toast.success("All notifications marked as read")
                                   } catch (error) {
-                                    console.error("Error marking all as read:", error)
-                                    toast.error("Error marking all as read")
+                                    console.error("❌ Error marking all as read:", error)
+                                    console.error("❌ Error details:", error.response?.data)
+                                    toast.error(error.response?.data?.message || "Error marking all as read")
                                   }
                                 }}
                                 className="text-xs text-primary hover:text-primary/80 font-medium transition-colors px-2 py-1 hover:bg-primary/5 rounded"
@@ -702,7 +758,7 @@ const Layout = ({ children }) => {
                           </div>
                         ) : (
                           <div className="divide-y divide-border">
-                            <AnimatePresence>
+                            <AnimatePresence mode="popLayout">
                               {notifications.map((notif, index) => {
                                 const requestId = notif.relatedRequest?._id || notif.relatedRequest
                                 const tripId = notif.relatedTrip?._id || notif.relatedTrip
@@ -719,7 +775,9 @@ const Layout = ({ children }) => {
                                       if (!notif.read) {
                                         try {
                                           await notificationsAPI.markAsRead(notif._id)
-                                          refetchNotifications()
+                                          // Invalidate and refetch notifications
+                                          await queryClient.invalidateQueries({ queryKey: ["notifications", user?._id] })
+                                          await refetchNotifications()
                                         } catch (error) {
                                           console.error("Error marking notification as read:", error)
                                         }

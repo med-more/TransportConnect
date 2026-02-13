@@ -24,6 +24,10 @@ const notificationSchema = new mongoose.Schema(
         "delivered", // Driver confirmed delivery
         "request_cancelled", // Shipper cancelled a request
         "trip_created", // Driver created a new trip (for shippers following)
+        "rating_received", // User received a rating from another user
+        "account_verified", // Admin verified user account
+        "account_suspended", // Admin suspended user account
+        "account_reactivated", // Admin reactivated user account
       ],
     },
     title: {

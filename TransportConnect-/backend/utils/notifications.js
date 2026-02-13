@@ -42,7 +42,7 @@ export const createNotification = async ({
  * Get notification messages based on type and context
  */
 export const getNotificationMessages = (type, context = {}) => {
-  const { driverName, shipperName, tripRoute, requestDescription } = context
+  const { driverName, shipperName, tripRoute, requestDescription, rating, raterName, adminName, reason } = context
 
   const messages = {
     request_created: {
@@ -72,6 +72,26 @@ export const getNotificationMessages = (type, context = {}) => {
     request_cancelled: {
       title: "Request Cancelled",
       message: `${shipperName || "The shipper"} cancelled their request`,
+    },
+    trip_created: {
+      title: "New Trip Available",
+      message: `${driverName || "A driver"} created a new trip ${tripRoute || ""}`,
+    },
+    rating_received: {
+      title: "New Rating Received",
+      message: `${raterName || "Someone"} rated you ${rating ? `${rating}/5 stars` : ""}`,
+    },
+    account_verified: {
+      title: "Account Verified",
+      message: `Your account has been verified by the admin${adminName ? ` (${adminName})` : ""}. You can now use all platform features.`,
+    },
+    account_suspended: {
+      title: "Account Suspended",
+      message: `Your account has been suspended${reason ? `: ${reason}` : ""}. Please contact support for more information.`,
+    },
+    account_reactivated: {
+      title: "Account Reactivated",
+      message: `Your account has been reactivated. Welcome back!`,
     },
   }
 

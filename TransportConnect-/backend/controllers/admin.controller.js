@@ -18,8 +18,40 @@ export const toggleUserActive = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" });
+    const wasActive = user.isActive;
     user.isActive = !user.isActive;
     await user.save();
+
+    // Create notification for the user
+    try {
+      const { createNotification, getNotificationMessages } = await import("../utils/notifications.js")
+      const adminName = `${req.user.firstName} ${req.user.lastName}`
+      const notificationType = user.isActive ? "account_reactivated" : "account_suspended"
+      const { title, message } = getNotificationMessages(notificationType, {
+        adminName,
+        reason: req.body.reason || null,
+      })
+      
+      console.log("🔔 Creating account status notification:", {
+        recipientId: user._id,
+        senderId: req.user._id,
+        type: notificationType,
+      })
+      
+      await createNotification({
+        recipientId: user._id,
+        senderId: req.user._id,
+        type: notificationType,
+        title,
+        message,
+      })
+      
+      console.log("✅ Account status notification created successfully")
+    } catch (notifError) {
+      console.error("❌ Error creating account status notification:", notifError)
+      console.error("❌ Error stack:", notifError.stack)
+    }
+
     res.json({ message: `Utilisateur ${user.isActive ? 'activé' : 'suspendu'}` });
   } catch (error) {
     res.status(500).json({ message: "Erreur lors du changement d'état de l'utilisateur" });
@@ -114,6 +146,35 @@ export const validateVerification = async (req, res) => {
     if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" })
     user.isVerified = true
     await user.save()
+
+    // Create notification for the verified user
+    try {
+      const { createNotification, getNotificationMessages } = await import("../utils/notifications.js")
+      const adminName = `${req.user.firstName} ${req.user.lastName}`
+      const { title, message } = getNotificationMessages("account_verified", {
+        adminName,
+      })
+      
+      console.log("🔔 Creating verification notification:", {
+        recipientId: user._id,
+        senderId: req.user._id,
+        type: "account_verified",
+      })
+      
+      await createNotification({
+        recipientId: user._id,
+        senderId: req.user._id,
+        type: "account_verified",
+        title,
+        message,
+      })
+      
+      console.log("✅ Verification notification created successfully")
+    } catch (notifError) {
+      console.error("❌ Error creating verification notification:", notifError)
+      console.error("❌ Error stack:", notifError.stack)
+    }
+
     res.json({ message: "Utilisateur vérifié avec succès" })
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la vérification de l'utilisateur" })
