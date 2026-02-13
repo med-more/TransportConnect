@@ -19,6 +19,7 @@ import tripsRoutes from "./routes/trips.route.js"
 import usersRoutes from "./routes/users.route.js"
 import requestRoutes from "./routes/requests.route.js"
 import adminRoutes from "./routes/admin.route.js"
+import notificationsRoutes from "./routes/notifications.route.js"
 
 const app = express()
 const PORT = process.env.PORT || 7000
@@ -64,6 +65,7 @@ app.use("/api/trips", tripsRoutes)
 app.use("/api/requests", requestRoutes)
 app.use("/api/users", usersRoutes)
 app.use("/api/admin", adminRoutes)
+app.use("/api/notifications", notificationsRoutes)
 
 const server = http.createServer(app)
 

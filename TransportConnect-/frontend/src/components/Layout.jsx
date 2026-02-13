@@ -25,12 +25,19 @@ import {
   ChevronRight,
   MapPin,
   ArrowRight,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Star,
+  Trash2,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
-import { tripsAPI, requestsAPI } from "../services/api"
+import { tripsAPI, requestsAPI, notificationsAPI } from "../services/api"
+import toast from "react-hot-toast"
+import { motion, AnimatePresence } from "framer-motion"
 
 const Layout = ({ children }) => {
   // Load sidebar collapsed state from localStorage
@@ -39,7 +46,6 @@ const Layout = ({ children }) => {
     return saved ? JSON.parse(saved) : false
   })
   const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile sidebar
-  const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
@@ -111,6 +117,102 @@ const Layout = ({ children }) => {
         : requestsAPI.getRequests({ limit: 50 }),
     enabled: !!user && searchQuery.length >= 2,
   })
+
+  // Fetch notifications
+  const { data: notificationsData, refetch: refetchNotifications, isLoading: notificationsLoading } = useQuery({
+    queryKey: ["notifications", user?._id],
+    queryFn: async () => {
+      try {
+        const response = await notificationsAPI.getNotifications({ limit: 50 })
+        console.log("📬 Notifications response:", response)
+        console.log("📬 Notifications data:", response.data)
+        return response.data
+      } catch (error) {
+        console.error("❌ Error fetching notifications:", error)
+        console.error("❌ Error response:", error.response)
+        return { notifications: [], unreadCount: 0 }
+      }
+    },
+    enabled: !!user,
+    refetchInterval: 10000, // Poll every 10 seconds for better responsiveness
+  })
+
+  const notifications = notificationsData?.notifications || []
+  const unreadCount = notificationsData?.unreadCount || 0
+
+  // Get notification icon based on type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "request_created":
+        return <Package className="w-5 h-5 text-info" />
+      case "request_accepted":
+        return <CheckCircle className="w-5 h-5 text-success" />
+      case "request_rejected":
+        return <XCircle className="w-5 h-5 text-destructive" />
+      case "pickup_confirmed":
+        return <Truck className="w-5 h-5 text-primary" />
+      case "in_transit":
+        return <Truck className="w-5 h-5 text-info" />
+      case "delivered":
+        return <CheckCircle className="w-5 h-5 text-success" />
+      case "request_cancelled":
+        return <XCircle className="w-5 h-5 text-warning" />
+      default:
+        return <Bell className="w-5 h-5 text-muted-foreground" />
+    }
+  }
+
+  // Get notification color based on type
+  const getNotificationColor = (type) => {
+    switch (type) {
+      case "request_created":
+        return "bg-info/10 border-info/20"
+      case "request_accepted":
+        return "bg-success/10 border-success/20"
+      case "request_rejected":
+        return "bg-destructive/10 border-destructive/20"
+      case "pickup_confirmed":
+        return "bg-primary/10 border-primary/20"
+      case "in_transit":
+        return "bg-info/10 border-info/20"
+      case "delivered":
+        return "bg-success/10 border-success/20"
+      case "request_cancelled":
+        return "bg-warning/10 border-warning/20"
+      default:
+        return "bg-accent border-border"
+    }
+  }
+
+  // Get time ago string
+  const getTimeAgo = (date) => {
+    const now = new Date()
+    const notificationDate = new Date(date)
+    const diffInSeconds = Math.floor((now - notificationDate) / 1000)
+
+    if (diffInSeconds < 60) return "Just now"
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`
+    
+    return notificationDate.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    })
+  }
+
+  // Handle delete notification
+  const handleDeleteNotification = async (e, notificationId) => {
+    e.stopPropagation()
+    try {
+      await notificationsAPI.deleteNotification(notificationId)
+      refetchNotifications()
+      toast.success("Notification deleted")
+    } catch (error) {
+      console.error("Error deleting notification:", error)
+      toast.error("Error deleting notification")
+    }
+  }
 
   const trips = tripsData?.data?.trips || []
   const requests = requestsData?.data?.requests || []
@@ -522,56 +624,175 @@ const Layout = ({ children }) => {
                   className="relative p-2 hover:bg-accent rounded-lg transition-colors"
                 >
                   <Bell className="w-5 h-5 text-foreground" />
-                  {unreadNotifications > 0 && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
                   )}
                 </button>
 
                 {/* Notifications Dropdown */}
-                {showNotifications && (
-                  <div
-                    ref={notificationRef}
-                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[calc(100vh-120px)] overflow-hidden"
-                  >
-                    <div className="p-4 border-b border-border">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground">Notifications</h3>
-                        <button
-                          onClick={() => setShowNotifications(false)}
-                          className="text-muted-foreground hover:text-foreground"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-muted-foreground">
-                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No notifications</p>
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-border">
-                          {notifications.map((notif, idx) => (
-                            <div
-                              key={idx}
-                              className={clsx(
-                                "p-4 hover:bg-accent transition-colors cursor-pointer",
-                                !notif.read && "bg-accent/50"
-                              )}
+                <AnimatePresence>
+                  {showNotifications && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      ref={notificationRef}
+                      className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-border rounded-xl shadow-2xl z-50 max-h-[calc(100vh-120px)] overflow-hidden flex flex-col"
+                    >
+                      {/* Header */}
+                      <div className="p-3 sm:p-4 border-b border-border bg-background">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Bell className="w-4 h-4 text-primary" />
+                            <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
+                            {unreadCount > 0 && (
+                              <span className="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full">
+                                {unreadCount > 99 ? "99+" : unreadCount}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {unreadCount > 0 && (
+                              <button
+                                onClick={async (e) => {
+                                  e.stopPropagation()
+                                  try {
+                                    await notificationsAPI.markAllAsRead()
+                                    refetchNotifications()
+                                    toast.success("All marked as read")
+                                  } catch (error) {
+                                    console.error("Error marking all as read:", error)
+                                    toast.error("Error marking all as read")
+                                  }
+                                }}
+                                className="text-xs text-primary hover:text-primary/80 font-medium transition-colors px-2 py-1 hover:bg-primary/5 rounded"
+                                title="Mark all as read"
+                              >
+                                Mark all read
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setShowNotifications(false)}
+                              className="p-1 hover:bg-accent rounded transition-colors text-muted-foreground hover:text-foreground"
+                              title="Close"
                             >
-                              <p className="text-sm font-medium text-foreground">{notif.title}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
-                              <p className="text-xs text-muted-foreground mt-2">
-                                {new Date(notif.date).toLocaleString()}
-                              </p>
-                            </div>
-                          ))}
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+                      </div>
+
+                      {/* Notifications List */}
+                      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                        {notificationsLoading ? (
+                          <div className="p-8 text-center">
+                            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
+                            <p className="text-sm text-muted-foreground mt-2">Loading notifications...</p>
+                          </div>
+                        ) : notifications.length === 0 ? (
+                          <div className="p-12 text-center">
+                            <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Bell className="w-8 h-8 text-muted-foreground opacity-50" />
+                            </div>
+                            <p className="text-sm font-medium text-foreground mb-1">No notifications</p>
+                            <p className="text-xs text-muted-foreground">You're all caught up!</p>
+                          </div>
+                        ) : (
+                          <div className="divide-y divide-border">
+                            <AnimatePresence>
+                              {notifications.map((notif, index) => {
+                                const requestId = notif.relatedRequest?._id || notif.relatedRequest
+                                const tripId = notif.relatedTrip?._id || notif.relatedTrip
+                                const timeAgo = getTimeAgo(notif.createdAt)
+
+                                return (
+                                  <motion.div
+                                    key={notif._id}
+                                    initial={{ opacity: 0, x: -20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: 20 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    onClick={async () => {
+                                      if (!notif.read) {
+                                        try {
+                                          await notificationsAPI.markAsRead(notif._id)
+                                          refetchNotifications()
+                                        } catch (error) {
+                                          console.error("Error marking notification as read:", error)
+                                        }
+                                      }
+                                      if (requestId) {
+                                        navigate(`/requests/${requestId}`)
+                                        setShowNotifications(false)
+                                      } else if (tripId) {
+                                        navigate(`/trips/${tripId}`)
+                                        setShowNotifications(false)
+                                      }
+                                    }}
+                                    className={clsx(
+                                      "group relative p-4 hover:bg-accent/50 transition-all cursor-pointer",
+                                      !notif.read && "bg-primary/5"
+                                    )}
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      {/* Icon */}
+                                      <div className={clsx(
+                                        "p-2 rounded-lg flex-shrink-0 border",
+                                        getNotificationColor(notif.type)
+                                      )}>
+                                        {getNotificationIcon(notif.type)}
+                                      </div>
+
+                                      {/* Content */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2 mb-1">
+                                          <p className={clsx(
+                                            "text-sm font-semibold text-foreground",
+                                            !notif.read && "font-bold"
+                                          )}>
+                                            {notif.title}
+                                          </p>
+                                          {!notif.read && (
+                                            <span className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1.5" />
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                                          {notif.message}
+                                        </p>
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-xs text-muted-foreground">{timeAgo}</span>
+                                          {notif.sender && (
+                                            <span className="text-xs text-muted-foreground">
+                                              {notif.sender.firstName} {notif.sender.lastName}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Actions */}
+                                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                          onClick={(e) => handleDeleteNotification(e, notif._id)}
+                                          className="p-1.5 hover:bg-destructive/10 rounded-lg transition-colors text-muted-foreground hover:text-destructive"
+                                          title="Delete notification"
+                                        >
+                                          <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                )
+                              })}
+                            </AnimatePresence>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* User Avatar */}

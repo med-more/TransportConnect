@@ -175,8 +175,10 @@ const RequestsPage = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2 flex items-center gap-2">
-            <Package className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2 flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+              <Package className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            </div>
             <span className="truncate">{user?.role === "conducteur" ? "Received Requests" : "My Requests"}</span>
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
@@ -196,50 +198,60 @@ const RequestsPage = () => {
       </div>
 
       {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
-          <Card className="p-3 sm:p-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total</p>
-              <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total</p>
+              <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
             </div>
-            <Package className="w-8 h-8 text-primary/20" />
+            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0 ml-2">
+              <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            </div>
           </div>
         </Card>
-          <Card className="p-3 sm:p-4">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Pending</p>
-              <p className="text-2xl font-bold text-warning">{stats.pending}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-xl sm:text-2xl font-bold text-warning">{stats.pending}</p>
             </div>
-            <Clock className="w-8 h-8 text-warning/20" />
+            <div className="p-2 bg-warning/10 rounded-lg flex-shrink-0 ml-2">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-warning" />
+            </div>
           </div>
         </Card>
-          <Card className="p-3 sm:p-4">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Accepted</p>
-              <p className="text-2xl font-bold text-success">{stats.accepted}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Accepted</p>
+              <p className="text-xl sm:text-2xl font-bold text-success">{stats.accepted}</p>
             </div>
-            <CheckCircle className="w-8 h-8 text-success/20" />
+            <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
+            </div>
           </div>
         </Card>
-          <Card className="p-3 sm:p-4">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">In Transit</p>
-              <p className="text-2xl font-bold text-info">{stats.inTransit}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">In Transit</p>
+              <p className="text-xl sm:text-2xl font-bold text-info">{stats.inTransit}</p>
             </div>
-            <Truck className="w-8 h-8 text-info/20" />
+            <div className="p-2 bg-info/10 rounded-lg flex-shrink-0 ml-2">
+              <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-info" />
+            </div>
           </div>
         </Card>
-          <Card className="p-3 sm:p-4">
+        <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Delivered</p>
-              <p className="text-2xl font-bold text-success">{stats.delivered}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Delivered</p>
+              <p className="text-xl sm:text-2xl font-bold text-success">{stats.delivered}</p>
             </div>
-            <CheckCircle className="w-8 h-8 text-success/20" />
+            <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
+              <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
+            </div>
           </div>
         </Card>
       </div>

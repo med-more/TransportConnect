@@ -94,6 +94,14 @@ export const usersAPI = {
   getStats: () => api.get("/users/stats"),
 }
 
+// API des notifications
+export const notificationsAPI = {
+  getNotifications: (params) => api.get("/notifications", { params }),
+  markAsRead: (id) => api.put(`/notifications/${id}/read`),
+  markAllAsRead: () => api.put("/notifications/all/read"),
+  deleteNotification: (id) => api.delete(`/notifications/${id}`),
+}
+
 // API d'administration
 export const adminAPI = {
   getAllUsers: () => api.get("/admin/users").then(res => ({ data: res.data.users })),

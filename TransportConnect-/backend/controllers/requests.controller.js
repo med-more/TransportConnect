@@ -1,6 +1,7 @@
 import Request from "../models/Request.js";
 import User from "../models/User.js";
 import Trip from "../models/Trip.js";
+import { createNotification, getNotificationMessages } from "../utils/notifications.js";
 
 
 
@@ -197,6 +198,28 @@ export const createRequest = async (req, res) => {
       console.error("Erreur envoi email:", emailError)
     }
 
+    // Create notification for driver
+    try {
+      const driverId = trip.driver._id || trip.driver
+      const { title, message } = getNotificationMessages("request_created", {
+        shipperName: `${req.user.firstName} ${req.user.lastName}`,
+        tripRoute: `${trip.departure.city} → ${trip.destination.city}`,
+      })
+      console.log("🔔 Creating notification for driver:", driverId)
+      const notification = await createNotification({
+        recipientId: driverId,
+        senderId: req.user._id,
+        type: "request_created",
+        title,
+        message,
+        relatedRequestId: request._id,
+        relatedTripId: tripId,
+      })
+      console.log("✅ Notification created successfully:", notification._id)
+    } catch (notifError) {
+      console.error("❌ Error creating notification:", notifError)
+    }
+
     const io = req.app.get("io")
     console.log("🔔 Émission de l'événement new_request vers:", `user_${trip.driver._id}`)
     console.log("📤 Données envoyées:", {
@@ -239,14 +262,24 @@ export const acceptRequest = async (req, res) => {
     try {
       const { message } = req.body
   
-      const request = await Request.findById(req.params.id).populate("sender").populate("trip")
+      const request = await Request.findById(req.params.id)
+        .populate("sender", "firstName lastName email _id")
+        .populate({
+          path: "trip",
+          select: "driver departure destination _id",
+          populate: {
+            path: "driver",
+            select: "firstName lastName _id",
+          },
+        })
   
       if (!request) {
         return res.status(404).json({ message: "Demande non trouvée" })
       }
+
+      const driverId = request.trip.driver?._id || request.trip.driver || request.trip.driver
   
-      
-      if (request.trip.driver.toString() !== req.user._id.toString()) {
+      if (!driverId || driverId.toString() !== req.user._id.toString()) {
         return res.status(403).json({ message: "Non autorisé à accepter cette demande" })
       }
   
@@ -262,7 +295,8 @@ export const acceptRequest = async (req, res) => {
       }
   
       // Vérifier la capacité disponible en temps réel
-      const trip = await Trip.findById(request.trip._id)
+      const tripId = request.trip._id || request.trip
+      const trip = await Trip.findById(tripId)
       if (!trip) {
         return res.status(404).json({ message: "Trajet non trouvé" })
       }
@@ -348,6 +382,43 @@ export const acceptRequest = async (req, res) => {
       })
       
       console.log("✅ Événement request_accepted émis avec succès")
+
+    // Create notification for shipper
+    try {
+      const senderId = request.sender?._id || request.sender
+      const tripIdForNotif = request.trip?._id || request.trip || tripId
+      if (!senderId) {
+        console.error("❌ Cannot create notification: senderId is missing", {
+          requestSender: request.sender,
+          requestId: request._id,
+        })
+      } else {
+        const { title, message: notifMessage } = getNotificationMessages("request_accepted", {
+          driverName: `${req.user.firstName} ${req.user.lastName}`,
+          requestDescription: request.cargo?.description,
+        })
+        console.log("🔔 Creating notification for shipper:", {
+          recipientId: senderId,
+          senderId: req.user._id,
+          type: "request_accepted",
+          title,
+          message: notifMessage,
+        })
+        const notification = await createNotification({
+          recipientId: senderId,
+          senderId: req.user._id,
+          type: "request_accepted",
+          title,
+          message: notifMessage,
+          relatedRequestId: request._id,
+          relatedTripId: tripIdForNotif,
+        })
+        console.log("✅ Notification created successfully:", notification._id)
+      }
+    } catch (notifError) {
+      console.error("❌ Error creating notification:", notifError)
+      console.error("❌ Error stack:", notifError.stack)
+    }
   
       res.json({
         message: "Demande acceptée avec succès",
@@ -405,6 +476,25 @@ export const acceptRequest = async (req, res) => {
         message: request.driverResponse.message,
       })
       
+      // Create notification for shipper
+      try {
+        const { title, message } = getNotificationMessages("request_rejected", {
+          driverName: `${req.user.firstName} ${req.user.lastName}`,
+          requestDescription: request.cargo?.description,
+        })
+        await createNotification({
+          recipientId: request.sender._id,
+          senderId: req.user._id,
+          type: "request_rejected",
+          title,
+          message,
+          relatedRequestId: request._id,
+          relatedTripId: request.trip._id,
+        })
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError)
+      }
+
       io.to(`user_${request.sender._id}`).emit("request_rejected", {
         requestId: request._id,
         driver: {
@@ -442,6 +532,27 @@ export const acceptRequest = async (req, res) => {
       const oldStatus = request.status
       request.status = "cancelled"
       await request.save()
+
+      // Populate trip to get driver info
+      await request.populate("trip", "driver")
+
+      // Create notification for driver
+      try {
+        const { title, message } = getNotificationMessages("request_cancelled", {
+          shipperName: `${req.user.firstName} ${req.user.lastName}`,
+        })
+        await createNotification({
+          recipientId: request.trip.driver._id,
+          senderId: req.user._id,
+          type: "request_cancelled",
+          title,
+          message,
+          relatedRequestId: request._id,
+          relatedTripId: request.trip._id,
+        })
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError)
+      }
   
    
       if (oldStatus === "accepted") {
@@ -462,7 +573,7 @@ export const acceptRequest = async (req, res) => {
   }
   export const confirmPickup = async (req, res) => {
     try {
-      const request = await Request.findById(req.params.id).populate("trip")
+      const request = await Request.findById(req.params.id).populate("trip").populate("sender")
   
       if (!request) {
         return res.status(404).json({ message: "Demande non trouvée" })
@@ -487,6 +598,37 @@ export const acceptRequest = async (req, res) => {
         confirmedAt: new Date(),
       }
       await request.save()
+
+      // Create notifications for shipper
+      try {
+        const { title: pickupTitle, message: pickupMessage } = getNotificationMessages("pickup_confirmed", {
+          driverName: `${req.user.firstName} ${req.user.lastName}`,
+        })
+        await createNotification({
+          recipientId: request.sender._id,
+          senderId: req.user._id,
+          type: "pickup_confirmed",
+          title: pickupTitle,
+          message: pickupMessage,
+          relatedRequestId: request._id,
+          relatedTripId: request.trip._id,
+        })
+
+        const { title: transitTitle, message: transitMessage } = getNotificationMessages("in_transit", {
+          driverName: `${req.user.firstName} ${req.user.lastName}`,
+        })
+        await createNotification({
+          recipientId: request.sender._id,
+          senderId: req.user._id,
+          type: "in_transit",
+          title: transitTitle,
+          message: transitMessage,
+          relatedRequestId: request._id,
+          relatedTripId: request.trip._id,
+        })
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError)
+      }
   
       res.json({
         message: "Collecte confirmée avec succès",
@@ -527,6 +669,26 @@ export const acceptRequest = async (req, res) => {
         signature: signature || null,
       }
       await request.save()
+
+      // Create notification for shipper (if driver confirmed) or driver (if shipper confirmed)
+      try {
+        if (isDriver) {
+          const { title, message } = getNotificationMessages("delivered", {
+            driverName: `${req.user.firstName} ${req.user.lastName}`,
+          })
+          await createNotification({
+            recipientId: request.sender._id,
+            senderId: req.user._id,
+            type: "delivered",
+            title,
+            message,
+            relatedRequestId: request._id,
+            relatedTripId: request.trip._id,
+          })
+        }
+      } catch (notifError) {
+        console.error("Error creating notification:", notifError)
+      }
   
       
       if (isDriver) {

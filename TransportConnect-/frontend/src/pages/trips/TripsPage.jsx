@@ -171,8 +171,10 @@ const TripsPage = () => {
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2 flex items-center gap-2">
-            <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-primary flex-shrink-0" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2 flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
+              <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            </div>
             <span className="truncate">{user?.role === "conducteur" ? "My Trips" : "Search Trips"}</span>
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
@@ -193,84 +195,100 @@ const TripsPage = () => {
 
       {/* Stats Cards */}
       {user?.role === "conducteur" ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-3 sm:p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total Trips</p>
-                <p className="text-2xl font-bold text-foreground">{stats.total}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Trips</p>
+                <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
               </div>
-              <Truck className="w-8 h-8 text-primary/20" />
+              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0 ml-2">
+                <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Active</p>
-                <p className="text-2xl font-bold text-success">{stats.active}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Active</p>
+                <p className="text-xl sm:text-2xl font-bold text-success">{stats.active}</p>
               </div>
-              <CheckCircle className="w-8 h-8 text-success/20" />
+              <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Completed</p>
-                <p className="text-2xl font-bold text-info">{stats.completed}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Completed</p>
+                <p className="text-xl sm:text-2xl font-bold text-info">{stats.completed}</p>
               </div>
-              <Clock className="w-8 h-8 text-info/20" />
+              <div className="p-2 bg-info/10 rounded-lg flex-shrink-0 ml-2">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-info" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Cancelled</p>
-                <p className="text-2xl font-bold text-destructive">{stats.cancelled}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Cancelled</p>
+                <p className="text-xl sm:text-2xl font-bold text-destructive">{stats.cancelled}</p>
               </div>
-              <XCircle className="w-8 h-8 text-destructive/20" />
+              <div className="p-2 bg-destructive/10 rounded-lg flex-shrink-0 ml-2">
+                <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-destructive" />
+              </div>
             </div>
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="p-3 sm:p-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Available Trips</p>
-                <p className="text-2xl font-bold text-primary">{shipperStats.totalAvailable}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Available Trips</p>
+                <p className="text-xl sm:text-2xl font-bold text-primary">{shipperStats.totalAvailable}</p>
               </div>
-              <Truck className="w-8 h-8 text-primary/20" />
+              <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0 ml-2">
+                <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Avg. Price</p>
-                <p className="text-2xl font-bold text-success">{shipperStats.averagePrice}€/kg</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Avg. Price</p>
+                <p className="text-xl sm:text-2xl font-bold text-success">{shipperStats.averagePrice}€/kg</p>
               </div>
-              <Euro className="w-8 h-8 text-success/20" />
+              <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
+                <Euro className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total Capacity</p>
-                <p className="text-2xl font-bold text-info">{shipperStats.totalCapacity}kg</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total Capacity</p>
+                <p className="text-xl sm:text-2xl font-bold text-info">{shipperStats.totalCapacity}kg</p>
               </div>
-              <Weight className="w-8 h-8 text-info/20" />
+              <div className="p-2 bg-info/10 rounded-lg flex-shrink-0 ml-2">
+                <Weight className="w-5 h-5 sm:w-6 sm:h-6 text-info" />
+              </div>
             </div>
           </Card>
-          <Card className="p-3 sm:p-4">
+          <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Best Deals</p>
-                <p className="text-2xl font-bold text-warning">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground mb-1">Best Deals</p>
+                <p className="text-xl sm:text-2xl font-bold text-warning">
                   {trips.length > 0
                     ? trips.filter((t) => t.pricePerKg <= parseFloat(shipperStats.averagePrice)).length
                     : 0}
                 </p>
               </div>
-              <TrendingUp className="w-8 h-8 text-warning/20" />
+              <div className="p-2 bg-warning/10 rounded-lg flex-shrink-0 ml-2">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-warning" />
+              </div>
             </div>
           </Card>
         </div>
