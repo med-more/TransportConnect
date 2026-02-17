@@ -796,13 +796,41 @@ const Layout = ({ children }) => {
                                     )}
                                   >
                                     <div className="flex items-start gap-3">
-                                      {/* Icon */}
-                                      <div className={clsx(
-                                        "p-2 rounded-lg flex-shrink-0 border",
-                                        getNotificationColor(notif.type)
-                                      )}>
-                                        {getNotificationIcon(notif.type)}
-                                      </div>
+                                      {/* Avatar or Icon */}
+                                      {notif.sender ? (
+                                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                                          {notif.sender?.avatar ? (
+                                            <img
+                                              src={normalizeAvatarUrl(notif.sender.avatar)}
+                                              alt={`${notif.sender.firstName} ${notif.sender.lastName}`}
+                                              className="w-full h-full object-cover"
+                                              onError={(e) => {
+                                                e.target.style.display = "none"
+                                                // Show initials if image fails
+                                                const parent = e.target.parentElement
+                                                if (parent && !parent.querySelector("span")) {
+                                                  const initials = document.createElement("span")
+                                                  initials.className = "text-sm font-semibold text-white"
+                                                  initials.textContent = `${notif.sender?.firstName?.charAt(0)?.toUpperCase() || ""}${notif.sender?.lastName?.charAt(0)?.toUpperCase() || ""}`
+                                                  parent.appendChild(initials)
+                                                }
+                                              }}
+                                            />
+                                          ) : (
+                                            <span className="text-sm font-semibold text-white">
+                                              {notif.sender?.firstName?.charAt(0)?.toUpperCase() || ""}
+                                              {notif.sender?.lastName?.charAt(0)?.toUpperCase() || ""}
+                                            </span>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <div className={clsx(
+                                          "p-2 rounded-lg flex-shrink-0 border",
+                                          getNotificationColor(notif.type)
+                                        )}>
+                                          {getNotificationIcon(notif.type)}
+                                        </div>
+                                      )}
 
                                       {/* Content */}
                                       <div className="flex-1 min-w-0">
