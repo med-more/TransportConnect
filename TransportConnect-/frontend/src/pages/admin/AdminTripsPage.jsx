@@ -24,6 +24,8 @@ import {
   Navigation,
   ChevronLeft,
   ChevronRight,
+  ArrowLeft,
+  ArrowRight,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -33,6 +35,7 @@ import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI, tripsAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import toast from "react-hot-toast"
+import { generatePageNumbers } from "../../utils/pagination"
 
 const AdminTripsPage = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -90,6 +93,11 @@ const AdminTripsPage = () => {
   useEffect(() => {
     setCurrentPage(1)
   }, [searchTerm, statusFilter])
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentPage])
 
   const handleUpdateTripStatus = async (tripId, newStatus) => {
     try {
@@ -375,28 +383,63 @@ const AdminTripsPage = () => {
           
           {/* Pagination - Mobile */}
           {filteredTrips.length > itemsPerPage && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-              <Button
-                variant="outline"
-                size="small"
-                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Previous
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Page {currentPage} of {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="small"
-                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                Next
-                <ChevronRight className="w-4 h-4" />
-              </Button>
+            <div className="flex flex-col gap-3 mt-4 pt-4 border-t border-border">
+              <div className="flex items-center justify-between">
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={() => setCurrentPage(1)}
+                  disabled={currentPage === 1}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <span className="text-sm font-medium text-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="small"
+                  onClick={() => setCurrentPage(totalPages)}
+                  disabled={currentPage === totalPages}
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-xs text-muted-foreground">Go to:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max={totalPages}
+                  value={currentPage}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value)
+                    if (page >= 1 && page <= totalPages) {
+                      setCurrentPage(page)
+                    }
+                  }}
+                  className="w-16 px-2 py-1 text-sm border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span className="text-xs text-muted-foreground">of {totalPages}</span>
+              </div>
             </div>
           )}
         </motion.div>
@@ -548,45 +591,99 @@ const AdminTripsPage = () => {
             
             {/* Pagination - Desktop */}
             {filteredTrips.length > itemsPerPage && (
-              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
-                <div className="text-sm text-muted-foreground">
-                  Showing {startIndex + 1} to {Math.min(endIndex, filteredTrips.length)} of {filteredTrips.length} trips
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="small"
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    Previous
-                  </Button>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={clsx(
-                          "px-3 py-1 text-sm rounded-md transition-colors",
-                          currentPage === page
-                            ? "bg-primary text-primary-foreground"
-                            : "text-muted-foreground hover:bg-accent"
-                        )}
-                      >
-                        {page}
-                      </button>
-                    ))}
+              <div className="flex flex-col gap-4 mt-4 pt-4 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to {Math.min(endIndex, filteredTrips.length)} of {filteredTrips.length} trips
                   </div>
-                  <Button
-                    variant="outline"
-                    size="small"
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Next
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      title="First page"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {generatePageNumbers(currentPage, totalPages).map((page, index) => {
+                        if (page === 'ellipsis') {
+                          return (
+                            <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+                              ...
+                            </span>
+                          )
+                        }
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={clsx(
+                              "min-w-[36px] px-3 py-1 text-sm rounded-md transition-colors",
+                              currentPage === page
+                                ? "bg-primary text-primary-foreground font-semibold"
+                                : "text-muted-foreground hover:bg-accent"
+                            )}
+                          >
+                            {page}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="small"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      title="Last page"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-sm text-muted-foreground">Go to page:</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={totalPages}
+                    value={currentPage}
+                    onChange={(e) => {
+                      const page = parseInt(e.target.value)
+                      if (page >= 1 && page <= totalPages) {
+                        setCurrentPage(page)
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const page = parseInt(e.target.value)
+                        if (page >= 1 && page <= totalPages) {
+                          setCurrentPage(page)
+                        }
+                      }
+                    }}
+                    className="w-20 px-3 py-1.5 text-sm border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  />
+                  <span className="text-sm text-muted-foreground">of {totalPages}</span>
                 </div>
               </div>
             )}

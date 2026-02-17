@@ -70,6 +70,87 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Check if this is an admin login from .env credentials
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    // Debug logging (remove in production)
+    console.log("Login attempt:", { 
+      email: email?.toLowerCase().trim(), 
+      adminEmailConfigured: !!adminEmail,
+      adminPasswordConfigured: !!adminPassword 
+    });
+
+    if (adminEmail && adminPassword && email?.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
+      console.log("Admin login attempt detected");
+      // Try to find existing admin user
+      let adminUser = await User.findOne({ email: adminEmail.toLowerCase().trim(), role: "admin" }).select("+password");
+      
+      if (adminUser) {
+        // Admin user exists - verify password using comparePassword
+        const isPasswordValid = await adminUser.comparePassword(password);
+        if (!isPasswordValid) {
+          // Also check if password matches plain text from .env (fallback for password reset)
+          if (password !== adminPassword) {
+            return res.status(401).json({ msg: "Email ou mot de passe incorrect" });
+          }
+          // If plain text matches .env, update the password in DB (password might have been changed)
+          adminUser.password = adminPassword; // Will be hashed on save
+          await adminUser.save();
+          console.log("Admin password updated from .env");
+        }
+      } else {
+        // Admin user doesn't exist - check if password matches .env
+        if (password === adminPassword) {
+          // Create admin user
+          adminUser = new User({
+            firstName: process.env.ADMIN_FIRST_NAME || "Admin",
+            lastName: process.env.ADMIN_LAST_NAME || "User",
+            email: adminEmail.toLowerCase().trim(),
+            password: adminPassword, // Will be hashed by User model pre-save hook
+            role: "admin",
+            phone: process.env.ADMIN_PHONE || "",
+            isVerified: true,
+            isActive: true,
+          });
+          await adminUser.save();
+          console.log("Admin user created from .env credentials");
+        } else {
+          return res.status(401).json({ msg: "Email ou mot de passe incorrect" });
+        }
+      }
+
+      // Check if admin user is active
+      if (!adminUser.isActive) {
+        return res.status(403).json({ msg: "Votre compte a été suspendu" });
+      }
+
+      // Update last login
+      adminUser.lastLogin = new Date();
+      await adminUser.save();
+
+      // Generate token for admin
+      const token = generateToken(adminUser._id);
+
+      return res.status(200).json({
+        msg: "Connexion réussie",
+        token,
+        user: {
+          id: adminUser._id,
+          firstName: adminUser.firstName,
+          lastName: adminUser.lastName,
+          email: adminUser.email,
+          role: adminUser.role,
+          isVerified: adminUser.isVerified,
+          stats: adminUser.stats,
+          avatar: adminUser.avatar,
+          phone: adminUser.phone,
+          address: adminUser.address,
+        },
+      });
+    }
+
+    // Regular user login
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ msg: "Email ou mot de passe incorrect" });
@@ -108,6 +189,7 @@ export const login = async (req, res) => {
 
   } catch (error) {
     console.error("Erreur connexion:", error);
+    console.error("Error stack:", error.stack);
     res.status(500).json({ msg: "Erreur lors de la connexion" });
   }
 };

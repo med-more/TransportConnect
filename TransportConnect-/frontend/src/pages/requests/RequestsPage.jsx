@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
@@ -19,6 +19,9 @@ import {
   ArrowRight,
   Plus,
   TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { requestsAPI } from "../../services/api"
@@ -28,6 +31,7 @@ import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Input from "../../components/ui/Input"
 import clsx from "clsx"
 import { normalizeAvatarUrl } from "../../utils/avatar"
+import { generatePageNumbers } from "../../utils/pagination"
 
 const RequestsPage = () => {
   const { user } = useAuth()
@@ -40,6 +44,8 @@ const RequestsPage = () => {
     poids: "",
     prix: "",
   })
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const { data: requestsData, isLoading } = useQuery({
     queryKey: ["requests", activeTab],
@@ -161,6 +167,34 @@ const RequestsPage = () => {
       (!filters.poids || String(request.cargo.weight).includes(filters.poids)) &&
       (!filters.prix || String(request.price).includes(filters.prix))
   )
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedRequests = filteredRequests.slice(startIndex, endIndex)
+
+  // Track previous requests count to detect new requests
+  const prevRequestsCountRef = useRef(0)
+
+  // Reset to page 1 when filters or tab change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeTab, filters.name, filters.collecte, filters.trajet, filters.poids, filters.prix])
+
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [currentPage])
+
+  // Reset to page 1 when a new request is added (count increases)
+  useEffect(() => {
+    const currentCount = requests.length
+    if (prevRequestsCountRef.current > 0 && currentCount > prevRequestsCountRef.current) {
+      setCurrentPage(1)
+    }
+    prevRequestsCountRef.current = currentCount
+  }, [requests.length])
 
   const stats = {
     total: requests.length,
@@ -351,8 +385,9 @@ const RequestsPage = () => {
             <LoadingSpinner />
           </div>
         ) : filteredRequests.length > 0 ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-            {filteredRequests.map((request, index) => (
+          <>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+              {paginatedRequests.map((request, index) => (
               <motion.div
                 key={request._id}
                 initial={{ opacity: 0, y: 20 }}
@@ -530,7 +565,111 @@ const RequestsPage = () => {
                 </Card>
               </motion.div>
             ))}
-          </div>
+            </div>
+            
+            {/* Pagination */}
+            {filteredRequests.length > 0 && (
+              <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-border">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to {Math.min(endIndex, filteredRequests.length)} of {filteredRequests.length} request{filteredRequests.length !== 1 ? "s" : ""}
+                  </div>
+                  {totalPages > 1 && (
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        title="First page"
+                      >
+                        <ArrowLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                        disabled={currentPage === 1}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                        Previous
+                      </Button>
+                      <div className="flex items-center gap-1 flex-wrap justify-center">
+                        {generatePageNumbers(currentPage, totalPages).map((page, index) => {
+                          if (page === 'ellipsis') {
+                            return (
+                              <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+                                ...
+                              </span>
+                            )
+                          }
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={clsx(
+                                "min-w-[36px] px-3 py-1 text-sm rounded-md transition-colors",
+                                currentPage === page
+                                  ? "bg-primary text-primary-foreground font-semibold"
+                                  : "text-muted-foreground hover:bg-accent"
+                              )}
+                            >
+                              {page}
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                        disabled={currentPage === totalPages}
+                      >
+                        Next
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="small"
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        title="Last page"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-sm text-muted-foreground">Go to page:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value)
+                        if (page >= 1 && page <= totalPages) {
+                          setCurrentPage(page)
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          const page = parseInt(e.target.value)
+                          if (page >= 1 && page <= totalPages) {
+                            setCurrentPage(page)
+                          }
+                        }
+                      }}
+                      className="w-20 px-3 py-1.5 text-sm border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                    <span className="text-sm text-muted-foreground">of {totalPages}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <Card className="text-center py-16">
             <div className="flex flex-col items-center">
