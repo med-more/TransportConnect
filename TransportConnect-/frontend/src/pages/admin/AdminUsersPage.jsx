@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import clsx from "clsx"
@@ -19,6 +19,8 @@ import {
   Mail,
   Star,
   Award,
+  ChevronLeft,
+  ChevronRight,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -37,6 +39,8 @@ const AdminUsersPage = () => {
   const [rejectUserId, setRejectUserId] = useState(null)
   const [selectedUser, setSelectedUser] = useState(null)
   const [showUserDetails, setShowUserDetails] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const { data: usersData, isLoading, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -75,6 +79,17 @@ const AdminUsersPage = () => {
   }
 
   const filteredUsers = filterUsers()
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter, roleFilter])
 
   const handleVerifyUser = async (userId) => {
     try {
@@ -238,7 +253,7 @@ const AdminUsersPage = () => {
         {/* Users - Mobile Cards View */}
         <motion.div variants={itemVariants} className="lg:hidden">
           <div className="space-y-3">
-            {filteredUsers.length === 0 ? (
+            {paginatedUsers.length === 0 ? (
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
@@ -246,7 +261,7 @@ const AdminUsersPage = () => {
                 </div>
               </Card>
             ) : (
-              filteredUsers.map((user, index) => (
+              paginatedUsers.map((user, index) => (
                 <motion.div
                   key={user._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -336,6 +351,33 @@ const AdminUsersPage = () => {
               ))
             )}
           </div>
+          
+          {/* Pagination - Mobile */}
+          {filteredUsers.length > itemsPerPage && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Users - Desktop Table View */}
@@ -353,7 +395,7 @@ const AdminUsersPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredUsers.map((user, index) => (
+                  {paginatedUsers.map((user, index) => (
                     <motion.tr
                       key={user._id}
                       initial={{ opacity: 0, y: 20 }}
@@ -436,13 +478,58 @@ const AdminUsersPage = () => {
                   ))}
                 </tbody>
               </table>
-              {filteredUsers.length === 0 && (
+              {paginatedUsers.length === 0 && (
                 <div className="text-center py-12">
                   <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                   <p className="text-muted-foreground">No users found</p>
                 </div>
               )}
             </div>
+            
+            {/* Pagination - Desktop */}
+            {filteredUsers.length > itemsPerPage && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                <div className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={clsx(
+                          "px-3 py-1 text-sm rounded-md transition-colors",
+                          currentPage === page
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent"
+                        )}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         </motion.div>
       </motion.div>

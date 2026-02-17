@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import clsx from "clsx"
@@ -22,6 +22,8 @@ import {
   Phone,
   Mail,
   Navigation,
+  ChevronLeft,
+  ChevronRight,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -39,6 +41,8 @@ const AdminTripsPage = () => {
   const [deleteTripId, setDeleteTripId] = useState(null)
   const [selectedTripId, setSelectedTripId] = useState(null)
   const [showTripDetails, setShowTripDetails] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const { data: tripsData, isLoading, refetch } = useQuery({
     queryKey: ["admin-trips"],
@@ -75,6 +79,17 @@ const AdminTripsPage = () => {
   }
 
   const filteredTrips = filterTrips()
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredTrips.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedTrips = filteredTrips.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, statusFilter])
 
   const handleUpdateTripStatus = async (tripId, newStatus) => {
     try {
@@ -224,7 +239,7 @@ const AdminTripsPage = () => {
         {/* Trips - Mobile Cards View */}
         <motion.div variants={itemVariants} className="lg:hidden">
           <div className="space-y-3">
-            {filteredTrips.length === 0 ? (
+            {paginatedTrips.length === 0 ? (
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="text-center py-12">
                   <Truck className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
@@ -232,7 +247,7 @@ const AdminTripsPage = () => {
                 </div>
               </Card>
             ) : (
-              filteredTrips.map((trip, index) => (
+              paginatedTrips.map((trip, index) => (
                 <motion.div
                   key={trip._id}
                   initial={{ opacity: 0, y: 20 }}
@@ -357,6 +372,33 @@ const AdminTripsPage = () => {
               ))
             )}
           </div>
+          
+          {/* Pagination - Mobile */}
+          {filteredTrips.length > itemsPerPage && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="small"
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </motion.div>
 
         {/* Trips - Desktop Table View */}
@@ -374,7 +416,7 @@ const AdminTripsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredTrips.map((trip, index) => (
+                  {paginatedTrips.map((trip, index) => (
                     <motion.tr
                       key={trip._id}
                       initial={{ opacity: 0, y: 20 }}
@@ -496,13 +538,58 @@ const AdminTripsPage = () => {
                   ))}
                 </tbody>
               </table>
-              {filteredTrips.length === 0 && (
+              {paginatedTrips.length === 0 && (
                 <div className="text-center py-12">
                   <Truck className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
                   <p className="text-muted-foreground">No trips found</p>
                 </div>
               )}
             </div>
+            
+            {/* Pagination - Desktop */}
+            {filteredTrips.length > itemsPerPage && (
+              <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
+                <div className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredTrips.length)} of {filteredTrips.length} trips
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={clsx(
+                          "px-3 py-1 text-sm rounded-md transition-colors",
+                          currentPage === page
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:bg-accent"
+                        )}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         </motion.div>
       </motion.div>
