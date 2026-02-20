@@ -1,6 +1,7 @@
 import Request from "../models/Request.js";
 import User from "../models/User.js";
 import Trip from "../models/Trip.js";
+import Chat from "../models/Chat.js";
 import { createNotification, getNotificationMessages } from "../utils/notifications.js";
 
 
@@ -755,6 +756,9 @@ export const acceptRequest = async (req, res) => {
         signature: signature || null,
       }
       await request.save()
+
+      // Close conversation when request is delivered
+      await Chat.findOneAndUpdate({ request: request._id }, { isActive: false })
 
       // Create notification for shipper (if driver confirmed) or driver (if shipper confirmed)
       try {

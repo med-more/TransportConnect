@@ -83,11 +83,21 @@ export const updateProfile = async (req, res) => {
       data: updatedUser
     })
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du profil:", error)
+    console.error("Erreur mise à jour profil:", error)
     res.status(500).json({
       success: false,
       message: "Erreur lors de la mise à jour du profil"
     })
+  }
+}
+
+export const updateLastSeen = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { lastSeenAt: new Date() })
+    res.json({ success: true })
+  } catch (error) {
+    console.error("updateLastSeen error:", error)
+    res.status(500).json({ success: false, message: "Error updating last seen" })
   }
 }
 

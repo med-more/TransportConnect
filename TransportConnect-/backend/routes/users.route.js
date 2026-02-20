@@ -1,5 +1,5 @@
 import express from "express"
-import { getUserStats, updateProfile, uploadAvatar } from "../controllers/users.controller.js"
+import { getUserStats, updateProfile, updateLastSeen, uploadAvatar } from "../controllers/users.controller.js"
 import { authenticateToken } from "../middleware/auth.middleware.js"
 import uploadSingle from "../middleware/upload.middleware.js"
 
@@ -13,6 +13,9 @@ router.get("/stats", getUserStats)
 
 // Mettre à jour le profil utilisateur
 router.put("/profile", updateProfile)
+
+// Mettre à jour last seen (pour afficher "dernière fois en ligne" dans le chat)
+router.put("/me/last-seen", updateLastSeen)
 
 // Upload avatar with error handling
 router.post("/avatar", (req, res, next) => {

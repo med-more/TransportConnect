@@ -94,6 +94,10 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
       },
+      lastSeenAt: {
+        type: Date,
+        default: null,
+      },
       resetPasswordToken: {
         type: String,
         default: null,

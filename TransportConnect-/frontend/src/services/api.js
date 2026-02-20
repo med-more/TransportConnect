@@ -87,6 +87,7 @@ export const reviewsAPI = {
 // API des utilisateurs
 export const usersAPI = {
   updateProfile: (userData) => api.put("/users/profile", userData),
+  updateLastSeen: () => api.put("/users/me/last-seen"),
   uploadAvatar: (formData) =>
     api.post("/users/avatar", formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -100,6 +101,19 @@ export const notificationsAPI = {
   markAsRead: (id) => api.put(`/notifications/${id}/read`),
   markAllAsRead: () => api.put("/notifications/all/read"),
   deleteNotification: (id) => api.delete(`/notifications/${id}`),
+}
+
+// API des conversations (driver–shipper chat)
+export const chatAPI = {
+  getConversations: () => api.get("/chats"),
+  getUnreadCount: () => api.get("/chats/unread-count"),
+  getConversationByRequest: (requestId) => api.get(`/chats/by-request/${requestId}`),
+  getMessages: (conversationId) => api.get(`/chats/${conversationId}/messages`),
+  sendMessage: (conversationId, content) =>
+    api.post(`/chats/${conversationId}/messages`, { content }),
+  reactToMessage: (conversationId, messageId, emoji) =>
+    api.put(`/chats/${conversationId}/messages/${messageId}/react`, { emoji }),
+  markAsRead: (conversationId) => api.put(`/chats/${conversationId}/read`),
 }
 
 // API d'administration

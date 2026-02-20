@@ -33,6 +33,8 @@ import RequestsPage from "./pages/requests/RequestsPage"
 import RequestDetailPage from "./pages/requests/RequestDetailPage"
 import CreateRequestPage from "./pages/requests/CreateRequestPage"
 import ProfilePage from "./pages/ProfilePage"
+import ConversationsPage from "./pages/conversations/ConversationsPage"
+import ConversationThreadPage from "./pages/conversations/ConversationThreadPage"
 
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage"
 import AdminUsersPage from "./pages/admin/AdminUsersPage"
@@ -147,6 +149,26 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <RequestDetailPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conversations"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConversationsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/conversations/:requestId"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <ConversationThreadPage />
             </Layout>
           </ProtectedRoute>
         }

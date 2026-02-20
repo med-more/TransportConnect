@@ -36,7 +36,7 @@ import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
-import { tripsAPI, requestsAPI, notificationsAPI } from "../services/api"
+import { tripsAPI, requestsAPI, notificationsAPI, chatAPI } from "../services/api"
 import toast from "react-hot-toast"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -77,6 +77,7 @@ const Layout = ({ children }) => {
     { name: "Dashboard", href: "/dashboard", icon: Home },
     { name: "Mes trajets", href: "/trips", icon: Truck },
     { name: "Mes demandes", href: "/requests", icon: Package },
+    { name: "Conversations", href: "/conversations", icon: MessageCircle },
     { name: "Profil", href: "/profile", icon: User },
   ]
 
@@ -156,6 +157,15 @@ const Layout = ({ children }) => {
 
   const notifications = notificationsData?.notifications || []
   const unreadCount = notificationsData?.unreadCount || 0
+
+  // Conversations (driver–shipper chat) unread count – only for non-admin
+  const { data: chatsUnreadData } = useQuery({
+    queryKey: ["chats-unread", user?._id],
+    queryFn: () => chatAPI.getUnreadCount().then((r) => r.data),
+    enabled: !!user && user?.role !== "admin",
+    refetchInterval: 15000,
+  })
+  const conversationsUnread = chatsUnreadData?.totalUnread ?? 0
   
   // Debug: Log notifications state
   useEffect(() => {
@@ -667,6 +677,22 @@ const Layout = ({ children }) => {
                 <Search className="w-5 h-5 text-foreground" />
               </button>
 
+              {/* Conversations (only for drivers/shippers) */}
+              {user?.role !== "admin" && (
+                <Link
+                  to="/conversations"
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                  aria-label="Conversations"
+                >
+                  <MessageCircle className="w-5 h-5 text-foreground" />
+                  {conversationsUnread > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-primary text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {conversationsUnread > 99 ? "99+" : conversationsUnread}
+                    </span>
+                  )}
+                </Link>
+              )}
+
               {/* Notifications */}
               <div className="relative">
                 <button
@@ -916,9 +942,11 @@ const Layout = ({ children }) => {
           </div>
         </header>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto">
-          {children}
+        {/* Main Content Area - wrapper scrolls for normal pages; full-height pages use h-full to fill */}
+        <main className="flex-1 flex flex-col min-h-0">
+          <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+            {children}
+          </div>
         </main>
       </div>
 

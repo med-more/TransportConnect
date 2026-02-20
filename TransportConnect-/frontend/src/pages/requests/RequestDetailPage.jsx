@@ -828,6 +828,16 @@ const RequestDetailPage = () => {
             <Card className="p-4 sm:p-5 md:p-6">
               <h2 className="text-lg font-semibold text-foreground mb-4">Actions</h2>
               <div className="space-y-3">
+                {(isDriver || isSender) && (
+                  <Button
+                    variant="outline"
+                    className="w-full border-primary text-primary hover:bg-primary/10"
+                    onClick={() => navigate(`/conversations/${request._id}`)}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {request.status === "delivered" ? "View conversation" : "Open conversation"}
+                  </Button>
+                )}
                 {isDriver && request.status === "pending" && (
                   <>
                     <Button

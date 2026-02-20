@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast"
 import App from "./App.jsx"
 import "./index.css"
 import { AuthProvider } from "./contexts/AuthContext.jsx"
+import { SocketProvider } from "./contexts/SocketContext.jsx"
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,7 +23,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <App />
+          <SocketProvider>
+            <App />
           <Toaster
             position="top-right"
             toastOptions={{
@@ -70,6 +72,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
               },
             }}
           />
+          </SocketProvider>
         </AuthProvider>
       </QueryClientProvider>
     </BrowserRouter>

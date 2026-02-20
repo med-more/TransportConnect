@@ -14,12 +14,14 @@ dotenv.config({ path: path.join(__dirname, ".env") })
 // Now import modules that depend on environment variables
 import { connectDB } from "./config/db.js"
 import passport from "./config/passport.js"
+import { Server as SocketServer } from "socket.io"
 import authRoutes from "./routes/auth.route.js"
 import tripsRoutes from "./routes/trips.route.js"
 import usersRoutes from "./routes/users.route.js"
 import requestRoutes from "./routes/requests.route.js"
 import adminRoutes from "./routes/admin.route.js"
 import notificationsRoutes from "./routes/notifications.route.js"
+import chatsRoutes from "./routes/chats.route.js"
 
 const app = express()
 const PORT = process.env.PORT || 7000
@@ -66,8 +68,29 @@ app.use("/api/requests", requestRoutes)
 app.use("/api/users", usersRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/notifications", notificationsRoutes)
+app.use("/api/chats", chatsRoutes)
 
 const server = http.createServer(app)
+
+const io = new SocketServer(server, {
+  cors: {
+    origin: corsOptions.origin,
+    credentials: true,
+  },
+})
+app.set("io", io)
+
+io.on("connection", (socket) => {
+  socket.on("join_user", (userId) => {
+    if (userId) socket.join(`user_${userId}`)
+  })
+  socket.on("join_conversation", (conversationId) => {
+    if (conversationId) socket.join(`conv_${conversationId}`)
+  })
+  socket.on("leave_conversation", (conversationId) => {
+    if (conversationId) socket.leave(`conv_${conversationId}`)
+  })
+})
 
 // Increase timeout for file uploads (30 seconds)
 server.timeout = 30000
