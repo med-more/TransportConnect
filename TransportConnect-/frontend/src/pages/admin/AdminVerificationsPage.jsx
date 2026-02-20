@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import clsx from "clsx"
@@ -15,6 +15,10 @@ import {
   Truck,
   User,
   XCircle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+  ArrowRight,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -24,6 +28,9 @@ import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import toast from "react-hot-toast"
+import { generatePageNumbers } from "../../utils/pagination"
+
+const ITEMS_PER_PAGE = 9
 
 const AdminVerificationsPage = () => {
   const [searchTerm, setSearchTerm] = useState("")
@@ -31,6 +38,7 @@ const AdminVerificationsPage = () => {
   const [showDetails, setShowDetails] = useState(false)
   const [rejectDialog, setRejectDialog] = useState(false)
   const [rejectUserId, setRejectUserId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const { data: usersData, isLoading, refetch } = useQuery({
     queryKey: ["admin-users"],
@@ -56,6 +64,23 @@ const AdminVerificationsPage = () => {
   }
 
   const filteredUsers = filterUsers()
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / ITEMS_PER_PAGE))
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const endIndex = startIndex + ITEMS_PER_PAGE
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm])
+
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(1)
+  }, [totalPages, currentPage])
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [currentPage])
 
   const handleVerifyUser = async (userId) => {
     try {
@@ -179,7 +204,7 @@ const AdminVerificationsPage = () => {
         {/* Users Grid */}
         <motion.div variants={itemVariants}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {filteredUsers.map((user, index) => (
+            {paginatedUsers.map((user, index) => (
               <motion.div
                 key={user._id}
                 initial={{ opacity: 0, y: 20 }}
@@ -275,6 +300,101 @@ const AdminVerificationsPage = () => {
             <div className="text-center py-12">
               <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-muted-foreground">No pending verifications</p>
+            </div>
+          )}
+
+          {/* Smart pagination */}
+          {filteredUsers.length > ITEMS_PER_PAGE && (
+            <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-border">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} user{filteredUsers.length !== 1 ? "s" : ""}
+                </div>
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage(1)}
+                    disabled={currentPage === 1}
+                    title="First page"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Previous
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {generatePageNumbers(currentPage, totalPages).map((page, index) => {
+                      if (page === "ellipsis") {
+                        return (
+                          <span key={`ellipsis-${index}`} className="px-2 text-muted-foreground">
+                            ...
+                          </span>
+                        )
+                      }
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={clsx(
+                            "min-w-[36px] px-3 py-1 text-sm rounded-md transition-colors",
+                            currentPage === page
+                              ? "bg-primary text-primary-foreground font-semibold"
+                              : "text-muted-foreground hover:bg-accent"
+                          )}
+                        >
+                          {page}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                  >
+                    Next
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={currentPage === totalPages}
+                    title="Last page"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-sm text-muted-foreground">Go to page:</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={totalPages}
+                  value={currentPage}
+                  onChange={(e) => {
+                    const page = parseInt(e.target.value, 10)
+                    if (page >= 1 && page <= totalPages) setCurrentPage(page)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const page = parseInt(e.target.value, 10)
+                      if (page >= 1 && page <= totalPages) setCurrentPage(page)
+                    }
+                  }}
+                  className="w-20 px-3 py-1.5 text-sm bg-background text-foreground border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <span className="text-sm text-muted-foreground">of {totalPages}</span>
+              </div>
             </div>
           )}
         </motion.div>

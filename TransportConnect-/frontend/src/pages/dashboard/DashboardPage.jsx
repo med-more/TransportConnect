@@ -124,7 +124,7 @@ const DashboardPage = () => {
             return (
               <Card key={index} hover className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <div className={`p-3 rounded-xl ${stat.bgColor}`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                   <div
@@ -138,8 +138,8 @@ const DashboardPage = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-3xl font-bold text-foreground mb-1">{stat.value}</p>
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-0.5">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
                 </div>
               </Card>
             )
@@ -169,7 +169,7 @@ const DashboardPage = () => {
                 </div>
 
                 {/* Map Placeholder */}
-                <div className="w-full h-48 sm:h-56 md:h-64 bg-background rounded-lg border border-border mb-4 flex items-center justify-center">
+                <div className="w-full h-48 sm:h-56 md:h-64 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border mb-4 flex items-center justify-center">
                   <div className="text-center">
                     <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">Map visualization</p>
@@ -189,8 +189,8 @@ const DashboardPage = () => {
                       <span className="text-muted-foreground">Traffic and route optimization</span>
                       <span className="font-medium text-foreground">85%</span>
                     </div>
-                    <div className="w-full bg-background rounded-full h-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: "85%" }} />
+                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                      <div className="bg-primary h-2 rounded-full transition-[width] duration-500" style={{ width: "85%" }} />
                     </div>
                   </div>
 
@@ -227,11 +227,11 @@ const DashboardPage = () => {
                     recentTrips.data.trips.map((trip) => (
                       <div
                         key={trip._id}
-                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                        className="p-4 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all duration-200"
                       >
                         <div className="flex items-start justify-between mb-2 gap-2">
                           <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+                            <div className="p-2 bg-primary/10 rounded-xl flex-shrink-0">
                               <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
                             </div>
                             <div className="min-w-0 flex-1">
@@ -286,7 +286,7 @@ const DashboardPage = () => {
                   <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
                 </div>
                 <div className="space-y-3">
-                  <div className="p-3 bg-accent rounded-lg border-l-4 border-primary">
+                  <div className="p-3 bg-accent/50 dark:bg-accent rounded-xl border-l-4 border-primary">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-medium text-foreground">Geofencing alert</span>
                       <span className="text-xs text-muted-foreground">13:48</span>
@@ -323,7 +323,7 @@ const DashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="p-2 sm:p-3 bg-background rounded-lg">
+                  <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
                     <p className="text-xs text-muted-foreground mb-1">Total Value</p>
                     <p className="text-lg sm:text-xl font-bold text-foreground">$520.45</p>
                   </div>
@@ -331,13 +331,13 @@ const DashboardPage = () => {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Status</span>
-                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-md text-xs font-medium">
+                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium">
                         Delivered
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Type</span>
-                      <span className="px-2 py-1 bg-accent text-foreground rounded-md text-xs font-medium">
+                      <span className="px-2 py-1 bg-accent text-foreground rounded-lg text-xs font-medium">
                         Household
                       </span>
                     </div>
@@ -364,7 +364,7 @@ const DashboardPage = () => {
                 </div>
                 <div className="space-y-3 sm:space-y-4">
                   {/* Truck Illustration */}
-                  <div className="relative w-full h-24 sm:h-28 md:h-32 bg-background rounded-lg flex items-center justify-center overflow-hidden">
+                  <div className="relative w-full h-24 sm:h-28 md:h-32 bg-muted/30 dark:bg-muted/50 rounded-xl flex items-center justify-center overflow-hidden">
                     <div className="absolute inset-0 flex items-end">
                       <div className="w-full h-3/4 bg-primary/20 relative">
                         <div

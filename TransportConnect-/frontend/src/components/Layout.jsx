@@ -364,7 +364,7 @@ const Layout = ({ children }) => {
       {/* Sidebar */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 bg-card dark:bg-[#0a0a0a] border-r border-border flex flex-col transition-all duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64"
         )}
@@ -401,7 +401,7 @@ const Layout = ({ children }) => {
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
                 className={clsx(
-                  "flex items-center rounded-lg text-sm font-medium transition-all duration-200 group relative",
+                  "flex items-center rounded-xl text-sm font-medium transition-all duration-200 group relative",
                   sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5",
                   isActive
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -544,7 +544,7 @@ const Layout = ({ children }) => {
         )}
       >
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-card border-b border-border">
+        <header className="sticky top-0 z-30 bg-card dark:bg-[#0a0a0a] border-b border-border">
           <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
             {/* Left: Sidebar Toggle */}
             <div className="flex-shrink-0">
@@ -978,7 +978,7 @@ const Layout = ({ children }) => {
           {/* Search Modal */}
           <div 
             ref={mobileSearchRef}
-            className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-lg"
+            className="absolute top-0 left-0 right-0 bg-card dark:bg-[#0a0a0a] border-b border-border shadow-lg"
           >
             <div className="p-4">
               <div className="flex items-center gap-3 mb-4">

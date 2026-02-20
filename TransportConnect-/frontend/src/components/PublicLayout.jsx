@@ -7,7 +7,7 @@ import { useTheme } from "../contexts/ThemeContext"
 export const PublicHeader = () => {
   const { theme, toggleTheme } = useTheme()
   return (
-    <header className="sticky top-0 z-50 border-b border-border glass bg-card/90 dark:bg-card/95 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-border bg-card/90 dark:bg-[#0a0a0a] backdrop-blur-sm dark:backdrop-blur-none">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">

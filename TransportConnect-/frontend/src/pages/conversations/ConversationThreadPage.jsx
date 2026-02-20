@@ -275,7 +275,7 @@ export default function ConversationThreadPage() {
   return (
     <div className="h-full min-h-0 flex flex-col w-full chat-wallpaper overflow-hidden">
       {/* Header - full width, touch-friendly, safe area */}
-      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-[#f0f2f5] dark:bg-black border-b border-border shadow-sm shrink-0 safe-top">
+      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-[#f0f2f5] dark:bg-[#262626] border-b border-border shadow-sm shrink-0 safe-top">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -353,7 +353,7 @@ export default function ConversationThreadPage() {
       >
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 sm:py-16 text-center">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/60 dark:bg-black/20 flex items-center justify-center mb-3 sm:mb-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white/60 dark:bg-white/10 flex items-center justify-center mb-3 sm:mb-4">
               <Package className="w-7 h-7 sm:w-8 sm:h-8 text-muted-foreground" />
             </div>
             <p className="text-foreground font-medium text-xs sm:text-sm">No messages yet</p>
@@ -498,7 +498,7 @@ export default function ConversationThreadPage() {
       {/* Input bar - full width, safe area for notched devices */}
       <form
         onSubmit={handleSend}
-        className="p-3 sm:p-4 md:px-6 bg-[#f0f2f5] dark:bg-black border-t border-border shrink-0 safe-bottom"
+        className="p-3 sm:p-4 md:px-6 bg-[#f0f2f5] dark:bg-[#262626] border-t border-border shrink-0 safe-bottom"
       >
         <div className="flex items-end gap-2 rounded-2xl bg-white dark:bg-card border border-border px-3 sm:px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
           <input
