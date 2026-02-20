@@ -28,6 +28,7 @@ import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
@@ -186,10 +187,39 @@ const AdminUsersPage = () => {
 
   if (isLoading) {
     return (
-      <div className="p-3 sm:p-4 md:p-6">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner size="large" />
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex items-start gap-4 mb-6">
+          <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-8 w-56" />
+            <Skeleton variant="text" lines={2} className="max-w-xl" />
+          </div>
         </div>
+        <Card className="p-4 overflow-hidden">
+          <div className="flex flex-wrap gap-3 mb-4">
+            <Skeleton className="h-10 w-full max-w-xs" />
+            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-28" />
+          </div>
+          <div className="border border-border rounded-xl overflow-hidden">
+            <div className="grid grid-cols-4 gap-4 p-4 bg-muted/30 border-b border-border">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-4 w-20" />
+              ))}
+            </div>
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="grid grid-cols-4 gap-4 p-4 border-b border-border last:border-0 items-center">
+                <div className="flex items-center gap-3">
+                  <Skeleton variant="avatar" className="h-9 w-9" />
+                  <Skeleton className="h-4 w-24" />
+                </div>
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-5 w-16" />
+                <Skeleton className="h-8 w-20" />
+              </div>
+            ))}
+          </div>
+        </Card>
       </div>
     )
   }

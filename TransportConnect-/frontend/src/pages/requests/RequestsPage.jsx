@@ -28,6 +28,7 @@ import { requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 import Input from "../../components/ui/Input"
 import clsx from "clsx"
 import { normalizeAvatarUrl } from "../../utils/avatar"
@@ -381,8 +382,25 @@ const RequestsPage = () => {
       {/* Requests List */}
       <div>
         {isLoading ? (
-          <div className="flex justify-center py-12">
-            <LoadingSpinner />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
+                <div className="flex justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-9 w-9 rounded-lg" />
+                    <Skeleton className="h-5 w-36" />
+                  </div>
+                  <Skeleton className="h-7 w-14" />
+                </div>
+                <div className="space-y-3 mb-4">
+                  <Skeleton variant="text" lines={2} />
+                  <Skeleton variant="text" lines={2} />
+                </div>
+                <div className="flex gap-2 mt-auto">
+                  <Skeleton className="h-9 flex-1" />
+                </div>
+              </Card>
+            ))}
           </div>
         ) : filteredRequests.length > 0 ? (
           <>

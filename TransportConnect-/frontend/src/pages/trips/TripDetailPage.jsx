@@ -25,6 +25,7 @@ import { tripsAPI, requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import toast from "react-hot-toast"
 import Card from "../../components/ui/Card"
@@ -102,8 +103,26 @@ const TripDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <LoadingSpinner size="large" />
+      <div className="p-3 sm:p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+          <div className="space-y-2">
+            <Skeleton className="h-6 w-56" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+        </div>
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton variant="text" lines={4} />
+          <div className="flex gap-3 pt-2">
+            <Skeleton className="h-10 w-28" />
+            <Skeleton className="h-10 w-28" />
+          </div>
+        </Card>
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-5 w-56" />
+          <Skeleton variant="text" lines={3} />
+        </Card>
       </div>
     )
   }

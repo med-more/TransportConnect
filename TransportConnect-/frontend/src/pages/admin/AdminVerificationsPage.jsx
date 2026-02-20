@@ -24,6 +24,7 @@ import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import { adminAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
@@ -156,9 +157,37 @@ const AdminVerificationsPage = () => {
 
   if (isLoading) {
     return (
-      <div className="p-3 sm:p-4 md:p-6">
-        <div className="flex justify-center items-center min-h-[400px]">
-          <LoadingSpinner size="large" />
+      <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+        <div className="flex items-start gap-4 mb-6">
+          <Skeleton className="h-14 w-14 rounded-xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton variant="text" lines={2} className="max-w-md" />
+          </div>
+        </div>
+        <Card className="p-4 sm:p-5 md:p-6">
+          <Skeleton className="h-10 w-full rounded-xl" />
+        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="p-4 sm:p-5 md:p-6">
+              <div className="text-center mb-4">
+                <Skeleton variant="avatar" className="h-20 w-20 mx-auto mb-3" />
+                <Skeleton className="h-5 w-32 mx-auto mb-2" />
+                <Skeleton className="h-4 w-48 mx-auto mb-3" />
+                <Skeleton className="h-5 w-16 mx-auto" />
+              </div>
+              <div className="space-y-2 mb-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+              <div className="flex gap-2">
+                <Skeleton className="h-9 flex-1" />
+                <Skeleton className="h-9 flex-1" />
+                <Skeleton className="h-9 flex-1" />
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
     )

@@ -7,6 +7,7 @@ import { chatAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 
 const FILTERS = [
   { id: "all", label: "All" },
@@ -30,14 +31,13 @@ function formatTime(dateStr) {
 
 function ConversationListSkeleton() {
   return (
-    <ul className="flex-1 min-h-0 overflow-hidden divide-y divide-border">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <li key={i} className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 py-4 animate-pulse">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-muted shrink-0" />
+    <ul className="flex-1 min-h-0 overflow-hidden divide-y divide-border safe-bottom">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <li key={i} className="flex items-center gap-3 sm:gap-4 px-3 sm:px-4 md:px-6 py-4 sm:py-3.5">
+          <Skeleton variant="avatar" className="h-12 w-12 sm:h-14 sm:w-14" />
           <div className="flex-1 min-w-0 space-y-2">
-            <div className="h-4 w-1/3 rounded bg-muted" />
-            <div className="h-3 w-1/2 rounded bg-muted" />
-            <div className="h-3 w-2/3 rounded bg-muted" />
+            <Skeleton className="h-4 w-28" />
+            <Skeleton className="h-3 w-full max-w-[180px]" />
           </div>
         </li>
       ))}

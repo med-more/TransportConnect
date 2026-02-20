@@ -10,6 +10,7 @@ import { useAuth } from "../../contexts/AuthContext"
 import { useSocket } from "../../contexts/SocketContext"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
+import Skeleton from "../../components/ui/Skeleton"
 import toast from "react-hot-toast"
 
 function formatMessageTime(dateStr) {
@@ -247,9 +248,30 @@ export default function ConversationThreadPage() {
 
   if (isLoading || !conversation) {
     return (
-      <div className="h-full min-h-0 flex flex-col">
-        <div className="flex-1 flex justify-center items-center min-h-[200px]">
-          <LoadingSpinner size="large" />
+      <div className="h-full min-h-0 flex flex-col w-full chat-wallpaper overflow-hidden">
+        <header className="flex items-center gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-[#f0f2f5] dark:bg-[#262626] border-b border-border shrink-0 safe-top">
+          <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+          <div className="flex-1 flex items-center gap-3 min-w-0">
+            <Skeleton variant="avatar" className="h-10 w-10 sm:h-11 sm:w-11 shrink-0" />
+            <div className="space-y-1 min-w-0">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        </header>
+        <div className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4 md:px-6 space-y-4">
+          <div className="flex justify-start">
+            <Skeleton className="h-14 w-[75%] max-w-[280px] rounded-2xl rounded-bl-md" />
+          </div>
+          <div className="flex justify-end">
+            <Skeleton className="h-12 w-[70%] max-w-[260px] rounded-2xl rounded-br-md" />
+          </div>
+          <div className="flex justify-start">
+            <Skeleton className="h-10 w-[50%] max-w-[200px] rounded-2xl rounded-bl-md" />
+          </div>
+        </div>
+        <div className="p-3 sm:p-4 md:px-6 bg-[#f0f2f5] dark:bg-[#262626] border-t border-border shrink-0 safe-bottom">
+          <Skeleton className="h-12 w-full rounded-2xl" />
         </div>
       </div>
     )
