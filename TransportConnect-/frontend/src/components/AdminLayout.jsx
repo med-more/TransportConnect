@@ -16,12 +16,15 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
+  Sun,
+  Moon,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
 import { adminAPI } from "../services/api"
+import { useTheme } from "../contexts/ThemeContext"
 
 const AdminLayout = ({ children }) => {
   // Load sidebar collapsed state from localStorage
@@ -36,6 +39,7 @@ const AdminLayout = ({ children }) => {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const notificationRef = useRef(null)
@@ -166,7 +170,7 @@ const AdminLayout = ({ children }) => {
       {/* Sidebar */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 bg-white border-r border-border flex flex-col transition-transform duration-300 ease-in-out",
+          "fixed inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-transform duration-300 ease-in-out",
           "lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64"
@@ -302,7 +306,7 @@ const AdminLayout = ({ children }) => {
         )}
       >
         {/* Top Header */}
-        <header className="sticky top-0 z-20 bg-white border-b border-border">
+        <header className="sticky top-0 z-20 bg-card border-b border-border">
           <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
             {/* Left: Sidebar Toggle */}
             <div className="flex-shrink-0">
@@ -352,7 +356,7 @@ const AdminLayout = ({ children }) => {
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchQuery.length >= 2 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -457,8 +461,17 @@ const AdminLayout = ({ children }) => {
               </div>
             </div>
 
-            {/* Right: Search (Mobile), Notifications & User Menu */}
+            {/* Right: Theme toggle, Search (Mobile), Notifications & User Menu */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               {/* Mobile Search Icon */}
               <button
                 onClick={() => setShowMobileSearch(true)}
@@ -484,7 +497,7 @@ const AdminLayout = ({ children }) => {
                 {showNotifications && (
                   <div
                     ref={notificationRef}
-                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[calc(100vh-120px)] overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-72 sm:w-80 bg-card border border-border rounded-lg shadow-lg z-50 max-h-[calc(100vh-120px)] overflow-hidden"
                   >
                     <div className="p-4 border-b border-border">
                       <div className="flex items-center justify-between">
@@ -574,7 +587,7 @@ const AdminLayout = ({ children }) => {
           {/* Search Modal */}
           <div 
             ref={mobileSearchRef}
-            className="absolute top-0 left-0 right-0 bg-white border-b border-border shadow-lg"
+            className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-lg"
           >
             <div className="p-4">
               <div className="flex items-center gap-3 mb-4">
@@ -592,7 +605,7 @@ const AdminLayout = ({ children }) => {
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchQuery.length >= 2 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[60vh] overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-[60vh] overflow-y-auto">
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />

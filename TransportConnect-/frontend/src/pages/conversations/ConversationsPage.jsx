@@ -69,7 +69,7 @@ export default function ConversationsPage() {
   if (isLoading) {
     return (
       <div className="h-full min-h-0 flex flex-col w-full bg-background overflow-hidden">
-        <header className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-[#f0f2f5] dark:bg-[#202c33] safe-top">
+        <header className="shrink-0 px-4 sm:px-6 py-3 sm:py-4 border-b border-border bg-[#f0f2f5] dark:bg-black safe-top">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-primary/10 shrink-0">
               <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
@@ -85,7 +85,7 @@ export default function ConversationsPage() {
   return (
     <div className="h-full min-h-0 flex flex-col w-full bg-background overflow-hidden">
       {/* Header - full width, safe area */}
-      <header className="shrink-0 border-b border-border bg-[#f0f2f5] dark:bg-[#202c33] safe-top">
+      <header className="shrink-0 border-b border-border bg-[#f0f2f5] dark:bg-black safe-top">
         <div className="px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-primary/10 shrink-0" aria-hidden>
@@ -123,7 +123,7 @@ export default function ConversationsPage() {
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2
                     ${isActive
                       ? "bg-primary text-white shadow-sm"
-                      : "bg-white dark:bg-[#2a3942] text-muted-foreground hover:bg-muted/60 border border-border"
+                      : "bg-white dark:bg-card text-muted-foreground hover:bg-muted/60 border border-border"
                     }
                   `}
                 >
@@ -207,10 +207,10 @@ export default function ConversationsPage() {
                       <img
                         src={normalizeAvatarUrl(other.avatar)}
                         alt=""
-                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-background dark:ring-[#202c33]"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover ring-2 ring-background dark:ring-black"
                       />
                     ) : (
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 flex items-center justify-center ring-2 ring-background dark:ring-[#202c33]">
+                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/15 flex items-center justify-center ring-2 ring-background dark:ring-black">
                         <span className="text-primary font-semibold text-base sm:text-lg">
                           {(other?.firstName?.[0] || "?") + (other?.lastName?.[0] || "")}
                         </span>

@@ -269,7 +269,7 @@ const RoleSelectionPage = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl bg-white rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row"
+        className="w-full max-w-6xl bg-card rounded-xl sm:rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row"
       >
         {/* Left Section - Visual Showcase */}
         <div className="relative lg:w-[45%] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-between overflow-hidden min-h-[250px] sm:min-h-[300px] md:min-h-[400px] lg:min-h-auto">
@@ -341,7 +341,7 @@ const RoleSelectionPage = () => {
         </div>
 
         {/* Right Section - Role Selection */}
-        <div className="lg:w-[55%] bg-white p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-center">
+        <div className="lg:w-[55%] bg-card p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-center">
           {/* Header */}
           <div className="mb-4 sm:mb-6 md:mb-8">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2 sm:mb-3">

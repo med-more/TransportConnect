@@ -5,38 +5,42 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "#e5e7eb",
-        input: "#f9fafb",
-        ring: "#ef4444",
-        background: "#f5f5f5",
-        foreground: "#111827",
+        border: {
+          DEFAULT: "var(--border)",
+          subtle: "var(--border-subtle)",
+          strong: "var(--border-strong)",
+        },
+        input: "var(--input)",
+        ring: "var(--ring)",
+        background: "var(--background)",
+        foreground: "var(--foreground)",
         primary: {
-          DEFAULT: "#ef4444",
-          foreground: "#ffffff",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         secondary: {
-          DEFAULT: "#f3f4f6",
-          foreground: "#111827",
+          DEFAULT: "var(--secondary)",
+          foreground: "var(--secondary-foreground)",
         },
         muted: {
-          DEFAULT: "#f9fafb",
-          foreground: "#6b7280",
+          DEFAULT: "var(--muted)",
+          foreground: "var(--muted-foreground)",
         },
         accent: {
-          DEFAULT: "#fef2f2",
-          foreground: "#ef4444",
+          DEFAULT: "var(--accent)",
+          foreground: "var(--accent-foreground)",
         },
         destructive: {
-          DEFAULT: "#ef4444",
-          foreground: "#ffffff",
+          DEFAULT: "var(--primary)",
+          foreground: "var(--primary-foreground)",
         },
         card: {
-          DEFAULT: "#ffffff",
-          foreground: "#111827",
+          DEFAULT: "var(--card)",
+          foreground: "var(--card-foreground)",
         },
         popover: {
-          DEFAULT: "#ffffff",
-          foreground: "#111827",
+          DEFAULT: "var(--popover)",
+          foreground: "var(--popover-foreground)",
         },
         success: "#10b981",
         error: "#ef4444",

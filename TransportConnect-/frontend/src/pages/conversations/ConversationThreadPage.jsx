@@ -275,7 +275,7 @@ export default function ConversationThreadPage() {
   return (
     <div className="h-full min-h-0 flex flex-col w-full chat-wallpaper overflow-hidden">
       {/* Header - full width, touch-friendly, safe area */}
-      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-[#f0f2f5] dark:bg-[#202c33] border-b border-border shadow-sm shrink-0 safe-top">
+      <header className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-6 py-2.5 sm:py-3 bg-[#f0f2f5] dark:bg-black border-b border-border shadow-sm shrink-0 safe-top">
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -292,10 +292,10 @@ export default function ConversationThreadPage() {
             <img
               src={normalizeAvatarUrl(otherParticipant.avatar)}
               alt=""
-              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover flex-shrink-0 ring-2 ring-white dark:ring-[#2a3942] shadow-sm"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover flex-shrink-0 ring-2 ring-white dark:ring-black shadow-sm"
             />
           ) : (
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 ring-2 ring-white dark:ring-[#2a3942]">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 ring-2 ring-white dark:ring-black">
               <span className="text-primary font-semibold text-sm sm:text-lg">
                 {(otherParticipant?.firstName?.[0] || "?") +
                   (otherParticipant?.lastName?.[0] || "")}
@@ -395,7 +395,7 @@ export default function ConversationThreadPage() {
                           {showPicker && (
                             <div
                               ref={pickerRef}
-                              className="absolute left-0 bottom-full mb-0.5 flex gap-0.5 py-1 px-1.5 rounded-full bg-[#233138] dark:bg-[#2a3942] border border-[#3f5059] shadow-xl z-20"
+                              className="absolute left-0 bottom-full mb-0.5 flex gap-0.5 py-1 px-1.5 rounded-full bg-[#233138] dark:bg-card dark:border border-border shadow-xl z-20"
                             >
                               {REACTION_EMOJIS.map((emoji) => (
                                 <button
@@ -416,7 +416,7 @@ export default function ConversationThreadPage() {
                               rounded-2xl px-3.5 sm:px-4 py-2 shadow-md group relative
                               ${isMe
                                 ? "rounded-br-md bg-[#005c4b] dark:bg-[#056162] text-white"
-                                : "rounded-bl-md bg-white dark:bg-[#2a3942] text-foreground border border-black/5"
+                                : "rounded-bl-md bg-white dark:bg-card text-foreground border border-border"
                               }
                             `}
                           >
@@ -498,9 +498,9 @@ export default function ConversationThreadPage() {
       {/* Input bar - full width, safe area for notched devices */}
       <form
         onSubmit={handleSend}
-        className="p-3 sm:p-4 md:px-6 bg-[#f0f2f5] dark:bg-[#202c33] border-t border-border shrink-0 safe-bottom"
+        className="p-3 sm:p-4 md:px-6 bg-[#f0f2f5] dark:bg-black border-t border-border shrink-0 safe-bottom"
       >
-        <div className="flex items-end gap-2 rounded-2xl bg-white dark:bg-[#2a3942] border border-border px-3 sm:px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
+        <div className="flex items-end gap-2 rounded-2xl bg-white dark:bg-card border border-border px-3 sm:px-4 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20">
           <input
             type="text"
             value={input}

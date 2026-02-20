@@ -4,6 +4,57 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
+/* Theme: CSS variables for light/dark */
+:root {
+  --background: #f5f5f5;
+  --foreground: #111827;
+  --border: #e5e7eb;
+  --border-subtle: #f0f0f0;
+  --border-strong: #d1d5db;
+  --input: #f9fafb;
+  --ring: #ef4444;
+  --primary: #ef4444;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f4f6;
+  --secondary-foreground: #111827;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --accent: #fef2f2;
+  --accent-foreground: #ef4444;
+  --card: #ffffff;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --scrollbar-track: #f1f1f1;
+  --scrollbar-thumb: #d1d5db;
+  --scrollbar-thumb-hover: #9ca3af;
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #fafafa;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.18);
+  --input: #0a0a0a;
+  --ring: #f87171;
+  --primary: #ef4444;
+  --primary-foreground: #ffffff;
+  --secondary: #0a0a0a;
+  --secondary-foreground: #f1f5f9;
+  --muted: #171717;
+  --muted-foreground: #a3a3a3;
+  --accent: rgba(255, 255, 255, 0.06);
+  --accent-foreground: #fecaca;
+  --card: #0a0a0a;
+  --card-foreground: #fafafa;
+  --popover: #0a0a0a;
+  --popover-foreground: #fafafa;
+  --scrollbar-track: #0a0a0a;
+  --scrollbar-thumb: #404040;
+  --scrollbar-thumb-hover: #525252;
+}
+
 /* Reset */
 * {
   margin: 0;
@@ -14,11 +65,12 @@
 /* Global styles */
 body {
   font-family: "Inter", system-ui, -apple-system, sans-serif;
-  background-color: #f5f5f5;
-  color: #111827;
+  background-color: var(--background);
+  color: var(--foreground);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* Scrollbar styling */
@@ -28,17 +80,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--scrollbar-track);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Custom Tailwind Components */
@@ -65,6 +117,14 @@ body {
 
   .card {
     @apply bg-card text-card-foreground rounded-lg border border-border shadow-sm;
+  }
+
+  /* Subtle dividers (professional look) */
+  .divider {
+    @apply border-border-subtle;
+  }
+  .divider-strong {
+    @apply border-border;
   }
 
   .card-hover {
@@ -118,7 +178,7 @@ body {
       url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20h80M0 40h80M0 60h80' stroke='%23000000' stroke-opacity='0.04' stroke-width='.5' stroke-dasharray='4 4' fill='none'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Ccircle cx='50' cy='40' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Ccircle cx='70' cy='60' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Cpath d='M35 35l4-2 4 2v3l-4 2-4-2z' fill='%23000000' fill-opacity='0.03'/%3E%3C/svg%3E");
   }
   .dark .chat-wallpaper {
-    background-color: #0d1419;
+    background-color: #000000;
     background-image:
       url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20h80M0 40h80M0 60h80' stroke='%23ffffff' stroke-opacity='0.03' stroke-width='.5' stroke-dasharray='4 4' fill='none'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23ffffff' fill-opacity='0.04'/%3E%3Ccircle cx='50' cy='40' r='1.5' fill='%23ffffff' fill-opacity='0.04'/%3E%3Ccircle cx='70' cy='60' r='1.5' fill='%23ffffff' fill-opacity='0.04'/%3E%3Cpath d='M35 35l4-2 4 2v3l-4 2-4-2z' fill='%23ffffff' fill-opacity='0.02'/%3E%3C/svg%3E");
   }
@@ -145,8 +205,8 @@ body {
 
 /* Spinner */
 .spinner {
-  border: 2px solid #f3f4f6;
-  border-top: 2px solid #ef4444;
+  border: 2px solid var(--muted);
+  border-top: 2px solid var(--primary);
   border-radius: 50%;
   width: 20px;
   height: 20px;

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
+import { useTheme } from "../contexts/ThemeContext"
 import {
   Home,
   Truck,
@@ -31,6 +32,8 @@ import {
   Star,
   Trash2,
   AlertCircle,
+  Sun,
+  Moon,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
@@ -52,6 +55,7 @@ const Layout = ({ children }) => {
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const { user, logout } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -360,7 +364,7 @@ const Layout = ({ children }) => {
       {/* Sidebar */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 bg-white border-r border-border flex flex-col transition-all duration-300 lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 bg-card border-r border-border flex flex-col transition-all duration-300 lg:translate-x-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64"
         )}
@@ -429,19 +433,18 @@ const Layout = ({ children }) => {
                 sidebarCollapsed
                   ? "px-3 py-3 justify-center"
                   : "px-3 py-2.5 flex items-center gap-3",
-                "bg-gradient-to-r from-primary via-primary to-primary/90",
-                "hover:from-primary/90 hover:via-primary hover:to-primary",
+                "bg-primary hover:bg-primary/90 dark:bg-primary dark:hover:bg-primary/90",
                 "text-white font-semibold rounded-lg",
                 "shadow-lg hover:shadow-xl",
                 "transform hover:scale-[1.02] active:scale-[0.98]"
               )}
               title={sidebarCollapsed ? getCreateButtonLabel() : ""}
             >
-              {/* Animated background effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              {/* Subtle shine - lighter in light mode only */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 dark:via-white/10" />
               
               <div className="relative flex items-center justify-center gap-3 w-full">
-                <div className="p-1 bg-white/20 rounded-md group-hover:bg-white/30 transition-colors">
+                <div className="p-1 bg-white/20 dark:bg-white/15 rounded-md group-hover:bg-white/30 dark:group-hover:bg-white/25 transition-colors">
                   <Plus className="w-4 h-4" />
                 </div>
                 {!sidebarCollapsed && (
@@ -449,8 +452,8 @@ const Layout = ({ children }) => {
                 )}
               </div>
               
-              {/* Glow effect */}
-              <div className="absolute inset-0 rounded-lg bg-primary/50 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
+              {/* Glow effect - subtle in dark mode */}
+              <div className="absolute inset-0 rounded-lg bg-primary/50 dark:bg-primary/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
             </button>
           )}
         </nav>
@@ -541,7 +544,7 @@ const Layout = ({ children }) => {
         )}
       >
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white border-b border-border">
+        <header className="sticky top-0 z-30 bg-card border-b border-border">
           <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
             {/* Left: Sidebar Toggle */}
             <div className="flex-shrink-0">
@@ -591,7 +594,7 @@ const Layout = ({ children }) => {
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchQuery.length >= 2 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
@@ -666,8 +669,22 @@ const Layout = ({ children }) => {
               </div>
             </div>
 
-            {/* Right: Search (Mobile), Notifications & User Menu */}
+            {/* Right: Search (Mobile), Theme toggle, Notifications & User Menu */}
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+              {/* Theme toggle */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
+              </button>
               {/* Mobile Search Icon */}
               <button
                 onClick={() => setShowMobileSearch(true)}
@@ -716,7 +733,7 @@ const Layout = ({ children }) => {
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
                       ref={notificationRef}
-                      className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-border rounded-xl shadow-2xl z-50 max-h-[calc(100vh-120px)] overflow-hidden flex flex-col"
+                      className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-card border border-border rounded-xl shadow-2xl z-50 max-h-[calc(100vh-120px)] overflow-hidden flex flex-col"
                     >
                       {/* Header */}
                       <div className="p-3 sm:p-4 border-b border-border bg-background">
@@ -961,7 +978,7 @@ const Layout = ({ children }) => {
           {/* Search Modal */}
           <div 
             ref={mobileSearchRef}
-            className="absolute top-0 left-0 right-0 bg-white border-b border-border shadow-lg"
+            className="absolute top-0 left-0 right-0 bg-card border-b border-border shadow-lg"
           >
             <div className="p-4">
               <div className="flex items-center gap-3 mb-4">
@@ -979,7 +996,7 @@ const Layout = ({ children }) => {
                   
                   {/* Search Results Dropdown */}
                   {showSearchResults && searchQuery.length >= 2 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-h-[60vh] overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-[60vh] overflow-y-auto">
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />

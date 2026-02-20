@@ -38,7 +38,7 @@ const ForgotPasswordPage = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-6xl bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row"
+        className="w-full max-w-6xl bg-card rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row"
       >
         {/* Left Section - Visual Showcase */}
         <div className="relative lg:w-[40%] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6 sm:p-8 lg:p-12 flex flex-col justify-between overflow-hidden min-h-[200px] sm:min-h-[300px] lg:min-h-auto">
@@ -81,7 +81,7 @@ const ForgotPasswordPage = () => {
         </div>
 
         {/* Right Section - Forgot Password Form */}
-        <div className="lg:w-[60%] bg-white p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-between">
+        <div className="lg:w-[60%] bg-card p-4 sm:p-6 md:p-8 lg:p-12 flex flex-col justify-between">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">

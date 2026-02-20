@@ -752,7 +752,7 @@ const TripsPage = () => {
                           }
                         }
                       }}
-                      className="w-20 px-3 py-1.5 text-sm border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      className="w-20 px-3 py-1.5 text-sm bg-background text-foreground border border-border rounded-md text-center focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                     <span className="text-sm text-muted-foreground">of {totalPages}</span>
                   </div>

@@ -70,6 +70,8 @@ import {
   MdFavorite,
   MdCookie,
   MdSettings,
+  MdLightMode,
+  MdDarkMode,
 } from "react-icons/md"
 import {
   FaFacebook,
@@ -175,6 +177,8 @@ export const Icons = {
   Heart: MdFavorite,
   Cookie: MdCookie,
   Settings: MdSettings,
+  Sun: MdLightMode,
+  Moon: MdDarkMode,
 }
 
 // Re-export all icons for direct use (named exports for compatibility)
@@ -256,6 +260,8 @@ export const {
   Heart,
   Cookie,
   Settings,
+  Sun,
+  Moon,
 } = Icons
 
 export default Icons

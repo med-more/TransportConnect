@@ -686,25 +686,25 @@ const AdminDashboardPage = () => {
                   </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
                     <span className="admin-description">Active users</span>
                     <span className="font-medium text-foreground">
                       {(recentUsers?.data || []).filter((u) => u.isActive)?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
                     <span className="admin-description">Verified users</span>
                     <span className="font-medium text-foreground">
                       {(recentUsers?.data || []).filter((u) => u.isVerified)?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
                     <span className="admin-description">Active trips</span>
                     <span className="font-medium text-foreground">
                       {(recentTrips?.data || []).filter((t) => t.status === "active")?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
                     <span className="admin-description">Pending requests</span>
                     <span className="font-medium text-foreground">
                       {(recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0}

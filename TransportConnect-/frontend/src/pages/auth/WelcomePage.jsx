@@ -26,9 +26,12 @@ import {
   Youtube,
   Play,
   User,
+  Sun,
+  Moon,
 } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo.svg"
+import { useTheme } from "../../contexts/ThemeContext"
 
 // Image Card Component for "Our Platform in Action" section
 const ImageCard = ({ item, index }) => {
@@ -94,6 +97,7 @@ const viewportDefaults = { once: true, amount: 0.2 }
 const transitionSmooth = { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 
 const WelcomePage = () => {
+  const { theme, toggleTheme } = useTheme()
   const heroRef = useRef(null)
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
@@ -192,7 +196,7 @@ const WelcomePage = () => {
       />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between gap-2 sm:gap-4">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
@@ -211,12 +215,21 @@ const WelcomePage = () => {
               </Link>
             </nav>
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                title={theme === "dark" ? "Light mode" : "Dark mode"}
+              >
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
               <Link to="/login">
                 <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
-            </Link>
-            <Link to="/register">
+              </Link>
+              <Link to="/register">
                 <Button className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign up</Button>
-            </Link>
+              </Link>
             </div>
           </div>
         </div>
@@ -333,8 +346,8 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Marquee – Trust strip (Awwwards-style) */}
-      <section className="relative py-4 sm:py-5 border-y border-border bg-foreground overflow-hidden">
+      {/* Marquee – Trust strip (Awwwards-style) - always dark for contrast */}
+      <section className="relative py-4 sm:py-5 border-y border-border bg-slate-900 dark:bg-black overflow-hidden">
         <motion.div
           className="flex whitespace-nowrap text-white/90 text-sm sm:text-base font-medium tracking-wide"
           animate={{ x: ["0%", "-50%"] }}
@@ -379,7 +392,7 @@ const WelcomePage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 sm:py-16 px-3 sm:px-4 md:px-6 bg-accent/30">
+      <section className="py-12 sm:py-16 px-3 sm:px-4 md:px-6 bg-muted/50 dark:bg-muted">
         <div className="container mx-auto max-w-7xl">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
             {stats.map((stat, index) => {
@@ -507,7 +520,7 @@ const WelcomePage = () => {
       </section>
 
       {/* Image Gallery Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-card">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 32 }}
@@ -585,7 +598,7 @@ const WelcomePage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-card">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 32 }}
@@ -633,7 +646,7 @@ const WelcomePage = () => {
       </section>
 
       {/* Image Showcase Section 2 */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-card">
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
             <motion.div
@@ -688,7 +701,7 @@ const WelcomePage = () => {
 
 
       {/* Image Gallery Section 2 */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-card">
         <div className="container mx-auto max-w-7xl">
           <motion.div
             initial={{ opacity: 0, y: 32 }}
@@ -732,8 +745,8 @@ const WelcomePage = () => {
               </div>
       </section>
 
-      {/* Testimonial – Awwwards-style quote block */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6 bg-foreground text-white">
+      {/* Testimonial – Awwwards-style quote block - always dark for contrast */}
+      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6 bg-slate-900 dark:bg-black text-white">
         <div className="container mx-auto max-w-4xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
@@ -759,7 +772,7 @@ const WelcomePage = () => {
       </section>
 
       {/* Final CTA */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/30">
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-muted/50 dark:bg-muted">
         <div className="container mx-auto max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 32 }}
@@ -789,8 +802,8 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-foreground text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6">
+      {/* Footer - always dark for contrast */}
+      <footer className="bg-slate-900 dark:bg-black text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 border-t border-white/10">
         <div className="container mx-auto max-w-7xl">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12">
             {/* Brand Column */}
