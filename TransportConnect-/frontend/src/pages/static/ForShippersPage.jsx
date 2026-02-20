@@ -54,7 +54,7 @@ const ForShippersPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
                 For Shippers
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
@@ -62,7 +62,7 @@ const ForShippersPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/register">
-                  <Button size="large" className="w-full sm:w-auto">
+                  <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
                     Start Shipping Now
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -103,7 +103,7 @@ const ForShippersPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Why Choose TransportConnect?
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -121,7 +121,7 @@ const ForShippersPage = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="p-6 text-center hover:shadow-lg transition-all duration-300 h-full border border-border">
+                  <Card className="p-6 text-center hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
                     <div className="p-3 bg-primary/5 rounded-lg w-fit mx-auto mb-4">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
@@ -144,7 +144,7 @@ const ForShippersPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               What Shippers Say
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -185,7 +185,7 @@ const ForShippersPage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8 headline-premium">
                 Everything You Need to Ship
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -280,14 +280,14 @@ const ForShippersPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
               Ready to Start Shipping?
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of shippers already using TransportConnect
             </p>
             <Link to="/register">
-              <Button size="large">
+              <Button size="large" className="btn-glow shadow-glow hover:shadow-glow-lg">
                 Create Free Account
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

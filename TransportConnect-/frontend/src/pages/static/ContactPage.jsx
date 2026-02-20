@@ -63,7 +63,7 @@ const ContactPage = () => {
             transition={{ duration: 0.6 }}
             className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
               Get in Touch
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -83,12 +83,12 @@ const ContactPage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <Card className="p-6 sm:p-8 md:p-10 shadow-lg border border-border">
+              <Card className="p-6 sm:p-8 md:p-10 shadow-lg glass-card border border-white/30">
                 <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                   <div className="p-3 bg-primary/5 rounded-lg">
                     <MessageSquare className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                   </div>
-                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground">Send us a Message</h2>
+                  <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground headline-premium">Send us a Message</h2>
                 </div>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -141,7 +141,7 @@ const ContactPage = () => {
                       <p className="text-sm text-destructive mt-1 sm:mt-2">{errors.message.message}</p>
                     )}
                   </div>
-                  <Button type="submit" className="w-full" loading={isSubmitting}>
+                  <Button type="submit" className="w-full btn-glow shadow-glow hover:shadow-glow-lg" loading={isSubmitting}>
                     <Send className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                     Send Message
                   </Button>

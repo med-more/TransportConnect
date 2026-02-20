@@ -48,7 +48,7 @@ const ServicesPage = () => {
               transition={{ duration: 0.6 }}
               className="text-center lg:text-left"
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
                 Our Services
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -82,7 +82,7 @@ const ServicesPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               How It Works
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -123,7 +123,7 @@ const ServicesPage = () => {
             viewport={{ once: true }}
             className="text-center mb-8 sm:mb-12"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               What We Offer
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -141,7 +141,7 @@ const ServicesPage = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="p-6 sm:p-8 hover:shadow-lg transition-all duration-300 h-full border border-border">
+                  <Card className="p-6 sm:p-8 hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
                     <div className="flex items-start gap-4 mb-6">
                       <div className="p-3 bg-primary/5 rounded-lg flex-shrink-0">
                         <Icon className="w-6 h-6 text-primary" />
@@ -175,7 +175,7 @@ const ServicesPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
               Ready to Get Started?
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -183,7 +183,7 @@ const ServicesPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register">
-                <Button size="large" className="w-full sm:w-auto">
+                <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
                   Get Started Free
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

@@ -312,7 +312,9 @@ export const googleCallback = async (req, res) => {
     const user = req.user
 
     if (!user) {
-      return res.redirect(`${process.env.FRONTEND_URL || "http://localhost:5174"}/login?error=google_auth_failed`)
+      const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
+      console.error("❌ No user found in Google OAuth callback")
+      return res.redirect(`${frontendUrl}/login?error=google_auth_failed`)
     }
 
     // Generate JWT token
@@ -325,20 +327,23 @@ export const googleCallback = async (req, res) => {
       (Date.now() - new Date(user.createdAt).getTime()) < 2 * 60 * 1000 // 2 minutes
 
     // Redirect to frontend with token
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
     
     if (isNewUser && user.role === "expediteur") {
       // New Google user - redirect to role selection
       const redirectUrl = `${frontendUrl}/auth/select-role?token=${token}&userId=${user._id}`
+      console.log("🔗 Redirecting new user to:", redirectUrl)
       res.redirect(redirectUrl)
     } else {
       // Existing user or already selected role - normal callback
       const redirectUrl = `${frontendUrl}/auth/google/callback?token=${token}&userId=${user._id}`
+      console.log("🔗 Redirecting existing user to:", redirectUrl)
       res.redirect(redirectUrl)
     }
   } catch (error) {
     console.error("Error in Google OAuth callback:", error)
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5174"
+    console.error("Error stack:", error.stack)
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173"
     res.redirect(`${frontendUrl}/login?error=google_auth_failed`)
   }
 }

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import { motion } from "framer-motion"
-import { useState } from "react"
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useState, useRef } from "react"
 import {
   Truck,
   MessageCircle,
@@ -51,10 +51,10 @@ const ImageCard = ({ item, index }) => {
   
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.96 }}
       whileInView={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      viewport={{ once: true }}
+      transition={{ ...transitionSmooth, delay: index * 0.06 }}
+      viewport={viewportDefaults}
       className="relative group overflow-hidden rounded-xl aspect-[4/3] cursor-pointer"
     >
       {!imageError ? (
@@ -90,41 +90,59 @@ const ImageCard = ({ item, index }) => {
   )
 }
 
+const viewportDefaults = { once: true, amount: 0.2 }
+const transitionSmooth = { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
+
 const WelcomePage = () => {
+  const heroRef = useRef(null)
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  })
+  const heroY = useTransform(heroProgress, [0, 1], [0, 60])
+  const heroOpacity = useTransform(heroProgress, [0, 0.5], [1, 0.85])
+  const { scrollYProgress: pageProgress } = useScroll()
+
   const features = [
     {
       icon: Shield,
       title: "Secure Transport",
+      benefit: "Your cargo in safe hands",
       description: "Verified and insured transporters with complete safety protocols",
       color: "from-blue-500 to-blue-600",
     },
     {
       icon: MessageCircle,
       title: "Real-time Chat",
+      benefit: "Stay in the loop, every step",
       description: "Direct communication with transporters for instant updates",
       color: "from-green-500 to-green-600",
     },
     {
       icon: Star,
       title: "Reliable Ratings",
+      benefit: "Choose with confidence",
       description: "Transparent rating system based on real user experiences",
       color: "from-yellow-500 to-yellow-600",
     },
     {
       icon: Clock,
       title: "Real-time Tracking",
+      benefit: "Know where your shipment is, always",
       description: "Track your packages live with GPS integration",
       color: "from-purple-500 to-purple-600",
     },
     {
       icon: Users,
       title: "Active Community",
+      benefit: "Find capacity when you need it",
       description: "Network of professional transporters across Morocco",
       color: "from-pink-500 to-pink-600",
     },
     {
       icon: Award,
       title: "Verified Partners",
+      benefit: "No surprises—only vetted drivers",
       description: "All transporters are verified and background checked",
       color: "from-indigo-500 to-indigo-600",
     },
@@ -167,6 +185,12 @@ const WelcomePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Scroll progress indicator */}
+      <motion.div
+        className="fixed top-0 left-0 right-0 h-1 bg-primary z-[100] origin-left"
+        style={{ scaleX: pageProgress }}
+      />
+
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-white/95 backdrop-blur-sm">
         <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
@@ -199,28 +223,27 @@ const WelcomePage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5"></div>
+      <section ref={heroRef} className="relative py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 overflow-hidden min-h-[85vh] flex flex-col justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5" />
         <div className="container mx-auto max-w-7xl relative z-10">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-4 sm:space-y-6"
-            >
+            transition={transitionSmooth}
+            className="space-y-4 sm:space-y-6"
+          >
               <div className="flex items-center gap-2 text-primary">
                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">Revolutionary Platform</span>
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
-                Connect with trusted transporters
+                Ship with confidence. Deliver on time.
               </h1>
 
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                The platform that revolutionizes freight transport in Morocco. Find the perfect transporter or offer your
-                services securely with real-time tracking and verified partners.
+                We connect shippers and transporters across Morocco with verified drivers, real-time tracking, and secure payments—so your cargo gets there safely.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -255,11 +278,12 @@ const WelcomePage = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ ...transitionSmooth, delay: 0.15 }}
+            style={{ y: heroY, opacity: heroOpacity }}
             className="relative"
-            >
+          >
               <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-primary/10 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16"></div>
                 <div className="bg-primary/10 rounded-xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-5 md:mb-6 relative z-10">
@@ -309,6 +333,51 @@ const WelcomePage = () => {
         </div>
       </section>
 
+      {/* Marquee – Trust strip (Awwwards-style) */}
+      <section className="relative py-4 sm:py-5 border-y border-border bg-foreground overflow-hidden">
+        <motion.div
+          className="flex whitespace-nowrap text-white/90 text-sm sm:text-base font-medium tracking-wide"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        >
+          {[
+            "Trusted across Morocco",
+            "•",
+            "Verified drivers",
+            "•",
+            "Real-time tracking",
+            "•",
+            "Secure payments",
+            "•",
+            "10K+ users",
+            "•",
+            "4.9/5 rating",
+            "•",
+            "24/7 support",
+          ]
+            .concat([
+              "Trusted across Morocco",
+              "•",
+              "Verified drivers",
+              "•",
+              "Real-time tracking",
+              "•",
+              "Secure payments",
+              "•",
+              "10K+ users",
+              "•",
+              "4.9/5 rating",
+              "•",
+              "24/7 support",
+            ])
+            .map((item, i) => (
+              <span key={i} className="mx-4 sm:mx-6 inline-block">
+                {item}
+              </span>
+            ))}
+        </motion.div>
+      </section>
+
       {/* Stats Section */}
       <section className="py-12 sm:py-16 px-3 sm:px-4 md:px-6 bg-accent/30">
         <div className="container mx-auto max-w-7xl">
@@ -318,10 +387,10 @@ const WelcomePage = () => {
               return (
                 <motion.div
                   key={stat.label}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                  transition={{ ...transitionSmooth, delay: index * 0.08 }}
+                  viewport={viewportDefaults}
                   className="text-center"
                 >
                   <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-primary/10 rounded-full mb-2 sm:mb-3 md:mb-4">
@@ -340,10 +409,10 @@ const WelcomePage = () => {
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
         <div className="container mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
             className="text-center mb-8 sm:mb-12 md:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">
@@ -360,16 +429,17 @@ const WelcomePage = () => {
               return (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 50 }}
+                  initial={{ opacity: 0, y: 36 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                  transition={{ ...transitionSmooth, delay: index * 0.07 }}
+                  viewport={viewportDefaults}
                 >
                   <div className="bg-card border border-border rounded-xl p-4 sm:p-5 md:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                     <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-3 sm:mb-4`}>
                       <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     </div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{feature.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-semibold text-foreground">{feature.title}</h3>
+                    <p className="text-sm font-medium text-primary mb-2">{feature.benefit}</p>
                     <p className="text-sm sm:text-base text-muted-foreground">{feature.description}</p>
                   </div>
                 </motion.div>
@@ -379,14 +449,71 @@ const WelcomePage = () => {
         </div>
       </section>
 
+      {/* Bento highlight – Awwwards-style */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-background">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
+              className="md:col-span-2 md:row-span-2 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-end min-h-[200px] sm:min-h-[280px] md:min-h-[320px]"
+            >
+              <p className="text-white/80 text-sm sm:text-base font-medium uppercase tracking-widest mb-2">
+                One platform
+              </p>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight max-w-xl">
+                Ship smarter. Not harder.
+              </h2>
+              <p className="text-white/90 mt-4 text-base sm:text-lg max-w-md">
+                From request to delivery—verified drivers, live tracking, and secure payments.
+              </p>
+            </motion.div>
+            <Link to="/for-shippers">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ ...transitionSmooth, delay: 0.08 }}
+                viewport={viewportDefaults}
+                className="h-full rounded-2xl sm:rounded-3xl border-2 border-border bg-card p-6 sm:p-8 hover:border-primary/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[160px] sm:min-h-[180px]"
+              >
+                <Package className="w-10 h-10 sm:w-12 sm:h-12 text-primary mb-3" />
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground">For Shippers</h3>
+                <p className="text-sm text-muted-foreground mt-1">Post requests, compare offers, track deliveries.</p>
+                <span className="inline-flex items-center gap-1 text-primary font-semibold text-sm mt-4">
+                  Learn more <ArrowRight className="w-4 h-4" />
+                </span>
+              </motion.div>
+            </Link>
+            <Link to="/for-drivers">
+              <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ ...transitionSmooth, delay: 0.12 }}
+                viewport={viewportDefaults}
+                className="h-full rounded-2xl sm:rounded-3xl border-2 border-border bg-card p-6 sm:p-8 hover:border-primary/50 hover:shadow-lg transition-all duration-300 flex flex-col justify-between min-h-[160px] sm:min-h-[180px]"
+              >
+                <Truck className="w-10 h-10 sm:w-12 sm:h-12 text-primary mb-3" />
+                <h3 className="text-xl sm:text-2xl font-bold text-foreground">For Drivers</h3>
+                <p className="text-sm text-muted-foreground mt-1">Fill your truck, get paid, grow your business.</p>
+                <span className="inline-flex items-center gap-1 text-primary font-semibold text-sm mt-4">
+                  Learn more <ArrowRight className="w-4 h-4" />
+                </span>
+              </motion.div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Image Gallery Section */}
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
             className="text-center mb-8 sm:mb-12 md:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">Our Platform in Action</h2>
@@ -408,10 +535,10 @@ const WelcomePage = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
               className="relative"
             >
               <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
@@ -426,10 +553,10 @@ const WelcomePage = () => {
               </div>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ ...transitionSmooth, delay: 0.1 }}
+              viewport={viewportDefaults}
               className="space-y-4 sm:space-y-6"
             >
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
@@ -461,10 +588,10 @@ const WelcomePage = () => {
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
             className="text-center mb-8 sm:mb-12 md:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">How It Works</h2>
@@ -479,10 +606,10 @@ const WelcomePage = () => {
               return (
                 <motion.div
                   key={step.number}
-                  initial={{ opacity: 0, y: 50 }}
+                  initial={{ opacity: 0, y: 36 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
+                  transition={{ ...transitionSmooth, delay: index * 0.08 }}
+                  viewport={viewportDefaults}
                   className="relative"
                 >
                   <div className="bg-card border border-border rounded-xl p-4 sm:p-5 md:p-6 text-center relative z-10">
@@ -510,10 +637,10 @@ const WelcomePage = () => {
         <div className="container mx-auto max-w-7xl">
           <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
+              initial={{ opacity: 0, x: -32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              viewport={{ once: true }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
               className="space-y-4 sm:space-y-6 order-2 lg:order-1"
             >
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
@@ -538,10 +665,10 @@ const WelcomePage = () => {
               </ul>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 32 }}
               whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ ...transitionSmooth, delay: 0.1 }}
+              viewport={viewportDefaults}
               className="relative order-1 lg:order-2"
             >
               <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
@@ -564,10 +691,10 @@ const WelcomePage = () => {
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-white">
         <div className="container mx-auto max-w-7xl">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
             className="text-center mb-8 sm:mb-12 md:mb-16"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">Success Stories</h2>
@@ -580,10 +707,10 @@ const WelcomePage = () => {
             {[1, 2].map((item, index) => (
               <motion.div
                 key={item}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 28 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.2 }}
-                viewport={{ once: true }}
+                transition={{ ...transitionSmooth, delay: index * 0.12 }}
+                viewport={viewportDefaults}
                 className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[16/9] shadow-xl group cursor-pointer"
               >
                 <img
@@ -605,20 +732,45 @@ const WelcomePage = () => {
               </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Testimonial – Awwwards-style quote block */}
+      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6 bg-foreground text-white">
+        <div className="container mx-auto max-w-4xl text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
+          >
+            <p className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white/95">
+              “TransportConnect cut our logistics headaches in half. We ship across Morocco every week—reliable,
+              transparent, and simple.”
+            </p>
+            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary flex items-center justify-center text-white font-bold text-lg sm:text-xl">
+                YM
+              </div>
+              <div className="text-left sm:text-center">
+                <p className="font-semibold text-white">Youssef M.</p>
+                <p className="text-sm text-white/70">Operations Manager, Casablanca</p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/30">
         <div className="container mx-auto max-w-4xl">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 32 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
             className="bg-card border border-border rounded-2xl p-6 sm:p-8 md:p-12 text-center shadow-xl"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">Ready to get started?</h2>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-3 sm:mb-4">Ship with confidence—get started in 2 minutes</h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-6 sm:mb-8 md:mb-10 max-w-2xl mx-auto px-4">
-              Join thousands of users who trust TransportConnect for their transport needs. Start today and experience
-              the future of logistics.
+              Join 10,000+ shippers and drivers. Create your free account, post a trip or request, and move your first shipment.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link to="/register" className="w-full sm:w-auto">

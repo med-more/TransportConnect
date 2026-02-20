@@ -54,7 +54,7 @@ const ForDriversPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
                 For Drivers
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
@@ -62,7 +62,7 @@ const ForDriversPage = () => {
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link to="/register">
-                  <Button size="large" className="w-full sm:w-auto">
+                  <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
                     Become a Driver
                     <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
@@ -103,7 +103,7 @@ const ForDriversPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Why Drive with TransportConnect?
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -144,7 +144,7 @@ const ForDriversPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Maximize Your Earnings
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -166,7 +166,7 @@ const ForDriversPage = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <Card className="p-6 sm:p-8 border border-border">
+                <Card className="p-6 sm:p-8 glass-card border border-white/30">
                   <div className="text-3xl sm:text-4xl md:text-5xl font-bold text-primary mb-2">{stat.value}</div>
                   <div className="text-sm sm:text-base text-muted-foreground">{stat.label}</div>
                 </Card>
@@ -185,7 +185,7 @@ const ForDriversPage = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8 headline-premium">
                 Everything You Need to Succeed
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
@@ -242,7 +242,7 @@ const ForDriversPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Driver Success Stories
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -261,7 +261,7 @@ const ForDriversPage = () => {
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
               >
-                <Card className="p-6 sm:p-8 border border-border">
+                <Card className="p-6 sm:p-8 glass-card border border-white/30">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="font-semibold text-foreground text-lg">{story.name}</p>
@@ -285,14 +285,14 @@ const ForDriversPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
               Ready to Start Earning?
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join our network of professional drivers today
             </p>
             <Link to="/register">
-              <Button size="large">
+              <Button size="large" className="btn-glow shadow-glow hover:shadow-glow-lg">
                 Become a Driver
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>

@@ -49,6 +49,7 @@ const TripsPage = () => {
   })
   const [showFilters, setShowFilters] = useState(false)
   const [sortBy, setSortBy] = useState("departureDate")
+  const [bestDealOnly, setBestDealOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
@@ -62,7 +63,8 @@ const TripsPage = () => {
       if (user?.role === "conducteur") {
         return tripsAPI.getMyTrips(filters)
       } else {
-        return tripsAPI.getTrips({ ...filters, sortBy })
+        // Shippers: fetch all trips (high limit) for client-side filtering, sorting & pagination
+        return tripsAPI.getTrips({ ...filters, sortBy, limit: 2000 })
       }
     },
     enabled: !!user,
@@ -99,6 +101,7 @@ const TripsPage = () => {
       cargoType: "",
       status: "active",
     })
+    setBestDealOnly(false)
   }
 
   const getStatusColor = (status) => {
@@ -171,16 +174,22 @@ const TripsPage = () => {
     }
   })
 
+  // Apply "Best deal only" filter for shippers (client-side)
+  const filteredTrips =
+    user?.role !== "conducteur" && bestDealOnly && parseFloat(shipperStats.averagePrice) > 0
+      ? sortedTrips.filter((t) => t.pricePerKg <= parseFloat(shipperStats.averagePrice))
+      : sortedTrips
+
   // Pagination logic
-  const totalPages = Math.ceil(sortedTrips.length / itemsPerPage)
+  const totalPages = Math.ceil(filteredTrips.length / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedTrips = sortedTrips.slice(startIndex, endIndex)
+  const paginatedTrips = filteredTrips.slice(startIndex, endIndex)
 
   // Reset to page 1 when filters or sort change
   useEffect(() => {
     setCurrentPage(1)
-  }, [filters.departure, filters.destination, filters.date, filters.cargoType, filters.status, sortBy])
+  }, [filters.departure, filters.destination, filters.date, filters.cargoType, filters.status, sortBy, bestDealOnly])
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -326,19 +335,38 @@ const TripsPage = () => {
           </h3>
           <div className="flex items-center gap-2 flex-wrap">
             {isShipper && (
-              <div className="flex items-center gap-2">
-                <ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <select
-                  className="input-field py-1.5 text-xs sm:text-sm min-w-[120px]"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+              <>
+                <label
+                  className={clsx(
+                    "flex items-center gap-2 py-1.5 px-3 rounded-lg border cursor-pointer transition-colors text-xs sm:text-sm font-medium",
+                    bestDealOnly
+                      ? "bg-warning/15 text-warning border-warning/30"
+                      : "bg-muted/50 text-muted-foreground border-border hover:border-warning/30"
+                  )}
                 >
-                  <option value="departureDate">Sort by Date</option>
-                  <option value="priceAsc">Price: Low to High</option>
-                  <option value="priceDesc">Price: High to Low</option>
-                  <option value="capacityDesc">Capacity: High to Low</option>
-                </select>
-              </div>
+                  <Sparkles className="w-4 h-4 shrink-0" />
+                  <span className="whitespace-nowrap">Best deal only</span>
+                  <input
+                    type="checkbox"
+                    checked={bestDealOnly}
+                    onChange={(e) => setBestDealOnly(e.target.checked)}
+                    className="sr-only"
+                  />
+                </label>
+                <div className="flex items-center gap-2">
+                  <ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <select
+                    className="input-field py-1.5 text-xs sm:text-sm min-w-[120px]"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="departureDate">Sort by Date</option>
+                    <option value="priceAsc">Price: Low to High</option>
+                    <option value="priceDesc">Price: High to Low</option>
+                    <option value="capacityDesc">Capacity: High to Low</option>
+                  </select>
+                </div>
+              </>
             )}
             <Button variant="ghost" size="small" onClick={() => setShowFilters(!showFilters)} className="flex-shrink-0">
               {showFilters ? "Hide" : "Show"} Filters
@@ -434,20 +462,23 @@ const TripsPage = () => {
                   <Card
                     hover
                     className={clsx(
-                      "p-4 sm:p-5 md:p-6 h-full flex flex-col relative overflow-hidden",
+                      "p-4 sm:p-5 md:p-6 h-full flex flex-col relative overflow-visible",
                       isBestDeal && "border-2 border-warning/30"
                     )}
                   >
                     {isBestDeal && (
-                      <div className="absolute top-4 right-4 flex items-center gap-1 px-2 py-1 bg-warning/10 rounded-md border border-warning/20">
-                        <Sparkles className="w-3 h-3 text-warning" />
-                        <span className="text-xs font-semibold text-warning">Best Deal</span>
+                      <div
+                        className="absolute top-0 right-0 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-bl-lg rounded-tr-lg bg-warning text-gray-900 shadow-md"
+                        aria-label="Best deal"
+                      >
+                        <Sparkles className="w-4 h-4 shrink-0" />
+                        <span className="text-xs font-bold uppercase tracking-wide">Best Deal</span>
                       </div>
                     )}
 
                     {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <div className="flex-1 min-w-0 pr-0">
                         <div className="flex items-center gap-2 mb-2">
                           <div className="p-2 bg-primary/10 rounded-lg">
                             <Navigation className="w-5 h-5 text-primary" />
@@ -466,9 +497,11 @@ const TripsPage = () => {
                           <span>{getStatusLabel(trip.status)}</span>
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <div className="text-2xl font-bold text-primary">{trip.pricePerKg}€/kg</div>
-                        <div className="text-sm text-muted-foreground flex items-center gap-1">
+                      <div className={clsx("text-right shrink-0 min-w-0", isBestDeal && "pt-6")}>
+                        <div className="text-2xl font-bold text-primary truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>
+                          {Number(trip.pricePerKg).toFixed(2)}€/kg
+                        </div>
+                        <div className="text-sm text-muted-foreground flex items-center justify-end gap-1">
                           <Weight className="w-3 h-3" />
                           {trip.availableCapacity.weight}kg
                         </div>
@@ -627,7 +660,9 @@ const TripsPage = () => {
               <div className="flex flex-col gap-4 mt-6 pt-6 border-t border-border">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1} to {Math.min(endIndex, sortedTrips.length)} of {sortedTrips.length} trip{sortedTrips.length !== 1 ? "s" : ""}
+                    {filteredTrips.length === 0
+                      ? "Showing 0 of 0 trips"
+                      : `Showing ${startIndex + 1} to ${Math.min(endIndex, filteredTrips.length)} of ${filteredTrips.length} trip${filteredTrips.length !== 1 ? "s" : ""}`}
                   </div>
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2">

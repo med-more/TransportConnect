@@ -15,9 +15,12 @@
         maxWeight,
         minCapacity,
         page = 1,
-        limit = 10,
+        limit: limitParam = 10,
         sortBy = "departureDate",
       } = req.query
+
+      // Allow up to 2000 trips per request (for shippers browsing all trips); default 10
+      const limit = Math.min(Math.max(1, parseInt(limitParam, 10) || 10), 2000)
 
       const filter = { status: "active" }
 
@@ -47,8 +50,8 @@
       }
 
       const options = {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: parseInt(page, 10) || 1,
+        limit,
         sort: { [sortBy]: 1 },
         populate: {
           path: "driver",

@@ -273,7 +273,7 @@ const AdminTripsPage = () => {
                             </span>
                           </div>
                           <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground ml-6">
-                            <span>Price: {trip.pricePerKg}€/kg</span>
+                            <span>Price: {Number(trip.pricePerKg).toFixed(2)}€/kg</span>
                             <span className="flex items-center gap-1">
                               <Package className="w-3 h-3" />
                               {trip.availableCapacity?.weight} kg
@@ -476,7 +476,7 @@ const AdminTripsPage = () => {
                             </span>
                           </div>
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>Price: {trip.pricePerKg}€/kg</span>
+                            <span>Price: {Number(trip.pricePerKg).toFixed(2)}€/kg</span>
                             <span className="flex items-center gap-1">
                               <Package className="w-3 h-3" />
                               Capacity: {trip.availableCapacity?.weight} kg
@@ -807,7 +807,7 @@ const AdminTripsPage = () => {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="text-sm text-muted-foreground">Price per kg:</span>
-                        <span className="font-semibold text-foreground text-lg">{tripDetails.pricePerKg}€</span>
+                        <span className="font-semibold text-foreground text-lg">{Number(tripDetails.pricePerKg).toFixed(2)}€</span>
                       </div>
                       {tripDetails.totalEarnings > 0 && (
                         <div className="flex items-center gap-2">

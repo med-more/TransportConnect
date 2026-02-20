@@ -50,7 +50,7 @@ const AboutUsPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
                 About TransportConnect
               </h1>
               <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -84,7 +84,7 @@ const AboutUsPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Our Journey
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -148,7 +148,7 @@ const AboutUsPage = () => {
             viewport={{ once: true }}
             className="prose prose-lg max-w-none"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8 headline-premium">
               Our Story
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-4 sm:mb-6 leading-relaxed">
@@ -195,7 +195,7 @@ const AboutUsPage = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <Card className="p-6 sm:p-8 border border-border">
+                <Card className="p-6 sm:p-8 glass-card border border-white/30">
                   <div className="text-sm sm:text-base font-medium text-muted-foreground">{partner}</div>
                 </Card>
               </motion.div>
@@ -213,7 +213,7 @@ const AboutUsPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
               Our Impact
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -230,7 +230,7 @@ const AboutUsPage = () => {
                 transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <Card className="p-6 sm:p-8 hover:shadow-lg transition-shadow border border-border">
+                <Card className="p-6 sm:p-8 hover:shadow-lg transition-shadow glass-card border border-white/30">
                   <div className="text-3xl sm:text-4xl md:text-5xl font-semibold text-primary mb-2 sm:mb-3">
                     {stat.value}
                   </div>
@@ -271,7 +271,7 @@ const AboutUsPage = () => {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                 >
-                  <Card className="p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all duration-300 h-full border border-border">
+                  <Card className="p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
                     <div className="flex items-start gap-4 sm:gap-6">
                       <div className="p-3 sm:p-4 bg-primary/5 rounded-lg flex-shrink-0">
                         <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
@@ -301,7 +301,7 @@ const AboutUsPage = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
               Join Our Community
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
@@ -309,7 +309,7 @@ const AboutUsPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register">
-                <Button size="large" className="w-full sm:w-auto">
+                <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
                   Get Started
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>

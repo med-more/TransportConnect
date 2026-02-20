@@ -247,7 +247,7 @@ const DashboardPage = () => {
                               </p>
                             </div>
                           </div>
-                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0">{trip.pricePerKg}€/kg</span>
+                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0 truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>{Number(trip.pricePerKg).toFixed(2)}€/kg</span>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">

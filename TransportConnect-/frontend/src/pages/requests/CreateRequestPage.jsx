@@ -2,7 +2,7 @@ import { useEffect } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Package, MapPin, User, Euro } from "../../utils/icons"
+import { ArrowLeft, Package, MapPin, User, Euro, AlertCircle } from "../../utils/icons"
 import { tripsAPI, requestsAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
@@ -10,6 +10,7 @@ import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import { CARGO_TYPES } from "../../config/constants"
 import toast from "react-hot-toast"
+import clsx from "clsx"
 
 const CreateRequestPage = () => {
   const { tripId: tripIdParam } = useParams()
@@ -83,9 +84,20 @@ const CreateRequestPage = () => {
   })
 
   const watchedWeight = watch("weight")
+  const watchedLength = watch("length")
+  const watchedWidth = watch("width")
+  const watchedHeight = watch("height")
   const trip = tripData?.data?.trip
 
   const estimatedPrice = watchedWeight && trip ? (Number.parseFloat(watchedWeight) * trip.pricePerKg).toFixed(2) : 0
+
+  const maxWeight = trip?.availableCapacity?.weight
+  const maxDims = trip?.availableCapacity?.dimensions
+
+  const weightExceedsLimit = maxWeight != null && watchedWeight !== "" && Number(watchedWeight) > Number(maxWeight)
+  const lengthExceedsLimit = maxDims?.length != null && watchedLength !== "" && Number(watchedLength) > Number(maxDims.length)
+  const widthExceedsLimit = maxDims?.width != null && watchedWidth !== "" && Number(watchedWidth) > Number(maxDims.width)
+  const heightExceedsLimit = maxDims?.height != null && watchedHeight !== "" && Number(watchedHeight) > Number(maxDims.height)
 
   const onSubmit = async (data) => {
     // Prevent double submission
@@ -189,7 +201,7 @@ const CreateRequestPage = () => {
           </div>
           <div>
             <h3 className="font-medium text-foreground">Price</h3>
-            <p className="text-primary font-semibold">{trip.pricePerKg}€/kg</p>
+            <p className="text-primary font-semibold">{Number(trip.pricePerKg).toFixed(2)}€/kg</p>
           </div>
         </div>
       </Card>
@@ -230,53 +242,105 @@ const CreateRequestPage = () => {
                 {errors.cargoType && <p className="text-sm text-destructive mt-1">{errors.cargoType.message}</p>}
               </div>
 
-              <Input
-                label="Weight (kg)"
-                type="number"
-                step="0.1"
-                placeholder="25.5"
-                error={errors.weight?.message}
-                {...register("weight", {
-                  required: "Weight is required",
-                  min: { value: 0.1, message: "Weight must be greater than 0" },
-                  max: {
-                    value: trip.availableCapacity.weight,
-                    message: `Weight cannot exceed ${trip.availableCapacity.weight}kg`,
-                  },
-                })}
-              />
+              <div>
+                <Input
+                  label="Weight (kg)"
+                  type="number"
+                  step="0.1"
+                  placeholder="25.5"
+                  error={errors.weight?.message || (weightExceedsLimit ? `Cannot exceed the driver's limit (${maxWeight} kg)` : undefined)}
+                  {...register("weight", {
+                    required: "Weight is required",
+                    min: { value: 0.1, message: "Weight must be greater than 0" },
+                    ...(maxWeight != null && {
+                      max: {
+                        value: maxWeight,
+                        message: `Cannot exceed the driver's limit (${maxWeight} kg)`,
+                      },
+                    }),
+                  })}
+                />
+                {maxWeight != null && (
+                  <p className={clsx("text-xs mt-1.5 flex items-center gap-1.5 font-medium", weightExceedsLimit ? "text-destructive" : "text-info")}>
+                    {weightExceedsLimit && <AlertCircle className="w-4 h-4 shrink-0" />}
+                    Driver's maximum: {maxWeight} kg
+                  </p>
+                )}
+              </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm)</label>
               <div className="grid grid-cols-3 gap-4">
-                <Input
-                  placeholder="Length"
-                  type="number"
-                  error={errors.length?.message}
-                  {...register("length", {
-                    required: "Length is required",
-                    min: { value: 1, message: "Length must be greater than 0" },
-                  })}
-                />
-                <Input
-                  placeholder="Width"
-                  type="number"
-                  error={errors.width?.message}
-                  {...register("width", {
-                    required: "Width is required",
-                    min: { value: 1, message: "Width must be greater than 0" },
-                  })}
-                />
-                <Input
-                  placeholder="Height"
-                  type="number"
-                  error={errors.height?.message}
-                  {...register("height", {
-                    required: "Height is required",
-                    min: { value: 1, message: "Height must be greater than 0" },
-                  })}
-                />
+                <div>
+                  <Input
+                    placeholder="Length"
+                    type="number"
+                    error={errors.length?.message || (lengthExceedsLimit ? `Cannot exceed driver's limit (${maxDims?.length} cm)` : undefined)}
+                    {...register("length", {
+                      required: "Length is required",
+                      min: { value: 1, message: "Length must be greater than 0" },
+                      ...(maxDims?.length != null && {
+                        max: {
+                          value: maxDims.length,
+                          message: `Cannot exceed the driver's limit (${maxDims.length} cm)`,
+                        },
+                      }),
+                    })}
+                  />
+                  {maxDims?.length != null && (
+                    <p className={clsx("text-xs mt-1.5 flex items-center gap-1.5 font-medium", lengthExceedsLimit ? "text-destructive" : "text-info")}>
+                      {lengthExceedsLimit && <AlertCircle className="w-4 h-4 shrink-0" />}
+                      Max: {maxDims.length} cm
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    placeholder="Width"
+                    type="number"
+                    error={errors.width?.message || (widthExceedsLimit ? `Cannot exceed driver's limit (${maxDims?.width} cm)` : undefined)}
+                    {...register("width", {
+                      required: "Width is required",
+                      min: { value: 1, message: "Width must be greater than 0" },
+                      ...(maxDims?.width != null && {
+                        max: {
+                          value: maxDims.width,
+                          message: `Cannot exceed the driver's limit (${maxDims.width} cm)`,
+                        },
+                      }),
+                    })}
+                  />
+                  {maxDims?.width != null && (
+                    <p className={clsx("text-xs mt-1.5 flex items-center gap-1.5 font-medium", widthExceedsLimit ? "text-destructive" : "text-info")}>
+                      {widthExceedsLimit && <AlertCircle className="w-4 h-4 shrink-0" />}
+                      Max: {maxDims.width} cm
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    placeholder="Height"
+                    type="number"
+                    error={errors.height?.message || (heightExceedsLimit ? `Cannot exceed driver's limit (${maxDims?.height} cm)` : undefined)}
+                    {...register("height", {
+                      required: "Height is required",
+                      min: { value: 1, message: "Height must be greater than 0" },
+                      ...(maxDims?.height != null && {
+                        max: {
+                          value: maxDims.height,
+                          message: `Cannot exceed the driver's limit (${maxDims.height} cm)`,
+                        },
+                      }),
+                    })}
+                  />
+                  {maxDims?.height != null && (
+                    <p className={clsx("text-xs mt-1.5 flex items-center gap-1.5 font-medium", heightExceedsLimit ? "text-destructive" : "text-info")}>
+                      {heightExceedsLimit && <AlertCircle className="w-4 h-4 shrink-0" />}
+                      Max: {maxDims.height} cm
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -396,7 +460,7 @@ const CreateRequestPage = () => {
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Price per kg:</span>
-              <span className="text-foreground">{trip.pricePerKg}€</span>
+              <span className="text-foreground">{Number(trip.pricePerKg).toFixed(2)}€</span>
             </div>
             <div className="border-t border-border pt-2 flex justify-between">
               <span className="font-semibold text-foreground">Estimated total:</span>

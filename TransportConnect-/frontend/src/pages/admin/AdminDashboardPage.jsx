@@ -1,3 +1,7 @@
+/**
+ * Admin dashboard – layout, typography, and data-display patterns aligned with
+ * building-admin-dashboard-customizations (display on mount, loading states, semantic spacing).
+ */
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
@@ -10,6 +14,7 @@ import {
   TrendingUp,
   ArrowRight,
   BarChart3,
+  AlertCircle,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -81,6 +86,8 @@ const AdminDashboardPage = () => {
     activeUsers: allUsers.filter(u => u.isActive !== false).length,
     verifiedUsers: allUsers.filter(u => u.isVerified === true).length,
   }
+
+  const needsAttention = (stats.pendingVerifications || 0) > 0 || activityStats.pendingRequests > 0
 
   const statCards = [
     {
@@ -207,8 +214,40 @@ const AdminDashboardPage = () => {
           </div>
         </motion.div>
 
-        {/* Stats Cards */}
-        <motion.div variants={itemVariants} className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {/* Attention needed */}
+        {needsAttention && (
+          <motion.div variants={itemVariants}>
+            <Link to={(stats.pendingVerifications || 0) > 0 ? "/admin/verifications" : "/admin/requests"}>
+              <Card className="p-4 border-l-4 border-l-warning bg-warning/5 hover:bg-warning/10 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-warning/20">
+                    <AlertCircle className="w-5 h-5 text-warning" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Attention needed</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                      {(stats.pendingVerifications || 0) > 0 && activityStats.pendingRequests > 0
+                        ? `${stats.pendingVerifications} verification(s) and ${activityStats.pendingRequests} pending request(s) need review`
+                        : (stats.pendingVerifications || 0) > 0
+                          ? `${stats.pendingVerifications} user verification(s) pending`
+                          : `${activityStats.pendingRequests} request(s) awaiting action`}
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-warning shrink-0" />
+                </div>
+              </Card>
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Key metrics */}
+        <motion.div variants={itemVariants}>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-px flex-1 bg-border" />
+            <h2 className="admin-label px-2">Key metrics</h2>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {statCards.map((stat, index) => {
             const Icon = stat.icon
             return (
@@ -234,16 +273,28 @@ const AdminDashboardPage = () => {
               </Card>
             )
           })}
+          </div>
         </motion.div>
 
-        {/* Statistics Charts - Two Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+        {/* Analytics */}
+        <motion.div variants={itemVariants}>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-px flex-1 bg-border" />
+            <h2 className="admin-label px-2">Analytics</h2>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
           {/* Platform Overview Statistics */}
           <motion.div variants={itemVariants}>
-            <Card className="p-4 sm:p-5 md:p-6">
+            <Card className="p-4 sm:p-5 md:p-6 h-full">
               <div className="flex items-center gap-2 mb-4">
-                <BarChart3 className="w-5 h-5 text-primary" />
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Overview</h3>
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="admin-card-title">Platform overview</h3>
+                  <p className="admin-card-subtitle">Users, trips, requests & verifications</p>
+                </div>
               </div>
               <div className="h-48 sm:h-64 md:h-80">
                 <Bar
@@ -290,10 +341,15 @@ const AdminDashboardPage = () => {
 
           {/* Activity Statistics */}
           <motion.div variants={itemVariants}>
-            <Card className="p-4 sm:p-5 md:p-6">
+            <Card className="p-4 sm:p-5 md:p-6 h-full">
               <div className="flex items-center gap-2 mb-4">
-                <TrendingUp className="w-5 h-5 text-info" />
-                <h3 className="text-base sm:text-lg font-semibold text-foreground">Activity Distribution</h3>
+                <div className="p-2 rounded-lg bg-info/10">
+                  <TrendingUp className="w-5 h-5 text-info" />
+                </div>
+                <div>
+                  <h3 className="admin-card-title">Activity distribution</h3>
+                  <p className="admin-card-subtitle">Trips & requests by status</p>
+                </div>
               </div>
               <div className="h-48 sm:h-64 md:h-80">
                 <Doughnut
@@ -343,17 +399,30 @@ const AdminDashboardPage = () => {
               </div>
             </Card>
           </motion.div>
-        </div>
+          </div>
+        </motion.div>
 
-        {/* Main Content Grid */}
+        {/* Quick access & Activity */}
+        <motion.div variants={itemVariants}>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-px flex-1 bg-border" />
+            <h2 className="admin-label px-2">Quick access & activity</h2>
+            <div className="h-px flex-1 bg-border" />
+          </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Quick Actions</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <Truck className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="admin-card-title">Quick actions</h3>
+                    <p className="admin-card-subtitle">Jump to management sections</p>
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   {quickActions.map((action, index) => {
@@ -382,7 +451,12 @@ const AdminDashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Recent Trips</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-info/10">
+                      <Truck className="w-4 h-4 text-info" />
+                    </div>
+                    <h3 className="admin-card-title">Recent trips</h3>
+                  </div>
                   <Link to="/admin/trips">
                     <Button variant="ghost" size="small" className="text-xs sm:text-sm">
                       View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
@@ -415,8 +489,8 @@ const AdminDashboardPage = () => {
                               </p>
                             </div>
                           </div>
-                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0">
-                            {trip.pricePerKg}€/kg
+                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0 truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>
+                            {Number(trip.pricePerKg).toFixed(2)}€/kg
                           </span>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
@@ -456,7 +530,12 @@ const AdminDashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Recent Requests</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-warning/10">
+                      <Package className="w-4 h-4 text-warning" />
+                    </div>
+                    <h3 className="admin-card-title">Recent requests</h3>
+                  </div>
                   <Link to="/admin/requests">
                     <Button variant="ghost" size="small" className="text-xs sm:text-sm">
                       View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
@@ -525,7 +604,12 @@ const AdminDashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Pending Verifications</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-success/10">
+                      <Shield className="w-4 h-4 text-success" />
+                    </div>
+                    <h3 className="admin-card-title">Pending verifications</h3>
+                  </div>
                   <Link to="/admin/verifications">
                     <Button variant="ghost" size="small" className="text-xs sm:text-sm">
                       View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
@@ -589,33 +673,39 @@ const AdminDashboardPage = () => {
               </Card>
             </motion.div>
 
-            {/* Platform Overview */}
+            {/* Platform at a glance */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Platform Overview</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="admin-card-title">Platform at a glance</h3>
+                    <p className="admin-card-subtitle">Current counts</p>
+                  </div>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Active Users</span>
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                    <span className="admin-description">Active users</span>
                     <span className="font-medium text-foreground">
                       {(recentUsers?.data || []).filter((u) => u.isActive)?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Verified Users</span>
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                    <span className="admin-description">Verified users</span>
                     <span className="font-medium text-foreground">
                       {(recentUsers?.data || []).filter((u) => u.isVerified)?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Active Trips</span>
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                    <span className="admin-description">Active trips</span>
                     <span className="font-medium text-foreground">
                       {(recentTrips?.data || []).filter((t) => t.status === "active")?.length || 0}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Pending Requests</span>
+                  <div className="flex items-center justify-between text-sm py-2 border-b border-border/50">
+                    <span className="admin-description">Pending requests</span>
                     <span className="font-medium text-foreground">
                       {(recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0}
                     </span>
@@ -625,6 +715,7 @@ const AdminDashboardPage = () => {
             </motion.div>
           </div>
         </div>
+        </motion.div>
       </motion.div>
     </div>
   )

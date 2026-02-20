@@ -70,6 +70,29 @@ body {
   .card-hover {
     @apply card transition-all duration-200 hover:shadow-md;
   }
+
+  /* Admin dashboard customizations (patterns from building-admin-dashboard-customizations) */
+  .admin-section-padding {
+    @apply px-6 py-4;
+  }
+  .admin-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+  .admin-description {
+    @apply text-xs leading-tight text-muted-foreground;
+  }
+  .admin-card-title {
+    @apply text-base sm:text-lg font-semibold text-foreground;
+  }
+  .admin-card-subtitle {
+    @apply text-xs text-muted-foreground;
+  }
+  .admin-list-gap {
+    @apply gap-2;
+  }
+  .admin-list-item-gap {
+    @apply gap-3;
+  }
 }
 
 /* Custom Utilities */

@@ -64,7 +64,7 @@ const PrivacyPolicyPage = () => {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
               Privacy Policy
             </h1>
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -104,7 +104,7 @@ const PrivacyPolicyPage = () => {
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="p-6 sm:p-8 md:p-10 border border-border">
+                  <Card className="p-6 sm:p-8 md:p-10 glass-card border border-white/30">
                     <div className="flex items-start gap-4 sm:gap-6 mb-4 sm:mb-6">
                       <div className="p-3 bg-primary/5 rounded-lg flex-shrink-0">
                         <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />

@@ -26,12 +26,26 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   let callbackURL = process.env.GOOGLE_CALLBACK_URL
   if (!callbackURL || !callbackURL.startsWith("http")) {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:7000"
-    callbackURL = `${backendUrl}/api/auth/google/callback`
+    // Remove trailing slash from backendUrl if present
+    const cleanBackendUrl = backendUrl.endsWith("/") ? backendUrl.slice(0, -1) : backendUrl
+    callbackURL = `${cleanBackendUrl}/api/auth/google/callback`
   }
+  // Normalize callback URL - remove trailing slash if present
+  callbackURL = callbackURL.endsWith("/") && callbackURL !== "http://" && callbackURL !== "https://" 
+    ? callbackURL.slice(0, -1) 
+    : callbackURL
   
   console.log("🔧 Google OAuth Configuration:")
   console.log("   Client ID:", process.env.GOOGLE_CLIENT_ID?.substring(0, 20) + "...")
   console.log("   Callback URL:", callbackURL)
+  console.log("   Frontend URL:", process.env.FRONTEND_URL || "http://localhost:5173 (default)")
+  console.log("")
+  console.log("⚠️  IMPORTANT: Make sure this exact callback URL is added to your Google Cloud Console:")
+  console.log("   → Go to: https://console.cloud.google.com/apis/credentials")
+  console.log("   → Select your OAuth 2.0 Client ID")
+  console.log("   → Under 'Authorized redirect URIs', add:")
+  console.log(`   → ${callbackURL}`)
+  console.log("")
   
   passport.use(
     new GoogleStrategy(

@@ -135,8 +135,8 @@ export const validateTripSearch = [
 
   query("limit")
     .optional({ checkFalsy: true })
-    .isInt({ min: 1, max: 50 })
-    .withMessage("La limite doit être entre 1 et 50"),
+    .isInt({ min: 1, max: 2000 })
+    .withMessage("La limite doit être entre 1 et 2000"),
 
   handleValidationErrors,
 ]

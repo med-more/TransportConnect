@@ -299,12 +299,14 @@ const TripDetailPage = () => {
                     {trip.availableCapacity.dimensions.height} cm
                   </p>
                 </div>
-                <div className="p-4 bg-primary/10 rounded-lg">
+                <div className="p-4 bg-primary/10 rounded-lg min-w-0 overflow-hidden">
                   <div className="flex items-center gap-2 mb-2">
-                    <Euro className="w-4 h-4 text-primary" />
-                    <h3 className="text-sm font-medium text-primary">Price per kg</h3>
+                    <Euro className="w-4 h-4 text-primary shrink-0" />
+                    <h3 className="text-sm font-medium text-primary truncate">Price per kg</h3>
                   </div>
-                  <p className="text-2xl font-bold text-primary">{trip.pricePerKg}€/kg</p>
+                  <p className="text-2xl font-bold text-primary truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>
+                    {Number(trip.pricePerKg).toFixed(2)}€/kg
+                  </p>
                 </div>
               </div>
             </Card>
