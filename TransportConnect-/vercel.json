@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd frontend && npm ci && npm run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "cd frontend && npm ci",
+  "framework": null,
+  "rewrites": [
+    { "source": "/((?!_next/|api/|assets/|.*\\.(?:ico|png|jpg|jpeg|gif|svg|css|js|woff2?)$).*)", "destination": "/index.html" }
+  ]
+}
