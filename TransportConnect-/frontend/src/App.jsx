@@ -41,6 +41,7 @@ import AdminUsersPage from "./pages/admin/AdminUsersPage"
 import AdminTripsPage from "./pages/admin/AdminTripsPage"
 import AdminRequestsPage from "./pages/admin/AdminRequestsPage"
 import AdminVerificationsPage from "./pages/admin/AdminVerificationsPage"
+import AdminVehiclesPage from "./pages/admin/AdminVehiclesPage"
 
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth()
@@ -235,8 +236,16 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-
-      
+      <Route
+        path="/admin/vehicles"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminVehiclesPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }

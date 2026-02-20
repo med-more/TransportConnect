@@ -129,6 +129,8 @@ export const adminAPI = {
   updateRequestStatus: (requestId, data) => api.patch(`/admin/requests/${requestId}/status`, data),
   deleteRequest: (requestId) => api.delete(`/admin/requests/${requestId}`),
   getStats: () => api.get("/admin/stats").then(res => res.data),
+  updateUserVehicle: (userId, vehicleInfo) =>
+    api.patch(`/admin/users/${userId}/vehicle`, { vehicleInfo }).then(res => res.data),
 }
 
 export default api

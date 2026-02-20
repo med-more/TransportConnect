@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import clsx from "clsx"
@@ -22,19 +22,23 @@ import {
   Paperclip,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
-import { tripsAPI, requestsAPI, usersAPI } from "../../services/api"
+import { tripsAPI, requestsAPI, usersAPI, notificationsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
+import ShipmentTrackingMap from "../../components/ShipmentTrackingMap"
 
 const DashboardPage = () => {
   const { user } = useAuth()
+  const navigate = useNavigate()
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: statsResponse, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats"],
     queryFn: usersAPI.getStats,
   })
+  // API returns { data: { success, data: { totalTrips, totalRequests, averageRating, ... } } }
+  const stats = statsResponse?.data?.data ?? statsResponse?.data ?? {}
 
   const { data: recentTrips, isLoading: tripsLoading } = useQuery({
     queryKey: ["recent-trips"],
@@ -46,14 +50,64 @@ const DashboardPage = () => {
     queryKey: ["recent-requests"],
     queryFn: () =>
       user?.role === "conducteur"
-        ? requestsAPI.getReceivedRequests({ limit: 5 })
-        : requestsAPI.getRequests({ limit: 5 }),
+        ? requestsAPI.getReceivedRequests({ limit: 10 })
+        : requestsAPI.getRequests({ limit: 10 }),
   })
+
+  const { data: notificationsData } = useQuery({
+    queryKey: ["notifications-dashboard", user?._id],
+    queryFn: () => notificationsAPI.getNotifications({ limit: 5 }),
+    enabled: !!user?._id,
+  })
+
+  const notifications = notificationsData?.notifications || []
+
+  // Active shipment: for driver = first active trip; for shipper = first accepted/in_transit request
+  const activeTrip =
+    user?.role === "conducteur"
+      ? recentTrips?.data?.trips?.find((t) => t.status === "active")
+      : null
+  const activeRequest =
+    user?.role !== "conducteur"
+      ? recentRequests?.data?.requests?.find((r) =>
+          ["accepted", "in_transit"].includes(r.status)
+        )
+      : recentRequests?.data?.requests?.find((r) =>
+          ["accepted", "in_transit"].includes(r.status)
+        )
+
+  // For driver: used weight from active trip's accepted requests; truck capacity from vehicleInfo
+  const acceptedRequests = activeTrip?.acceptedRequests || []
+  const usedWeight = acceptedRequests.reduce(
+    (sum, req) => sum + (req.cargo?.weight || 0),
+    0
+  )
+  const truckCapacityKg = user?.vehicleInfo?.capacity
+  const capacityPercent =
+    truckCapacityKg > 0
+      ? Math.min(100, Math.round((usedWeight / truckCapacityKg) * 100))
+      : 0
+
+  // ETA from trip arrival date (when we have an active trip)
+  const getDistanceToArrival = () => {
+    const trip = activeTrip || activeRequest?.trip
+    if (!trip?.arrivalDate) return null
+    const now = new Date()
+    const arrival = new Date(trip.arrivalDate)
+    if (arrival <= now) return { text: "Arrived", min: 0 }
+    const min = Math.round((arrival - now) / (60 * 1000))
+    const hours = Math.floor(min / 60)
+    const mins = min % 60
+    const timeStr =
+      hours > 0 ? `${hours}h ${mins}min` : `${mins} min`
+    return { text: `Est. ${timeStr}`, min }
+  }
+  const distanceToArrival = getDistanceToArrival()
 
   const statsCards = [
     {
       title: user?.role === "conducteur" ? "Total Trips" : "Total Requests",
-      value: stats?.data?.totalTrips || stats?.data?.totalRequests || 0,
+      value: stats?.totalTrips ?? stats?.totalRequests ?? 0,
       icon: Truck,
       color: "text-primary",
       bgColor: "bg-primary/10",
@@ -233,57 +287,105 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           {/* Left Column - 2/3 width */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Route Map Widget */}
+            {/* Route Map Widget - Shipment Tracking */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Tracking</h3>
                   <div className="flex flex-wrap gap-2">
-                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
-                      Tracking
+                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3" onClick={() => navigate("/trips")}>
+                      Trips
                     </Button>
-                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
-                      Traffic
-                    </Button>
-                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3">
-                      POI
+                    <Button variant="outline" size="small" className="text-xs px-2 sm:px-3" onClick={() => navigate("/requests")}>
+                      Requests
                     </Button>
                   </div>
                 </div>
 
-                {/* Map Placeholder */}
-                <div className="w-full h-48 sm:h-56 md:h-64 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border mb-4 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">Map visualization</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-xs sm:text-sm text-muted-foreground">Distance to arrival</p>
-                      <p className="text-base sm:text-lg font-semibold text-foreground">120 KM / 1h 50min</p>
+                {activeTrip || activeRequest ? (
+                  <>
+                    <div className="mb-4 w-full rounded-xl overflow-hidden h-[220px] sm:h-[300px] md:h-[340px] lg:h-[380px]">
+                      <ShipmentTrackingMap
+                        departure={
+                          activeTrip?.departure ||
+                          activeRequest?.trip?.departure || { city: activeRequest?.pickup?.city, address: activeRequest?.pickup?.address }
+                        }
+                        destination={
+                          activeTrip?.destination ||
+                          activeRequest?.trip?.destination || { city: activeRequest?.delivery?.city, address: activeRequest?.delivery?.address }
+                        }
+                        departureDate={
+                          activeTrip?.departureDate || activeRequest?.trip?.departureDate
+                        }
+                        arrivalDate={
+                          activeTrip?.arrivalDate || activeRequest?.trip?.arrivalDate
+                        }
+                        fromLabel={
+                          activeTrip?.departure?.city || activeRequest?.trip?.departure?.city || activeRequest?.pickup?.city || "Start"
+                        }
+                        toLabel={
+                          activeTrip?.destination?.city || activeRequest?.trip?.destination?.city || activeRequest?.delivery?.city || "End"
+                        }
+                        height="100%"
+                        className="w-full h-full"
+                        showRouteStrip
+                        showLegend
+                      />
                     </div>
-                  </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-center">
+                      {activeTrip
+                        ? `${activeTrip.departure?.city} → ${activeTrip.destination?.city} · ${activeTrip.status}`
+                        : activeRequest?.trip
+                          ? `${activeRequest.trip.departure?.city} → ${activeRequest.trip.destination?.city} · ${activeRequest?.status}`
+                          : `${activeRequest?.pickup?.city} → ${activeRequest?.delivery?.city}`}
+                    </p>
 
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-muted-foreground">Traffic and route optimization</span>
-                      <span className="font-medium text-foreground">85%</span>
-                    </div>
-                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      <div className="bg-primary h-2 rounded-full transition-[width] duration-500" style={{ width: "85%" }} />
-                    </div>
-                  </div>
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs sm:text-sm text-muted-foreground">Distance to arrival</p>
+                          <p className="text-base sm:text-lg font-semibold text-foreground">
+                            {distanceToArrival ? distanceToArrival.text : "—"}
+                          </p>
+                        </div>
+                      </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <Button size="small" className="w-full sm:w-auto">Optimize</Button>
-                    <Button variant="outline" size="small" className="w-full sm:w-auto">
-                      View all
-                    </Button>
-                  </div>
-                </div>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        {activeTrip && (
+                          <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(`/trips/${activeTrip._id}`)}>
+                            View trip
+                          </Button>
+                        )}
+                        {activeRequest && !activeTrip && (
+                          <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(`/requests/${activeRequest._id}`)}>
+                            View request
+                          </Button>
+                        )}
+                        <Button variant="outline" size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips" : "/requests")}>
+                          View all
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-full h-48 sm:h-56 md:h-64 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border mb-4 flex items-center justify-center">
+                      <div className="text-center">
+                        <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-muted-foreground">No active shipment</p>
+                        <p className="text-xs text-muted-foreground mt-1">Distance to arrival —</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips/create" : "/requests/create")}>
+                        {user?.role === "conducteur" ? "Create trip" : "Create request"}
+                      </Button>
+                      <Button variant="outline" size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips" : "/requests")}>
+                        View all
+                      </Button>
+                    </div>
+                  </>
+                )}
               </Card>
             </motion.div>
 
@@ -357,23 +459,44 @@ const DashboardPage = () => {
 
           {/* Right Column - 1/3 width */}
           <div className="space-y-6">
-            {/* Alerts Widget */}
+            {/* Alerts & Notifications */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Alerts & Notifications</h3>
-                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" />
+                  {notifications.some((n) => !n.read) && (
+                    <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" title="Unread" />
+                  )}
                 </div>
                 <div className="space-y-3">
-                  <div className="p-3 bg-accent/50 dark:bg-accent rounded-xl border-l-4 border-primary">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-foreground">Geofencing alert</span>
-                      <span className="text-xs text-muted-foreground">13:48</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Truck crossed geofence at Warehouse A. Driver arrival notification sent to staff.
-                    </p>
-                  </div>
+                  {notifications.length > 0 ? (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif._id}
+                        className={clsx(
+                          "p-3 rounded-xl border-l-4 transition-colors",
+                          notif.read
+                            ? "bg-muted/30 dark:bg-muted/50 border-border"
+                            : "bg-primary/5 border-primary"
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium text-foreground truncate flex-1 mr-2">
+                            {notif.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {new Date(notif.createdAt).toLocaleTimeString("en-US", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground line-clamp-2">{notif.message}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground py-2">No notifications yet.</p>
+                  )}
                 </div>
               </Card>
             </motion.div>
@@ -383,9 +506,22 @@ const DashboardPage = () => {
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Details</h3>
-                  <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                    Read more
-                  </Button>
+                  {(activeTrip || activeRequest) && (
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      className="text-xs sm:text-sm"
+                      onClick={() =>
+                        navigate(
+                          activeTrip
+                            ? `/trips/${activeTrip._id}`
+                            : `/requests/${activeRequest._id}`
+                        )
+                      }
+                    >
+                      Read more
+                    </Button>
+                  )}
                 </div>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center gap-2 sm:gap-3">
@@ -402,80 +538,131 @@ const DashboardPage = () => {
                     </div>
                   </div>
 
-                  <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
-                    <p className="text-xs text-muted-foreground mb-1">Total Value</p>
-                    <p className="text-lg sm:text-xl font-bold text-foreground">$520.45</p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Status</span>
-                      <span className="px-2 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium">
-                        Delivered
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Type</span>
-                      <span className="px-2 py-1 bg-accent text-foreground rounded-lg text-xs font-medium">
-                        Household
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Rating</span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-warning text-warning" />
-                        <span className="font-medium">4.2</span>
+                  {activeTrip || activeRequest ? (
+                    <>
+                      <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
+                        <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                        <p className="text-lg sm:text-xl font-bold text-foreground">
+                          {user?.role !== "conducteur" && activeRequest
+                            ? `${Number(activeRequest.price || 0).toFixed(2)}€`
+                            : activeTrip
+                              ? `${acceptedRequests.reduce((s, r) => s + (Number(r.price) || 0), 0).toFixed(2)}€`
+                              : "—"}
+                        </p>
                       </div>
-                    </div>
-                  </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Status</span>
+                          <span className="px-2 py-1 bg-primary/10 text-primary rounded-lg text-xs font-medium capitalize">
+                            {activeRequest ? activeRequest.status : activeTrip?.status}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Type</span>
+                          <span className="px-2 py-1 bg-accent text-foreground rounded-lg text-xs font-medium capitalize">
+                            {activeRequest?.cargo?.type || (acceptedRequests[0]?.cargo?.type ?? "—")}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Rating</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 fill-warning text-warning" />
+                            <span className="font-medium">
+                              {stats?.averageRating != null
+                                ? Number(stats.averageRating).toFixed(1)
+                                : "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
+                        <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                        <p className="text-lg sm:text-xl font-bold text-foreground">—</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Status</span>
+                          <span className="text-muted-foreground">No active shipment</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Type</span>
+                          <span className="text-muted-foreground">—</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Rating</span>
+                          <div className="flex items-center gap-1">
+                            <Star className="w-4 h-4 text-muted-foreground" />
+                            <span className="font-medium">
+                              {stats?.averageRating != null
+                                ? Number(stats.averageRating).toFixed(1)
+                                : "—"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </Card>
             </motion.div>
 
-            {/* Truck Capacity */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Current Truck Capacity</h3>
-                  <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                    Read more
-                  </Button>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  {/* Truck Illustration */}
-                  <div className="relative w-full h-24 sm:h-28 md:h-32 bg-muted/30 dark:bg-muted/50 rounded-xl flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 flex items-end">
-                      <div className="w-full h-3/4 bg-primary/20 relative">
-                        <div
-                          className="absolute bottom-0 left-0 right-0 bg-primary"
-                          style={{ height: "82%" }}
-                        />
+            {/* Current Truck Capacity - drivers only */}
+            {user?.role === "conducteur" && (
+              <motion.div variants={itemVariants}>
+                <Card className="p-4 sm:p-5 md:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground">Current Truck Capacity</h3>
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      className="text-xs sm:text-sm"
+                      onClick={() => navigate("/profile")}
+                    >
+                      Profile
+                    </Button>
+                  </div>
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="relative w-full h-24 sm:h-28 md:h-32 bg-muted/30 dark:bg-muted/50 rounded-xl flex items-center justify-center overflow-hidden">
+                      <div
+                        className="absolute bottom-0 left-0 right-0 bg-primary transition-[height] duration-500"
+                        style={{ height: `${Math.min(100, capacityPercent)}%` }}
+                      />
+                      <Truck className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-foreground/20 relative z-10" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-muted-foreground">Truck ID</span>
+                        <span className="font-medium text-foreground text-xs sm:text-sm truncate ml-2">
+                          {user?.vehicleInfo?.licensePlate || "—"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-muted-foreground">Capacity</span>
+                        <span className="font-bold text-primary">{capacityPercent}%</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-muted-foreground">Status</span>
+                        <span className={activeTrip ? "text-primary font-medium" : "text-muted-foreground"}>
+                          {activeTrip ? "On Route" : "Available"}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-muted-foreground">Weight</span>
+                        <span className="font-medium text-foreground">
+                          {truckCapacityKg != null
+                            ? `${Number(usedWeight).toLocaleString()} / ${Number(truckCapacityKg).toLocaleString()} kg`
+                            : "—"}
+                        </span>
                       </div>
                     </div>
-                    <Truck className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-foreground/20 relative z-10" />
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-muted-foreground">Truck ID</span>
-                      <span className="font-medium text-foreground text-xs sm:text-sm truncate ml-2">AL-223965406</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-muted-foreground">Capacity</span>
-                      <span className="font-bold text-primary">82%</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-muted-foreground">Status</span>
-                      <span className="text-primary font-medium">On Route</span>
-                    </div>
-                    <div className="flex items-center justify-between text-xs sm:text-sm">
-                      <span className="text-muted-foreground">Weight</span>
-                      <span className="font-medium text-foreground">8,453 KG</span>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
+                </Card>
+              </motion.div>
+            )}
 
             {/* Recent Requests */}
             <motion.div variants={itemVariants}>

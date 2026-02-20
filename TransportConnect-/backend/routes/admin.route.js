@@ -1,6 +1,7 @@
 import express from "express";
-import { getAllUsers, toggleUserActive, getAllTrips, getAllRequests, validateVerification, getAdminStats, updateTripStatus, deleteTrip, updateRequestStatus, deleteRequest } from "../controllers/admin.controller.js";
+import { getAllUsers, toggleUserActive, getAllTrips, getAllRequests, validateVerification, getAdminStats, updateTripStatus, deleteTrip, updateRequestStatus, deleteRequest, updateUserVehicle } from "../controllers/admin.controller.js";
 import { authenticateToken, authorizeRoles } from "../middleware/auth.middleware.js";
+import { validateAdminVehicleUpdate } from "../middleware/validation.js";
 
 const router = express.Router();
 
@@ -10,6 +11,7 @@ router.use(authorizeRoles("admin"));
 
 router.get("/users", getAllUsers);
 router.put("/users/:id/toggle-active", toggleUserActive);
+router.patch("/users/:id/vehicle", validateAdminVehicleUpdate, updateUserVehicle);
 router.get("/trips", getAllTrips);
 router.get("/requests", getAllRequests);
 router.post("/verifications/:id/validate", validateVerification);

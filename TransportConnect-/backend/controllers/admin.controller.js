@@ -291,4 +291,49 @@ export const deleteRequest = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la suppression de la demande" })
   }
+}
+
+// Update a driver's vehicle info (admin only). Request body validated by validateAdminVehicleUpdate.
+export const updateUserVehicle = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).select("-password")
+    if (!user) return res.status(404).json({ message: "Utilisateur non trouvé" })
+    if (user.role !== "conducteur") {
+      return res.status(400).json({ message: "Seuls les conducteurs ont des informations véhicule" })
+    }
+
+    const { vehicleInfo } = req.body
+    const updateData = {}
+
+    if (vehicleInfo.type != null && vehicleInfo.type !== "") {
+      updateData["vehicleInfo.type"] = vehicleInfo.type
+    }
+    if (vehicleInfo.capacity != null && vehicleInfo.capacity !== "") {
+      updateData["vehicleInfo.capacity"] = Number(vehicleInfo.capacity)
+    }
+    if (vehicleInfo.licensePlate != null && String(vehicleInfo.licensePlate).trim() !== "") {
+      updateData["vehicleInfo.licensePlate"] = String(vehicleInfo.licensePlate).trim()
+    }
+    if (vehicleInfo.dimensions != null && typeof vehicleInfo.dimensions === "object") {
+      const d = vehicleInfo.dimensions
+      if (d.length != null && d.length !== "") updateData["vehicleInfo.dimensions.length"] = Number(d.length)
+      if (d.width != null && d.width !== "") updateData["vehicleInfo.dimensions.width"] = Number(d.width)
+      if (d.height != null && d.height !== "") updateData["vehicleInfo.dimensions.height"] = Number(d.height)
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "Aucune donnée à mettre à jour" })
+    }
+
+    const updated = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true }
+    ).select("-password")
+
+    res.json({ message: "Véhicule mis à jour", user: updated })
+  } catch (error) {
+    console.error("Error updating user vehicle:", error)
+    res.status(500).json({ message: "Erreur lors de la mise à jour du véhicule" })
+  }
 } 

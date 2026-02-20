@@ -97,6 +97,49 @@ export const validateObjectId = (paramName) => [
 ]
 
 
+const VALID_VEHICLE_TYPES = ["camion", "camionnette", "voiture", "moto"]
+
+export const validateAdminVehicleUpdate = [
+  param("id").isMongoId().withMessage("ID utilisateur invalide"),
+  body("vehicleInfo")
+    .exists()
+    .withMessage("vehicleInfo requis")
+    .bail()
+    .isObject()
+    .withMessage("vehicleInfo doit être un objet"),
+  body("vehicleInfo.type")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isIn(VALID_VEHICLE_TYPES)
+    .withMessage(`Type de véhicule invalide. Valeurs: ${VALID_VEHICLE_TYPES.join(", ")}`),
+  body("vehicleInfo.capacity")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("La capacité doit être un nombre positif ou nul"),
+  body("vehicleInfo.licensePlate")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ max: 20 })
+    .withMessage("La plaque ne peut pas dépasser 20 caractères"),
+  body("vehicleInfo.dimensions")
+    .optional({ checkFalsy: true })
+    .isObject()
+    .withMessage("dimensions doit être un objet"),
+  body("vehicleInfo.dimensions.length")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("La longueur doit être positive ou nulle"),
+  body("vehicleInfo.dimensions.width")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("La largeur doit être positive ou nulle"),
+  body("vehicleInfo.dimensions.height")
+    .optional({ checkFalsy: true })
+    .isFloat({ min: 0 })
+    .withMessage("La hauteur doit être positive ou nulle"),
+  handleValidationErrors,
+]
+
 export const validateTripSearch = [
   query("departure")
     .optional({ checkFalsy: true })

@@ -87,7 +87,7 @@
       const trips = await Trip.find(filter)
         .populate("driver", "firstName lastName avatar stats isVerified vehicleInfo")
         .populate("requests", "sender cargo status createdAt")
-        .populate("acceptedRequests", "sender cargo pickup delivery status")
+        .populate("acceptedRequests", "sender cargo pickup delivery status price")
         .sort({ createdAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit)

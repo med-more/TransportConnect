@@ -18,6 +18,7 @@ import {
   ArrowRight,
   Sun,
   Moon,
+  Car,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
@@ -56,6 +57,7 @@ const AdminLayout = ({ children }) => {
     { name: "Utilisateurs", href: "/admin/users", icon: Users },
     { name: "Trajets", href: "/admin/trips", icon: Truck },
     { name: "Demandes", href: "/admin/requests", icon: Package },
+    { name: "Véhicules", href: "/admin/vehicles", icon: Car },
     { name: "Vérifications", href: "/admin/verifications", icon: Shield },
   ]
 
