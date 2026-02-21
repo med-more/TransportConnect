@@ -48,3 +48,34 @@ export function pointAlongRoute(routePoints, progress) {
     a[1] + (b[1] - a[1]) * u,
   ]
 }
+
+/**
+ * Bearing in degrees from point A to B (0 = North, 90 = East).
+ * Used for vehicle icon rotation.
+ */
+export function bearingBetween(a, b) {
+  if (!a || !b || (a[0] === b[0] && a[1] === b[1])) return 0
+  const [lat1, lng1] = a
+  const [lat2, lng2] = b
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const lat1Rad = (lat1 * Math.PI) / 180
+  const lat2Rad = (lat2 * Math.PI) / 180
+  const y = Math.sin(dLng) * Math.cos(lat2Rad)
+  const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLng)
+  let bearing = (Math.atan2(y, x) * 180) / Math.PI
+  return (bearing + 360) % 360
+}
+
+/** Convert [lat, lng][] to GeoJSON LineString for Mapbox (coordinates are [lng, lat]). */
+export function routeToGeoJSONLineString(routePoints) {
+  if (!routePoints?.length) return null
+  const coordinates = routePoints.map(([lat, lng]) => [lng, lat])
+  return {
+    type: "Feature",
+    properties: {},
+    geometry: {
+      type: "LineString",
+      coordinates,
+    },
+  }
+}

@@ -4,56 +4,22 @@ import L from "leaflet"
 import "leaflet/dist/leaflet.css"
 import { useTheme } from "../contexts/ThemeContext"
 import { geocode, MOROCCO_CENTER } from "../utils/geocode"
-import { getRoute, pointAlongRoute } from "../utils/route"
+import { getRoute } from "../utils/route"
+import { MAP_TILES } from "../config/mapConfig"
+import { useSmoothVehiclePosition } from "../hooks/useSmoothVehiclePosition"
+import VehicleMarker from "./map/VehicleMarker"
+import CameraFollow from "./map/CameraFollow"
+import TrackingMapMapbox from "./map/TrackingMapMapbox"
+import { createStartPinIcon, createEndPinIcon, INDRIVE_ORANGE } from "./map/IndriveStyleMarkers"
 
-// Modern basemaps: clear streets, buildings, and labels (CARTO – no API key)
-const MAP_TILES = {
-  light: {
-    url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-  dark: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  },
-}
-
-function createDivIcon(html, className = "") {
-  return L.divIcon({
-    html,
-    className: `shipment-map-icon ${className}`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-  })
-}
-
-const TRUCK_MARKER_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:block;width:100%;height:100%;">' +
-  '<rect x="1" y="3" width="15" height="13" rx="1.2"/>' +
-  '<path d="M16 8h4l3 3v5h-7V8z"/>' +
-  '<circle cx="5.5" cy="18.5" r="2.5"/>' +
-  '<circle cx="18.5" cy="18.5" r="2.5"/>' +
-  '</svg>'
-
-function createTruckIcon() {
-  return L.divIcon({
-    html:
-      '<div class="truck-marker-pin" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--primary);border-radius:50%;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.25), 0 0 0 1px rgba(0,0,0,0.06);">' +
-      '<span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;color:white;">' +
-      TRUCK_MARKER_SVG +
-      '</span></div>',
-    className: "shipment-map-icon truck-marker",
-    iconSize: [44, 44],
-    iconAnchor: [22, 22],
-  })
-}
-
-function FitBounds({ points }) {
+function FitBoundsOnce({ points }) {
   const map = useMap()
+  const doneRef = useRef(false)
   useEffect(() => {
-    if (points.length < 2) return
+    if (points.length < 2 || doneRef.current) return
+    doneRef.current = true
     const bounds = L.latLngBounds(points)
-    map.fitBounds(bounds, { padding: [32, 32], maxZoom: 16, minZoom: 4 })
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15, minZoom: 4 })
   }, [map, points])
   return null
 }
@@ -94,6 +60,7 @@ export default function ShipmentTrackingMap({
   showLiveOverlay = true,
   showLegend = true,
   showRouteStrip = true,
+  cameraFollow = true,
 }) {
   const [startCoords, setStartCoords] = useState(null)
   const [endCoords, setEndCoords] = useState(null)
@@ -101,15 +68,16 @@ export default function ShipmentTrackingMap({
   const [routeInfo, setRouteInfo] = useState(null)
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [, setRouteError] = useState(false)
   const progressRef = useRef(0)
 
-  const dep = departure?.coordinates?.lat != null
-    ? [departure.coordinates.lat, departure.coordinates.lng]
-    : null
-  const dest = destination?.coordinates?.lat != null
-    ? [destination.coordinates.lat, destination.coordinates.lng]
-    : null
+  const dep =
+    departure?.coordinates?.lat != null
+      ? [departure.coordinates.lat, departure.coordinates.lng]
+      : null
+  const dest =
+    destination?.coordinates?.lat != null
+      ? [destination.coordinates.lat, destination.coordinates.lng]
+      : null
 
   useEffect(() => {
     let cancelled = false
@@ -120,8 +88,12 @@ export default function ShipmentTrackingMap({
         setLoading(false)
         return
       }
-      const start = dep || (await geocode(departure?.city || departure?.address || "Casablanca"))
-      const end = dest || (await geocode(destination?.city || destination?.address || "Rabat"))
+      const start =
+        dep ||
+        (await geocode(departure?.city || departure?.address || "Casablanca"))
+      const end =
+        dest ||
+        (await geocode(destination?.city || destination?.address || "Rabat"))
       if (!cancelled) {
         setStartCoords(start ? [start.lat, start.lng] : MOROCCO_CENTER)
         setEndCoords(end ? [end.lat, end.lng] : MOROCCO_CENTER)
@@ -129,12 +101,13 @@ export default function ShipmentTrackingMap({
       }
     }
     resolve()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [dep, dest, departure?.city, departure?.address, destination?.city, destination?.address])
 
   useEffect(() => {
     if (!startCoords || !endCoords) return
-    setRouteError(false)
     let cancelled = false
     async function fetchRoute() {
       const start = { lat: startCoords[0], lng: startCoords[1] }
@@ -143,17 +116,23 @@ export default function ShipmentTrackingMap({
       if (cancelled) return
       if (result?.coordinates?.length >= 2) {
         setRoutePoints(result.coordinates)
-        setRouteInfo({ distanceMeters: result.distanceMeters, durationSeconds: result.durationSeconds })
+        setRouteInfo({
+          distanceMeters: result.distanceMeters,
+          durationSeconds: result.durationSeconds,
+        })
       } else {
         setRoutePoints([startCoords, endCoords])
         setRouteInfo(null)
-        setRouteError(true)
       }
     }
     fetchRoute()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [startCoords, endCoords])
 
+  // Progress: time-based for ETA simulation. Replace with WebSocket/socket.io
+  // for real-time GPS: subscribe to driver location and set progress from server.
   useEffect(() => {
     if (!departureDate || !arrivalDate) return
     const start = new Date(departureDate).getTime()
@@ -166,16 +145,21 @@ export default function ShipmentTrackingMap({
       setProgress(progressRef.current)
     }
     update()
-    const interval = setInterval(update, 200)
+    const interval = setInterval(update, 150)
     return () => clearInterval(interval)
   }, [departureDate, arrivalDate])
 
-  const displayPoints = routePoints && routePoints.length >= 2 ? routePoints : (startCoords && endCoords ? [startCoords, endCoords] : [])
+  const displayPoints =
+    routePoints && routePoints.length >= 2
+      ? routePoints
+      : startCoords && endCoords
+        ? [startCoords, endCoords]
+        : []
 
-  const truckPosition = useMemo(() => {
-    if (!displayPoints.length) return null
-    return pointAlongRoute(displayPoints, progress)
-  }, [displayPoints, progress])
+  const { position: vehiclePosition, bearing } = useSmoothVehiclePosition(
+    displayPoints,
+    progress
+  )
 
   const etaMinutes = useMemo(() => {
     if (!departureDate || !arrivalDate) return null
@@ -189,6 +173,13 @@ export default function ShipmentTrackingMap({
   const { theme } = useTheme()
   const tiles = MAP_TILES[theme === "dark" ? "dark" : "light"]
 
+  const [followEnabled, setFollowEnabled] = useState(false)
+  useEffect(() => {
+    if (!vehiclePosition || !cameraFollow) return
+    const t = setTimeout(() => setFollowEnabled(true), 1200)
+    return () => clearTimeout(t)
+  }, [vehiclePosition, cameraFollow])
+
   if (loading || !startCoords || !endCoords) {
     return (
       <div
@@ -197,7 +188,9 @@ export default function ShipmentTrackingMap({
       >
         <div className="w-full flex-1 min-h-[200px] sm:min-h-[280px] flex flex-col items-center justify-center gap-4 p-6">
           <div className="w-12 h-12 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-          <p className="text-sm text-muted-foreground text-center">Loading map & route…</p>
+          <p className="text-sm text-muted-foreground text-center">
+            Loading map & route…
+          </p>
           <div className="w-full max-w-[200px] h-1.5 rounded-full bg-muted overflow-hidden">
             <div className="h-full w-1/3 rounded-full bg-primary/50 animate-pulse" />
           </div>
@@ -212,6 +205,8 @@ export default function ShipmentTrackingMap({
   ]
 
   const style = height ? { height } : { minHeight: "200px" }
+  // MapLibre GL map (free, no API key) is used by default
+  const useGlMap = true
 
   return (
     <div
@@ -220,16 +215,34 @@ export default function ShipmentTrackingMap({
     >
       {showRouteStrip && (fromLabel || toLabel) && (
         <div className="absolute top-0 left-0 right-0 z-[999] flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-b from-black/60 to-transparent pointer-events-none rounded-t-xl">
-          <span className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0" title={fromLabel}>
+          <span
+            className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0"
+            title={fromLabel}
+          >
             {fromLabel || "Start"}
           </span>
           <span className="text-white/80 shrink-0">→</span>
-          <span className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0 text-right" title={toLabel}>
+          <span
+            className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0 text-right"
+            title={toLabel}
+          >
             {toLabel || "End"}
           </span>
         </div>
       )}
 
+      {useGlMap ? (
+        <div className="h-full w-full rounded-xl" style={{ minHeight: "200px" }}>
+          <TrackingMapMapbox
+            routePoints={displayPoints}
+            startCoords={startCoords}
+            endCoords={endCoords}
+            vehiclePosition={vehiclePosition}
+            vehicleBearing={bearing}
+            cameraFollow={cameraFollow}
+          />
+        </div>
+      ) : (
       <MapContainer
         center={center}
         zoom={10}
@@ -249,41 +262,34 @@ export default function ShipmentTrackingMap({
           maxZoom={19}
           minZoom={2}
         />
-        {displayPoints.length >= 2 && <FitBounds points={displayPoints} />}
+        {displayPoints.length >= 2 && <FitBoundsOnce points={displayPoints} />}
+        {cameraFollow && vehiclePosition && (
+          <CameraFollow position={vehiclePosition} enabled={followEnabled} />
+        )}
         <Polyline
           positions={displayPoints}
           pathOptions={{
-            color: "hsl(var(--primary))",
+            color: INDRIVE_ORANGE,
             weight: 5,
-            opacity: 0.9,
+            opacity: 0.92,
             lineCap: "round",
             lineJoin: "round",
           }}
         />
-        <Marker
-          position={startCoords}
-          icon={createDivIcon(
-            '<div style="width:28px;height:28px;border-radius:50%;background:#22c55e;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
-            "start-marker"
-          )}
-        />
-        <Marker
-          position={endCoords}
-          icon={createDivIcon(
-            '<div style="width:28px;height:28px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.3);"></div>',
-            "end-marker"
-          )}
-        />
-        {truckPosition && (
-          <Marker position={truckPosition} icon={createTruckIcon()} />
-        )}
+        <Marker position={startCoords} icon={createStartPinIcon()} />
+        <Marker position={endCoords} icon={createEndPinIcon()} />
+        <VehicleMarker position={vehiclePosition} bearing={bearing} />
       </MapContainer>
+      )}
 
       {showLiveOverlay && (departureDate || arrivalDate) && (
         <div className="absolute bottom-0 left-0 right-0 z-[1000] p-3 sm:p-4 pb-3 sm:pb-4 safe-bottom bg-gradient-to-t from-black/75 via-black/40 to-transparent pointer-events-none rounded-b-xl">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500 text-white text-xs font-semibold shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-white animate-pulse" aria-hidden />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white text-xs font-semibold shadow-sm" style={{ backgroundColor: INDRIVE_ORANGE }}>
+              <span
+                className="w-2 h-2 rounded-full bg-white animate-pulse"
+                aria-hidden
+              />
               Live
             </span>
             {etaMinutes != null && (
@@ -299,33 +305,45 @@ export default function ShipmentTrackingMap({
             </div>
             <div className="h-2 rounded-full bg-white/25 overflow-hidden backdrop-blur-sm">
               <div
-                className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
-                style={{ width: `${progressPercent}%` }}
+                className="h-full rounded-full transition-all duration-300 ease-out"
+                style={{ width: `${progressPercent}%`, backgroundColor: INDRIVE_ORANGE }}
               />
             </div>
           </div>
           {routeInfo && (
             <p className="text-white/80 text-[10px] sm:text-xs mt-2">
-              {formatDistance(routeInfo.distanceMeters)} · ~{formatDuration(routeInfo.durationSeconds)}
+              {formatDistance(routeInfo.distanceMeters)} · ~
+              {formatDuration(routeInfo.durationSeconds)}
             </p>
           )}
         </div>
       )}
 
       {showLegend && (
-        <div className="absolute top-12 sm:top-14 left-3 sm:left-4 z-[998] flex flex-wrap items-center gap-2 sm:gap-3 pointer-events-none">
-          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-green-500 border border-white/80 shadow" />
-            Start
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 border border-white/80 shadow" />
-            End
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-            <span className="w-2.5 h-2.5 rounded-full bg-primary border border-white/80 shadow" style={{ background: "var(--primary)" }} />
-            Truck
-          </span>
+        <div className="absolute top-12 sm:top-14 left-3 sm:left-4 z-[998] flex flex-col gap-1.5 pointer-events-none">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: "#00c853" }} />
+              Départ
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: "#e53935" }} />
+              Arrivée
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: INDRIVE_ORANGE }} />
+              Véhicule
+            </span>
+          </div>
+          <a
+            href="https://www.flaticon.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[9px] text-white/60 hover:text-white/80 drop-shadow-sm w-fit pointer-events-auto"
+            title="Truck &amp; destination icons by Freepik from Flaticon"
+          >
+            Icons by Freepik from flaticon.com
+          </a>
         </div>
       )}
     </div>
