@@ -3,9 +3,7 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "rewrites": [
-    {
-      "source": "/((?!_next/|api/|assets/|.*\\.(?:ico|png|jpg|jpeg|gif|svg|css|js|woff2?)$).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/", "destination": "/index.html" },
+    { "source": "/((?!assets/|_next/|api/|.*\\.(js|css|ico|png|jpeg|jpg|gif|svg|woff2?|woff|ttf|json)$).*)", "destination": "/index.html" }
   ]
 }
