@@ -7,7 +7,7 @@ Deploy both **frontend** (static site) and **backend** (Node/Express + Socket.io
 ## 1. Prepare the repo
 
 - Push your code to **GitHub** (or GitLab/Bitbucket).
-- Ensure `render.yaml` is in the repo at: **`TransportConnect/TransportConnect-/render.yaml`** (or at the root you will set in step 2).
+- **Blueprint location:** `render.yaml` must be at your **repository root** (e.g. `tr/render.yaml` if your repo is the `tr` folder). A copy is also in `TransportConnect/TransportConnect-/render.yaml` for when the repo root is that folder (then use that file and set Root Directory to `TransportConnect/TransportConnect-` in Render).
 
 ---
 
@@ -16,9 +16,7 @@ Deploy both **frontend** (static site) and **backend** (Node/Express + Socket.io
 1. Go to [render.com](https://render.com) and sign up (GitHub login is easiest).
 2. **Dashboard** → **New** → **Blueprint**.
 3. Connect your repository and choose the repo.
-4. Set **Root Directory** to the folder that contains `render.yaml` and both `frontend/` and `backend/`:
-   - If your repo root is the project: leave empty or `.`
-   - If your repo is e.g. `tr` and the app is in `TransportConnect/TransportConnect-/`: set **`TransportConnect/TransportConnect-`**
+4. **Leave Root Directory empty** so Render uses the repo root and finds `render.yaml` at the root (e.g. `tr/render.yaml`). The blueprint already sets each service’s `rootDir` to `TransportConnect/TransportConnect-` and `TransportConnect/TransportConnect-/frontend`.
 5. Render will detect `render.yaml` and create two services: **transportconnect-api** (backend) and **transportconnect-web** (frontend).
 
 ---
