@@ -4,7 +4,7 @@
   "installCommand": "cd frontend && npm ci",
   "framework": null,
   "rewrites": [
-    { "source": "/", "destination": "/index.html" },
-    { "source": "/((?!assets/|_next/|api/|.*\\.(js|css|ico|png|jpeg|jpg|gif|svg|woff2?|woff|ttf|json)$).*)", "destination": "/index.html" }
+    { "source": "/((?!assets/)(?!.*\\.(js|css|ico|png|jpeg|jpg|gif|svg|woff2?|woff|ttf|json)).*)", "destination": "/index.html" },
+    { "source": "/", "destination": "/index.html" }
   ]
 }
