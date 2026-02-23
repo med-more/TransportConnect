@@ -185,18 +185,21 @@ const WelcomePage = () => {
       description:
         "Experience technology-driven transport solutions built for speed, safety, and efficiency — from freight and logistics to last-mile delivery.",
       imageUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1920&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=800&h=1200&q=80",
     },
     {
       title: "Connect with Verified Transporters. Ship with Confidence.",
       description:
         "We connect shippers and transporters across Morocco with real-time tracking, secure payments, and a network you can trust.",
       imageUrl: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1920&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=800&h=1200&q=80",
     },
     {
       title: "Your Cargo. On Time. Every Time.",
       description:
         "Verified drivers, transparent ratings, and direct chat — so your shipments get there safely and on schedule.",
       imageUrl: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1920&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&h=1200&q=80",
     },
   ]
 
@@ -222,22 +225,30 @@ const WelcomePage = () => {
 
       <PublicHeader />
 
-      {/* Hero: single section, one bg + carousel slides (no separate scroll sections) */}
+      {/* Hero: single section, fully responsive — mobile image on small screens, desktop image on sm+ */}
       <section
         ref={heroRef}
-        className="relative min-h-[90vh] flex flex-col justify-between overflow-hidden"
-        style={{
-          backgroundImage: `url(${heroSlides[heroSlide].imageUrl})`,
-          backgroundSize: "cover",
-          backgroundPosition: "right center",
-        }}
+        className="relative min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] flex flex-col justify-between overflow-hidden"
       >
+        {/* Mobile background (trucks/transport, optimized for small screens) */}
+        <div
+          className="absolute inset-0 sm:hidden bg-cover bg-center bg-no-repeat transition-opacity duration-500"
+          style={{ backgroundImage: `url(${heroSlides[heroSlide].imageUrlMobile || heroSlides[heroSlide].imageUrl})` }}
+        />
+        {/* Desktop background (same as before) */}
+        <div
+          className="absolute inset-0 hidden sm:block bg-cover bg-no-repeat transition-opacity duration-500"
+          style={{
+            backgroundImage: `url(${heroSlides[heroSlide].imageUrl})`,
+            backgroundPosition: "right center",
+          }}
+        />
         <div className="absolute inset-0 bg-slate-900/75 dark:bg-black/70 transition-opacity duration-500" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
 
-        <div className="container mx-auto max-w-7xl relative z-10 px-3 sm:px-4 md:px-6 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col min-h-[90vh] justify-between">
-          <div className="flex-1 flex flex-col justify-center pt-4">
-            <div className="max-w-2xl">
+        <div className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] justify-between">
+          <div className="flex-1 flex flex-col justify-center pt-2 sm:pt-4 min-h-0">
+            <div className="max-w-2xl w-full">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={heroSlide}
@@ -245,22 +256,22 @@ const WelcomePage = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -16 }}
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="space-y-4 sm:space-y-6"
+                  className="space-y-3 sm:space-y-4 md:space-y-6"
                 >
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                  <h1 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.12] tracking-tight">
                     {heroSlides[heroSlide].title}
                   </h1>
-                  <p className="text-base sm:text-lg md:text-xl text-white/85 leading-relaxed max-w-xl">
+                  <p className="text-sm min-[400px]:text-base sm:text-lg md:text-xl text-white/85 leading-relaxed max-w-xl">
                     {heroSlides[heroSlide].description}
                   </p>
-                  <Link to="/features" className="inline-block mt-6 sm:mt-8">
+                  <Link to="/features" className="inline-block mt-4 sm:mt-6 md:mt-8 w-full sm:w-auto">
                     <Button
                       size="large"
                       variant="outline"
-                      className="border-white/70 text-white hover:bg-white/10 hover:border-white hover:text-white"
+                      className="w-full sm:w-auto min-h-[44px] border-white/70 text-white hover:bg-white/10 hover:border-white hover:text-white text-sm sm:text-base"
                     >
                       See How It Works
-                      <ArrowRight className="w-5 h-5 ml-2" />
+                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 flex-shrink-0" />
                     </Button>
                   </Link>
                 </motion.div>
@@ -268,34 +279,34 @@ const WelcomePage = () => {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-end justify-between gap-6 sm:gap-8 mt-8 pt-6 border-t border-white/10">
-            <div className="grid grid-cols-3 gap-4 sm:gap-8">
-              {heroStats.map((item, i) => (
-                <div key={item.label} className="text-left">
-                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{item.number}</p>
-                  <p className="text-xs sm:text-sm text-white/70 mt-0.5">{item.label}</p>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-end justify-between gap-4 sm:gap-6 md:gap-8 mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10 flex-shrink-0">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8 min-w-0">
+              {heroStats.map((item) => (
+                <div key={item.label} className="text-left min-w-0">
+                  <p className="text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white truncate">{item.number}</p>
+                  <p className="text-[10px] min-[400px]:text-xs sm:text-sm text-white/70 mt-0.5 line-clamp-2 sm:line-clamp-none">{item.label}</p>
                 </div>
               ))}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-end sm:justify-end gap-2 sm:gap-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setHeroSlide((s) => (s - 1 + heroSlides.length) % heroSlides.length)}
-                className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                className="min-w-[44px] min-h-[44px] p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
                 aria-label="Previous slide"
               >
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
               <button
                 type="button"
                 onClick={() => setHeroSlide((s) => (s + 1) % heroSlides.length)}
-                className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                className="min-w-[44px] min-h-[44px] p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors flex items-center justify-center"
                 aria-label="Next slide"
               >
-                <ChevronRight className="w-5 h-5" />
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
-              <div className="h-0.5 w-8 sm:w-12 bg-primary rounded-full" />
-              <span className="text-sm font-medium text-white/90 tabular-nums">
+              <div className="h-0.5 w-6 sm:w-8 md:w-12 bg-primary rounded-full flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium text-white/90 tabular-nums min-w-[1.5rem]">
                 {String(heroSlide + 1).padStart(2, "0")}
               </span>
             </div>
