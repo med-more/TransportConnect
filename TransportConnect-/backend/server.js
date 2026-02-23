@@ -35,8 +35,14 @@ const frontendOrigins = [
 if (process.env.FRONTEND_URL) {
   frontendOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ""))
 }
+// Allow any *.vercel.app (production + preview deployments)
 const corsOptions = {
-  origin: frontendOrigins,
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true)
+    if (frontendOrigins.some((allowed) => origin === allowed)) return cb(null, true)
+    if (origin.endsWith(".vercel.app")) return cb(null, true)
+    return cb(null, false)
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   credentials: true,
 }
