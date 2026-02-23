@@ -1,0 +1,5 @@
+# Nixpacks/Railpack fallback: explicit start command for backend
+# Root Directory in Railway must be: TransportConnect/TransportConnect-
+
+[start]
+cmd = "node backend/server.js"

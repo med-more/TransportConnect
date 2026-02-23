@@ -1,0 +1,8 @@
+# Railway: force start command so the correct package.json root is used
+# Root Directory in Railway must be: TransportConnect/TransportConnect-
+
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "node backend/server.js"
