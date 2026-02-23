@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "start": "cd TransportConnect- && node backend/server.js"
+  },
   "dependencies": {
     "chart.js": "^4.5.0",
     "cloudinary": "^1.41.3",
