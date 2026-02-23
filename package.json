@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "build": "cd TransportConnect- && npm install",
     "start": "cd TransportConnect- && node backend/server.js"
   },
   "dependencies": {
