@@ -543,15 +543,15 @@ const Layout = ({ children }) => {
           sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"
         )}
       >
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-card dark:bg-[#0a0a0a] border-b border-border">
-          <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2">
-            {/* Left: Sidebar Toggle */}
+        {/* Top Header - responsive with safe area */}
+        <header className="sticky top-0 z-30 bg-card dark:bg-[#0a0a0a] border-b border-border pt-[env(safe-area-inset-top)]">
+          <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2 min-h-[44px] sm:min-h-0">
+            {/* Left: Sidebar Toggle - touch-friendly on mobile */}
             <div className="flex-shrink-0">
               {/* Desktop Sidebar Toggle */}
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                className="hidden lg:flex p-2 hover:bg-accent rounded-lg transition-colors"
+                className="hidden lg:flex p-2 hover:bg-accent rounded-lg transition-colors min-w-[44px] min-h-[44px] items-center justify-center"
                 title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
                 <Menu className="w-5 h-5 text-foreground" />
@@ -559,17 +559,19 @@ const Layout = ({ children }) => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors"
+                className="lg:hidden p-2.5 hover:bg-accent rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                aria-label="Open menu"
               >
-                <Menu className="w-5 h-5 text-foreground" />
+                <Menu className="w-6 h-6 text-foreground" />
               </button>
             </div>
 
-            {/* Center: Welcome & Search */}
-            <div className="flex-1 flex items-center justify-center gap-4 min-w-0">
-              <div className="hidden lg:block text-center min-w-0">
-                <h2 className="text-base lg:text-lg font-semibold text-foreground">
-                  Welcome back, {user?.firstName}!
+            {/* Center: Welcome (short on mobile) & Search */}
+            <div className="flex-1 flex items-center justify-center gap-2 sm:gap-4 min-w-0">
+              <div className="text-center min-w-0 flex-1 lg:flex-initial">
+                <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-foreground truncate">
+                  <span className="lg:hidden">Hi, {user?.firstName}!</span>
+                  <span className="hidden lg:inline">Welcome back, {user?.firstName}!</span>
                 </h2>
                 <p className="text-xs lg:text-sm text-muted-foreground hidden xl:block">
                   {new Date().toLocaleDateString("en-US", {
@@ -675,7 +677,7 @@ const Layout = ({ children }) => {
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+                className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 title={theme === "dark" ? "Light mode" : "Dark mode"}
               >
@@ -688,7 +690,7 @@ const Layout = ({ children }) => {
               {/* Mobile Search Icon */}
               <button
                 onClick={() => setShowMobileSearch(true)}
-                className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors"
+                className="md:hidden p-2.5 rounded-lg hover:bg-accent transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5 text-foreground" />

@@ -1,22 +1,27 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon } from "../utils/icons"
+import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X } from "../utils/icons"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { useTheme } from "../contexts/ThemeContext"
 
 export const PublicHeader = () => {
   const { theme, toggleTheme } = useTheme()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card/90 dark:bg-[#0a0a0a] backdrop-blur-sm dark:backdrop-blur-none">
+    <header className="sticky top-0 z-50 border-b border-border bg-card dark:bg-[#0a0a0a] backdrop-blur-sm dark:backdrop-blur-none pt-[env(safe-area-inset-top)]">
       <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial" onClick={() => setMobileMenuOpen(false)}>
             <img src={logo} alt="TransportConnect" className="h-12 sm:h-16 md:h-20 w-auto flex-shrink-0" />
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">TransportConnect</h1>
               <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
             </div>
           </Link>
+
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-4 lg:gap-6 flex-shrink-0">
             <Link to="/about-us" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
               About
@@ -25,11 +30,13 @@ export const PublicHeader = () => {
               Contact
             </Link>
           </nav>
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+
+          {/* Desktop: theme + auth */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-4 flex-shrink-0">
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
+              className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
               aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
               title={theme === "dark" ? "Light mode" : "Dark mode"}
             >
@@ -42,15 +49,74 @@ export const PublicHeader = () => {
               <Button className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 btn-glow shadow-glow hover:shadow-glow-lg">Sign up</Button>
             </Link>
           </div>
+
+          {/* Mobile: hamburger (and theme on very small) */}
+          <div className="flex md:hidden items-center gap-1 flex-shrink-0">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
+            >
+              {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile menu panel */}
+      {mobileMenuOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <nav
+            className="fixed left-0 right-0 top-[4.5rem] z-50 md:hidden bg-card dark:bg-[#0a0a0a] border-b border-border shadow-xl max-h-[calc(100vh-4.5rem)] overflow-y-auto"
+          >
+            <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
+              <Link
+                to="/about-us"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 px-3 rounded-lg text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                About
+              </Link>
+              <Link
+                to="/contact"
+                onClick={() => setMobileMenuOpen(false)}
+                className="py-3 px-3 rounded-lg text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Contact
+              </Link>
+              <div className="border-t border-border my-2" />
+              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button variant="ghost" className="w-full justify-center py-3 text-base">Sign in</Button>
+              </Link>
+              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button className="w-full justify-center py-3 text-base btn-glow shadow-glow">Sign up</Button>
+              </Link>
+            </div>
+          </nav>
+        </>
+      )}
     </header>
   )
 }
 
 export const PublicFooter = () => {
   return (
-    <footer className="bg-slate-900 dark:bg-slate-950 text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6">
+    <footer className="bg-slate-900 dark:bg-black text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 border-t border-white/10">
       <div className="container mx-auto max-w-7xl">
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12">
           {/* Brand Column */}
@@ -170,6 +236,9 @@ export const PublicFooter = () => {
 
         <div className="border-t border-white/10 pt-6 sm:pt-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            <p className="text-white/70 text-xs sm:text-sm text-center sm:text-left">
+              &copy; {new Date().getFullYear()} TransportConnect. All rights reserved.
+            </p>
             <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm">
               <Link to="/privacy-policy" className="text-white/70 hover:text-white transition-colors">
                 Privacy Policy

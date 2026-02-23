@@ -26,12 +26,10 @@ import {
   Youtube,
   Play,
   User,
-  Sun,
-  Moon,
 } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo.svg"
-import { useTheme } from "../../contexts/ThemeContext"
+import { PublicHeader } from "../../components/PublicLayout"
 
 // Image Card Component for "Our Platform in Action" section
 const ImageCard = ({ item, index }) => {
@@ -97,7 +95,6 @@ const viewportDefaults = { once: true, amount: 0.2 }
 const transitionSmooth = { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 
 const WelcomePage = () => {
-  const { theme, toggleTheme } = useTheme()
   const heroRef = useRef(null)
   const { scrollYProgress: heroProgress } = useScroll({
     target: heroRef,
@@ -195,45 +192,7 @@ const WelcomePage = () => {
         style={{ scaleX: pageProgress }}
       />
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/95 dark:bg-[#0a0a0a] backdrop-blur-sm dark:backdrop-blur-none">
-        <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
-            <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial">
-              <img src={logo} alt="TransportConnect" className="h-12 sm:h-16 md:h-20 w-auto flex-shrink-0" />
-              <div className="min-w-0">
-                <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">TransportConnect</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
-          </div>
-            </Link>
-            <nav className="hidden md:flex items-center gap-4 lg:gap-6 flex-shrink-0">
-              <Link to="/about-us" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
-                About
-              </Link>
-              <Link to="/contact" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
-                Contact
-              </Link>
-            </nav>
-            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground"
-                aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                title={theme === "dark" ? "Light mode" : "Dark mode"}
-              >
-                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              </button>
-              <Link to="/login">
-                <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
-              </Link>
-              <Link to="/register">
-                <Button className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign up</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero Section */}
       <section ref={heroRef} className="relative py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 overflow-hidden min-h-[85vh] flex flex-col justify-center">
@@ -924,7 +883,7 @@ const WelcomePage = () => {
           <div className="border-t border-white/10 pt-6 sm:pt-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
               <p className="text-white/70 text-xs sm:text-sm text-center sm:text-left">
-                &copy; {new Date().getFullYear()} TransportConnect. All rights reserved. Made with ❤️ in Morocco.
+                &copy; {new Date().getFullYear()} TransportConnect. All rights reserved.
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs sm:text-sm">
                 <a href="#" className="text-white/70 hover:text-white transition-colors">
