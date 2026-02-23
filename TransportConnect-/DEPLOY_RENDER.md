@@ -2,6 +2,8 @@
 
 Deploy both **frontend** (static site) and **backend** (Node/Express + Socket.io) on [Render.com](https://render.com). Free tier available for both.
 
+**→ For a simple step-by-step from scratch (no Blueprint): see [RENDER_SIMPLE_GUIDE.md](./RENDER_SIMPLE_GUIDE.md).**
+
 ---
 
 ## 1. Prepare the repo
@@ -106,6 +108,10 @@ If you prefer not to use `render.yaml`:
 
 ## Troubleshooting
 
+- **"Blueprint file render.yaml not found on master branch"**  
+  1. **Branch:** Render often defaults to `master`. If your GitHub repo uses `main`, in Render go to the Blueprint/Repo settings and set **Branch** to `main` (or your actual default branch).  
+  2. **File at root:** On GitHub, open your repo and confirm `render.yaml` is at the **root** (e.g. `https://github.com/YOUR_USER/YOUR_REPO/blob/main/render.yaml`). If your repo root only has `frontend/`, `backend/`, `package.json`, then `render.yaml` must be in that root (the one in `TransportConnect/TransportConnect-/render.yaml`).  
+  3. **Committed and pushed:** Run `git status`, then `git add render.yaml`, `git commit -m "Add render.yaml"`, `git push origin main` (or `master`).
 - **404 on frontend routes**: Enable the SPA rewrite to `/index.html` (step 5).
 - **CORS errors**: Ensure `FRONTEND_URL` on the backend matches the frontend URL exactly (no trailing slash).
 - **Socket.io not connecting**: Use `https://` for `VITE_SOCKET_URL`; ensure the backend is deployed and env vars are set.

@@ -1,69 +1,126 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X } from "../utils/icons"
+import { Link, NavLink } from "react-router-dom"
+import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X, ArrowRight } from "../utils/icons"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { useTheme } from "../contexts/ThemeContext"
+
+const heroNavLinks = [
+  { to: "/", label: "Home" },
+  { to: "/about-us", label: "About Us" },
+  { to: "/services", label: "Services" },
+  { to: "/features", label: "Features" },
+  { to: "/contact", label: "Contact" },
+]
 
 export const PublicHeader = () => {
   const { theme, toggleTheme } = useTheme()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  const isDark = theme === "dark"
+
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-card dark:bg-[#0a0a0a] backdrop-blur-sm dark:backdrop-blur-none pt-[env(safe-area-inset-top)]">
+    <header
+      className={`sticky top-0 z-50 border-b backdrop-blur-md pt-[env(safe-area-inset-top)] ${
+        isDark ? "bg-slate-900/95 dark:bg-black/95 border-white/10" : "bg-white border-border"
+      }`}
+    >
       <div className="container mx-auto px-3 sm:px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial" onClick={() => setMobileMenuOpen(false)}>
-            <img src={logo} alt="TransportConnect" className="h-12 sm:h-16 md:h-20 w-auto flex-shrink-0" />
+          <Link
+            to="/"
+            className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 sm:flex-initial"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <img
+              src={logo}
+              alt="TransportConnect"
+              className={`h-10 sm:h-12 md:h-14 w-auto flex-shrink-0 ${isDark ? "brightness-0 invert" : ""}`}
+            />
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg md:text-xl font-bold text-foreground truncate">TransportConnect</h1>
-              <p className="text-xs text-muted-foreground hidden sm:block">Revolutionize your transport</p>
+              <h1
+                className={`text-base sm:text-lg md:text-xl font-bold truncate ${isDark ? "text-white" : "text-foreground"}`}
+              >
+                TransportConnect
+              </h1>
             </div>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-4 lg:gap-6 flex-shrink-0">
-            <Link to="/about-us" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
-              About
-            </Link>
-            <Link to="/contact" className="text-sm lg:text-base text-foreground hover:text-primary transition-colors">
-              Contact
-            </Link>
+          {/* Desktop nav - center links with active state */}
+          <nav className="hidden lg:flex items-center gap-1 flex-shrink-0">
+            {heroNavLinks.map(({ to, label }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === "/"}
+                className={({ isActive }) =>
+                  `px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary text-white"
+                      : isDark
+                        ? "text-white/90 hover:text-white hover:bg-white/10"
+                        : "text-foreground hover:bg-slate-100"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Desktop: theme + auth */}
-          <div className="hidden md:flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          {/* Desktop: theme + two CTAs */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              title={theme === "dark" ? "Light mode" : "Dark mode"}
+              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                isDark ? "text-white/90 hover:text-white hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+              }`}
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Light mode" : "Dark mode"}
             >
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <Link to="/login">
-              <Button variant="ghost" className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2">Sign in</Button>
+            <Link to="/trips">
+              <Button
+                variant="outline"
+                size="medium"
+                className={
+                  isDark
+                    ? "border-white/60 text-white hover:bg-white/10 hover:border-white/80 hover:text-white"
+                    : "border-border text-foreground hover:bg-slate-50"
+                }
+              >
+                Track Shipment
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
             </Link>
-            <Link to="/register">
-              <Button className="text-xs sm:text-sm px-2 sm:px-4 py-1.5 sm:py-2 btn-glow shadow-glow hover:shadow-glow-lg">Sign up</Button>
+            <Link to="/contact">
+              <Button size="medium" className="bg-primary hover:bg-primary/90 text-white">
+                Get in touch
+                <ArrowRight className="w-4 h-4 ml-1.5" />
+              </Button>
             </Link>
           </div>
 
-          {/* Mobile: hamburger (and theme on very small) */}
+          {/* Mobile: theme + hamburger */}
           <div className="flex md:hidden items-center gap-1 flex-shrink-0">
             <button
               type="button"
               onClick={toggleTheme}
-              className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label={theme === "dark" ? "Light mode" : "Dark mode"}
+              className={`p-2.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                isDark ? "text-white/90 hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+              }`}
+              aria-label={isDark ? "Light mode" : "Dark mode"}
             >
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
+              className={`p-2.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+                isDark ? "text-white hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+              }`}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
             >
@@ -82,29 +139,52 @@ export const PublicHeader = () => {
             aria-hidden="true"
           />
           <nav
-            className="fixed left-0 right-0 top-[4.5rem] z-50 md:hidden bg-card dark:bg-[#0a0a0a] border-b border-border shadow-xl max-h-[calc(100vh-4.5rem)] overflow-y-auto"
+            className={`fixed left-0 right-0 top-[4.5rem] z-50 md:hidden border-b shadow-xl max-h-[calc(100vh-4.5rem)] overflow-y-auto ${
+              isDark ? "bg-slate-900 dark:bg-black border-white/10" : "bg-white border-border"
+            }`}
           >
             <div className="container mx-auto px-4 py-4 flex flex-col gap-1">
-              <Link
-                to="/about-us"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-3 px-3 rounded-lg text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              {heroNavLinks.map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={to === "/"}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={({ isActive }) =>
+                    `py-3 px-3 rounded-lg text-base font-medium transition-colors ${
+                      isActive ? "bg-primary text-white" : isDark ? "text-white/90 hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+                    }`
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+              <div className={`border-t my-2 ${isDark ? "border-white/10" : "border-border"}`} />
+              <button
+                type="button"
+                onClick={() => { toggleTheme(); setMobileMenuOpen(false); }}
+                className={`py-3 px-3 rounded-lg text-base font-medium text-left w-full flex items-center gap-2 ${
+                  isDark ? "text-white/90 hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+                }`}
               >
-                About
+                {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </button>
+              <div className={`border-t my-2 ${isDark ? "border-white/10" : "border-border"}`} />
+              <Link to="/trips" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button
+                  variant="outline"
+                  className={`w-full justify-center py-3 text-base ${isDark ? "border-white/60 text-white" : "border-border text-foreground"}`}
+                >
+                  Track Shipment
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
               </Link>
-              <Link
-                to="/contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="py-3 px-3 rounded-lg text-base font-medium text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Contact
-              </Link>
-              <div className="border-t border-border my-2" />
-              <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="block">
-                <Button variant="ghost" className="w-full justify-center py-3 text-base">Sign in</Button>
-              </Link>
-              <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="block">
-                <Button className="w-full justify-center py-3 text-base btn-glow shadow-glow">Sign up</Button>
+              <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="block">
+                <Button className="w-full justify-center py-3 text-base bg-primary text-white">
+                  Get in touch
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
               </Link>
             </div>
           </nav>

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { useState, useRef } from "react"
+import { motion, useScroll, AnimatePresence } from "framer-motion"
+import { useState, useRef, useEffect } from "react"
 import {
   Truck,
   MessageCircle,
@@ -26,6 +26,8 @@ import {
   Youtube,
   Play,
   User,
+  ChevronLeft,
+  ChevronRight,
 } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo.svg"
@@ -96,12 +98,6 @@ const transitionSmooth = { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 
 const WelcomePage = () => {
   const heroRef = useRef(null)
-  const { scrollYProgress: heroProgress } = useScroll({
-    target: heroRef,
-    offset: ["start start", "end start"],
-  })
-  const heroY = useTransform(heroProgress, [0, 1], [0, 60])
-  const heroOpacity = useTransform(heroProgress, [0, 0.5], [1, 0.85])
   const { scrollYProgress: pageProgress } = useScroll()
 
   const features = [
@@ -183,6 +179,38 @@ const WelcomePage = () => {
     { number: "500+", label: "Verified Drivers", icon: Shield },
   ]
 
+  const heroSlides = [
+    {
+      title: "Smarter Transport. Faster Deliveries. Nationwide Reach.",
+      description:
+        "Experience technology-driven transport solutions built for speed, safety, and efficiency — from freight and logistics to last-mile delivery.",
+      imageUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1920&q=80",
+    },
+    {
+      title: "Connect with Verified Transporters. Ship with Confidence.",
+      description:
+        "We connect shippers and transporters across Morocco with real-time tracking, secure payments, and a network you can trust.",
+      imageUrl: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1920&q=80",
+    },
+    {
+      title: "Your Cargo. On Time. Every Time.",
+      description:
+        "Verified drivers, transparent ratings, and direct chat — so your shipments get there safely and on schedule.",
+      imageUrl: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1920&q=80",
+    },
+  ]
+
+  const [heroSlide, setHeroSlide] = useState(0)
+  useEffect(() => {
+    const t = setInterval(() => setHeroSlide((s) => (s + 1) % heroSlides.length), 6000)
+    return () => clearInterval(t)
+  }, [heroSlides.length])
+
+  const heroStats = [
+    { number: "25+", label: "Years of Logistics Expertise" },
+    { number: "1.2M+", label: "Successful Deliveries" },
+    { number: "180+", label: "Global Shipping Destinations" },
+  ]
 
   return (
     <div className="min-h-screen bg-background">
@@ -194,113 +222,83 @@ const WelcomePage = () => {
 
       <PublicHeader />
 
-      {/* Hero Section */}
-      <section ref={heroRef} className="relative py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 overflow-hidden min-h-[85vh] flex flex-col justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-blue-500/5" />
-        <div className="container mx-auto max-w-7xl relative z-10">
-          <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={transitionSmooth}
-            className="space-y-4 sm:space-y-6"
-          >
-              <div className="flex items-center gap-2 text-primary">
-                <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                <span className="text-xs sm:text-sm font-semibold uppercase tracking-wider">Revolutionary Platform</span>
-              </div>
+      {/* Hero: single section, one bg + carousel slides (no separate scroll sections) */}
+      <section
+        ref={heroRef}
+        className="relative min-h-[90vh] flex flex-col justify-between overflow-hidden"
+        style={{
+          backgroundImage: `url(${heroSlides[heroSlide].imageUrl})`,
+          backgroundSize: "cover",
+          backgroundPosition: "right center",
+        }}
+      >
+        <div className="absolute inset-0 bg-slate-900/75 dark:bg-black/70 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-tight">
-                Ship with confidence. Deliver on time.
-              </h1>
+        <div className="container mx-auto max-w-7xl relative z-10 px-3 sm:px-4 md:px-6 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col min-h-[90vh] justify-between">
+          <div className="flex-1 flex flex-col justify-center pt-4">
+            <div className="max-w-2xl">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={heroSlide}
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -16 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="space-y-4 sm:space-y-6"
+                >
+                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+                    {heroSlides[heroSlide].title}
+                  </h1>
+                  <p className="text-base sm:text-lg md:text-xl text-white/85 leading-relaxed max-w-xl">
+                    {heroSlides[heroSlide].description}
+                  </p>
+                  <Link to="/features" className="inline-block mt-6 sm:mt-8">
+                    <Button
+                      size="large"
+                      variant="outline"
+                      className="border-white/70 text-white hover:bg-white/10 hover:border-white hover:text-white"
+                    >
+                      See How It Works
+                      <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </Link>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
 
-              <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-lg">
-                We connect shippers and transporters across Morocco with verified drivers, real-time tracking, and secure payments—so your cargo gets there safely.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/register">
-                  <Button size="large" className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/90">
-                    Get started free
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/login">
-                  <Button variant="outline" size="large" className="w-full sm:w-auto">
-                    <Play className="w-4 h-4 mr-2" />
-                    Watch demo
-                </Button>
-              </Link>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-4">
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">10K+</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Active Users</p>
+          <div className="flex flex-col sm:flex-row items-end justify-between gap-6 sm:gap-8 mt-8 pt-6 border-t border-white/10">
+            <div className="grid grid-cols-3 gap-4 sm:gap-8">
+              {heroStats.map((item, i) => (
+                <div key={item.label} className="text-left">
+                  <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">{item.number}</p>
+                  <p className="text-xs sm:text-sm text-white/70 mt-0.5">{item.label}</p>
                 </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">4.9/5</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Average Rating</p>
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">500+</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">Verified Drivers</p>
-                </div>
-              </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ ...transitionSmooth, delay: 0.15 }}
-            style={{ y: heroY, opacity: heroOpacity }}
-            className="relative"
-          >
-              <div className="bg-card border border-border rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-primary/10 rounded-full -mr-12 sm:-mr-16 -mt-12 sm:-mt-16"></div>
-                <div className="bg-primary/10 rounded-xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-5 md:mb-6 relative z-10">
-                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground mb-2 sm:mb-3">Trip Casablanca → Tangier</h3>
-                  <div className="space-y-1.5 sm:space-y-2 text-foreground">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
-                      <p className="text-xs sm:text-sm">Departure: March 12, 2025, 14:30</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Package className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
-                      <p className="text-xs sm:text-sm">Capacity: 1200kg available</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-primary flex-shrink-0" />
-                      <p className="text-xs sm:text-sm">Standard delivery</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 relative z-10">
-                  <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-white font-bold text-sm sm:text-base md:text-lg">AM</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-bold text-foreground text-sm sm:text-base md:text-lg truncate">Amine Mansouri</p>
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 ${i < 5 ? "text-warning fill-warning" : "text-muted-foreground"}`}
-                          />
-                        ))}
-                        <span className="text-xs sm:text-sm text-muted-foreground ml-1 sm:ml-2">4.9 (89 reviews)</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-left sm:text-right flex-shrink-0">
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-primary">40DH/kg</p>
-                    <p className="text-xs sm:text-sm text-success font-semibold">Competitive price</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+              ))}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setHeroSlide((s) => (s - 1 + heroSlides.length) % heroSlides.length)}
+                className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Previous slide"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeroSlide((s) => (s + 1) % heroSlides.length)}
+                className="p-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="Next slide"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+              <div className="h-0.5 w-8 sm:w-12 bg-primary rounded-full" />
+              <span className="text-sm font-medium text-white/90 tabular-nums">
+                {String(heroSlide + 1).padStart(2, "0")}
+              </span>
+            </div>
           </div>
         </div>
       </section>
