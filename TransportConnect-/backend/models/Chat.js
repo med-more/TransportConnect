@@ -55,9 +55,8 @@ const chatSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for listing user's conversations
+// Index for listing user's conversations (request already has unique index via unique: true)
 chatSchema.index({ participants: 1, updatedAt: -1 });
-chatSchema.index({ request: 1 });
 
 const Chat = mongoose.model("Chat", chatSchema);
 export default Chat;
