@@ -1,11 +1,12 @@
-// Must be a full URL (e.g. https://your-backend.up.railway.app/api). No trailing slash after /api.
+// Must be a full URL ending with /api (e.g. https://your-backend.up.railway.app/api). Backend routes are under /api.
 const rawApi = import.meta.env.VITE_API_BASE_URL || "http://localhost:7000/api"
-export const API_BASE_URL =
+let base =
   rawApi.startsWith("http://") || rawApi.startsWith("https://")
     ? rawApi.replace(/\/$/, "")
     : rawApi.startsWith("/")
       ? "http://localhost:7000/api"
       : `https://${rawApi.replace(/\/$/, "")}`
+export const API_BASE_URL = base.endsWith("/api") ? base : `${base.replace(/\/?$/, "")}/api`
 
 const rawSocket = import.meta.env.VITE_SOCKET_URL || "http://localhost:7000"
 export const SOCKET_URL =
