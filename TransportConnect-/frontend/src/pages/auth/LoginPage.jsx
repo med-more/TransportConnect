@@ -4,11 +4,13 @@ import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
 import { Eye, EyeOff, Truck, Mail, Lock, ArrowLeft, ArrowRight, Facebook, Twitter, Linkedin, Instagram, Home, AlertCircle } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import toast from "react-hot-toast"
 
 const LoginPage = () => {
+  const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [loginError, setLoginError] = useState("")
@@ -23,9 +25,9 @@ const LoginPage = () => {
   useEffect(() => {
     const error = searchParams.get("error")
     if (error === "google_oauth_not_configured") {
-      toast.error("Google OAuth is not configured. Please use email/password login or contact support.")
+      toast.error(t("auth.googleOAuthNotConfigured"))
     } else if (error === "google_auth_failed") {
-      toast.error("Google authentication failed. Please try again or use email/password login.")
+      toast.error(t("auth.googleAuthFailed"))
     }
   }, [searchParams])
 
@@ -67,7 +69,7 @@ const LoginPage = () => {
         }, 500)
       } else {
         // Login failed - show error
-        const errorMessage = result?.message || "Email or password is incorrect"
+        const errorMessage = result?.message || t("auth.loginError")
         console.log("Login failed, error message:", errorMessage)
         console.log("Result object:", result)
         
@@ -104,7 +106,7 @@ const LoginPage = () => {
         error?.response?.data?.msg || 
         error?.response?.data?.message || 
         error?.message || 
-        "Email or password is incorrect"
+        t("auth.loginError")
       
       console.log("Setting login error from catch:", errorMessage)
       
@@ -166,12 +168,12 @@ const LoginPage = () => {
               <div className="flex gap-3">
                 <Link to="/register">
                   <button className="px-4 py-2 rounded-lg border border-white/30 text-white text-sm font-medium hover:bg-white/10 transition-colors">
-                    Sign Up
+                    {t("auth.signUp")}
                   </button>
                 </Link>
                 <Link to="/register">
                   <button className="px-4 py-2 rounded-lg bg-black/50 text-white text-sm font-medium hover:bg-black/70 transition-colors">
-                    Join Us
+                    {t("auth.joinUs")}
                   </button>
                 </Link>
               </div>
@@ -185,14 +187,14 @@ const LoginPage = () => {
           <div className="flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
               <Home className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="text-xs sm:text-sm font-medium">Back to Home</span>
+              <span className="text-xs sm:text-sm font-medium">{t("auth.backToHome")}</span>
             </Link>
           </div>
 
           {/* Welcome Message */}
           <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Hi there!</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">Welcome to TransportConnect</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{t("auth.hiThere")}</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">{t("auth.welcomeToApp")}</p>
           </div>
 
           {/* Login Form */}
@@ -200,13 +202,13 @@ const LoginPage = () => {
             <div>
               <Input
                 type="email"
-                placeholder="Email"
+                placeholder={t("auth.email")}
                 error={errors.email?.message}
                 {...register("email", {
-                  required: "Email is required",
+                  required: t("auth.emailRequired"),
                   pattern: {
                     value: /^\S+@\S+$/i,
-                    message: "Invalid email format",
+                    message: t("auth.emailRequired"),
                   },
                 })}
                 className="w-full"
@@ -216,13 +218,13 @@ const LoginPage = () => {
             <div className="relative">
               <Input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder={t("auth.password")}
                 error={errors.password?.message}
                 {...register("password", {
-                  required: "Password is required",
+                  required: t("auth.passwordRequired"),
                   minLength: {
                     value: 6,
-                    message: "Password must be at least 6 characters",
+                    message: t("auth.passwordRequired"),
                   },
                 })}
                 className="w-full"
@@ -242,7 +244,7 @@ const LoginPage = () => {
                 to="/forgot-password"
                 className="text-sm text-primary hover:underline font-medium"
               >
-                Forgot password?
+                {t("auth.forgotPassword")}
               </Link>
             </div>
 
@@ -251,7 +253,7 @@ const LoginPage = () => {
               <div className="flex items-start gap-3 p-4 rounded-lg bg-red-50 border-2 border-red-300 shadow-sm animate-in fade-in slide-in-from-top-2">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 text-red-600 mt-0.5" />
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-800 mb-1">Login Failed</p>
+                  <p className="text-sm font-semibold text-red-800 mb-1">{t("auth.loginFailed")}</p>
                   <p className="text-sm text-red-700">{loginError}</p>
                 </div>
               </div>
@@ -263,7 +265,7 @@ const LoginPage = () => {
                 <div className="w-full border-t border-border"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">or</span>
+                <span className="bg-card px-2 text-muted-foreground">{t("auth.or")}</span>
               </div>
             </div>
 
@@ -290,21 +292,21 @@ const LoginPage = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              <span className="text-foreground font-medium">Login with Google</span>
+              <span className="text-foreground font-medium">{t("auth.loginWithGoogle")}</span>
             </a>
 
             {/* Submit Button */}
             <Button type="submit" loading={loading} className="w-full bg-primary hover:bg-primary/90 text-white" size="large">
-              Login
+              {t("auth.login")}
             </Button>
           </form>
 
           {/* Sign Up Link */}
           <div className="text-center mt-6">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{" "}
+              {t("auth.noAccount")}{" "}
               <Link to="/register" className="text-primary hover:underline font-medium">
-                Sign up
+                {t("auth.register")}
               </Link>
             </p>
           </div>

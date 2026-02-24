@@ -23,6 +23,8 @@ import {
 } from "../../utils/icons"
 import { requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLocale } from "../../contexts/LocaleContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
@@ -39,6 +41,8 @@ const RequestDetailPage = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const { t } = useTranslation()
+  const { formatCurrency } = useLocale()
   const [cancelDialog, setCancelDialog] = useState(false)
   const [pickupDialog, setPickupDialog] = useState(false)
   const [deliveryDialog, setDeliveryDialog] = useState(false)
@@ -424,14 +428,14 @@ const RequestDetailPage = () => {
                         <Euro className="w-4 h-4 text-primary shrink-0" />
                         <h3 className="text-xs sm:text-sm font-medium text-primary truncate">Price</h3>
                       </div>
-                      <p className="text-primary font-bold text-lg truncate">{request.price ?? "—"}€</p>
+                      <p className="text-primary font-bold text-lg truncate">{request.price != null ? formatCurrency(request.price) : "—"}</p>
                     </div>
                   </div>
 
                   {request.cargo?.value && (
                     <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
                       <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Declared Value</h3>
-                      <p className="text-foreground font-semibold">{request.cargo.value}€</p>
+                      <p className="text-foreground font-semibold">{formatCurrency(request.cargo.value)}</p>
                     </div>
                   )}
                 </div>

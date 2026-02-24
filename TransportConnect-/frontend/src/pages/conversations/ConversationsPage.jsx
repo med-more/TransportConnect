@@ -5,26 +5,27 @@ import { motion } from "framer-motion"
 import { MessageCircle, Package } from "../../utils/icons"
 import { chatAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
 
-const FILTERS = [
-  { id: "all", label: "All" },
-  { id: "unread", label: "Unread" },
-  { id: "open", label: "Open" },
-  { id: "closed", label: "Closed" },
+const getFilters = (t) => [
+  { id: "all", label: t("conversations.all") },
+  { id: "unread", label: t("conversations.unread") },
+  { id: "open", label: t("conversations.open") },
+  { id: "closed", label: t("conversations.closed") },
 ]
 
-function formatTime(dateStr) {
+function formatTime(dateStr, t) {
   if (!dateStr) return ""
   const d = new Date(dateStr)
   const now = new Date()
   const diff = now - d
-  if (diff < 60000) return "Now"
+  if (diff < 60000) return t("conversations.now")
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m`
   if (diff < 86400000) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  if (diff < 172800000) return "Yesterday"
+  if (diff < 172800000) return t("conversations.yesterday")
   if (diff < 604800000) return d.toLocaleDateString([], { weekday: "short" })
   return d.toLocaleDateString([], { day: "numeric", month: "short" })
 }
@@ -47,8 +48,10 @@ function ConversationListSkeleton() {
 
 export default function ConversationsPage() {
   const { user } = useAuth()
+  const { t } = useTranslation()
   const userId = user?._id ?? user?.id
   const [filter, setFilter] = useState("all")
+  const FILTERS = getFilters(t)
 
   const { data, isLoading } = useQuery({
     queryKey: ["chats-conversations", userId],
@@ -92,9 +95,9 @@ export default function ConversationsPage() {
               <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">Chats</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">{t("conversations.title")}</h1>
               <p className="text-xs text-muted-foreground">
-                {conversations.length} of {allConversations.length} conversation{allConversations.length !== 1 ? "s" : ""}
+                {conversations.length} {t("conversations.ofConversations")} {allConversations.length} {allConversations.length !== 1 ? t("conversations.conversations") : t("conversations.conversation")}
               </p>
             </div>
           </div>
@@ -151,19 +154,19 @@ export default function ConversationsPage() {
             <MessageCircle className="w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground" />
           </div>
           <p className="text-foreground font-semibold text-base sm:text-lg mb-1">
-            {allConversations.length === 0 ? "No conversations yet" : `No ${filter} conversations`}
+            {allConversations.length === 0 ? t("conversations.noConversations") : `${t("common.noResults")} ${filter}`}
           </p>
           <p className="text-muted-foreground text-xs sm:text-sm max-w-[280px] mb-6 leading-relaxed">
             {allConversations.length === 0
-              ? "When you create or accept a request, you can chat with the driver or shipper here."
-              : "Try another filter or start a new request."}
+              ? t("conversations.emptyHint")
+              : t("conversations.tryOtherFilter")}
           </p>
           {allConversations.length === 0 ? (
             <Link
               to="/requests"
               className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 py-3 rounded-xl bg-primary text-white font-medium text-sm hover:bg-primary/90 active:scale-[0.98] transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 touch-target"
             >
-              View requests
+              {t("conversations.viewRequests")}
             </Link>
           ) : (
             <button
@@ -171,7 +174,7 @@ export default function ConversationsPage() {
               onClick={() => setFilter("all")}
               className="px-5 py-3 rounded-xl bg-muted hover:bg-muted/80 font-medium text-sm transition-colors"
             >
-              Show all
+              {t("conversations.showAll")}
             </button>
           )}
         </motion.div>
@@ -229,7 +232,7 @@ export default function ConversationsPage() {
                       </span>
                       {conv.lastMessage?.createdAt && (
                         <span className="text-[10px] sm:text-xs text-muted-foreground shrink-0">
-                          {formatTime(conv.lastMessage.createdAt)}
+                          {formatTime(conv.lastMessage.createdAt, t)}
                         </span>
                       )}
                     </div>
@@ -242,13 +245,13 @@ export default function ConversationsPage() {
                         conv.unreadCount > 0 ? "font-medium text-foreground" : "text-muted-foreground"
                       }`}
                     >
-                      {isFromMe && "You: "}
+                      {isFromMe && t("common.you") + ": "}
                       {lastPreview}
                     </p>
                   </div>
                   {!conv.isActive && (
                     <span className="text-[10px] px-2.5 py-1 rounded-full bg-muted text-muted-foreground shrink-0">
-                      Closed
+                      {t("conversations.closed")}
                     </span>
                   )}
                 </Link>

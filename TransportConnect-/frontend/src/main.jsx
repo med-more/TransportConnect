@@ -6,6 +6,7 @@ import App from "./App.jsx"
 import "./index.css"
 import { AuthProvider } from "./contexts/AuthContext.jsx"
 import { ThemeProvider } from "./contexts/ThemeContext.jsx"
+import { LocaleProvider } from "./contexts/LocaleContext.jsx"
 import { SocketProvider } from "./contexts/SocketContext.jsx"
 
 const queryClient = new QueryClient({
@@ -24,9 +25,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <ThemeProvider>
-            <SocketProvider>
-              <App />
-            </SocketProvider>
+            <LocaleProvider>
+              <SocketProvider>
+                <App />
+              </SocketProvider>
+            </LocaleProvider>
           </ThemeProvider>
         </AuthProvider>
       </QueryClientProvider>

@@ -23,6 +23,8 @@ import {
 } from "../../utils/icons"
 import { tripsAPI, requestsAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLocale } from "../../contexts/LocaleContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
@@ -37,6 +39,8 @@ const TripDetailPage = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { user } = useAuth()
+  const { t } = useTranslation()
+  const { formatCurrency } = useLocale()
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [completeDialog, setCompleteDialog] = useState(false)
   const [scrollY, setScrollY] = useState(0)
@@ -349,8 +353,8 @@ const TripDetailPage = () => {
                       <Euro className="w-4 h-4 text-primary shrink-0" />
                       <h3 className="text-xs sm:text-sm font-medium text-primary truncate">Price per kg</h3>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold text-primary truncate" title={`${Number(trip.pricePerKg || 0).toFixed(2)}€/kg`}>
-                      {Number(trip.pricePerKg || 0).toFixed(2)}€/kg
+                    <p className="text-xl sm:text-2xl font-bold text-primary truncate" title={formatCurrency(trip.pricePerKg || 0) + "/kg"}>
+                      {formatCurrency(trip.pricePerKg || 0)}/kg
                     </p>
                   </div>
                 </div>
@@ -432,7 +436,7 @@ const TripDetailPage = () => {
                                   <Weight className="w-3 h-3 inline mr-1" />
                                   {request.cargo?.weight ?? "—"} kg
                                 </span>
-                                <span className="text-primary font-semibold">{request.price}€</span>
+                                <span className="text-primary font-semibold">{formatCurrency(request.price)}</span>
                               </div>
                             </div>
                             <Link to={`/requests/${request._id}`} className="w-full sm:w-auto">

@@ -24,6 +24,8 @@ import {
   ArrowLeft,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLocale } from "../../contexts/LocaleContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import { requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -36,6 +38,8 @@ import { generatePageNumbers } from "../../utils/pagination"
 
 const RequestsPage = () => {
   const { user } = useAuth()
+  const { t } = useTranslation()
+  const { formatCurrency } = useLocale()
   const [activeTab, setActiveTab] = useState("all")
   const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
@@ -84,17 +88,17 @@ const RequestsPage = () => {
   const getStatusLabel = (status) => {
     switch (status) {
       case "pending":
-        return "Pending"
+        return t("status.pending")
       case "accepted":
-        return "Accepted"
+        return t("status.accepted")
       case "rejected":
-        return "Rejected"
+        return t("status.rejected")
       case "in_transit":
-        return "In Transit"
+        return t("status.in_transit")
       case "delivered":
-        return "Delivered"
+        return t("status.delivered")
       case "cancelled":
-        return "Cancelled"
+        return t("status.cancelled")
       default:
         return status
     }
@@ -120,28 +124,28 @@ const RequestsPage = () => {
   }
 
   const tabs = [
-    { id: "all", label: "All", count: requests.length, icon: Package },
+    { id: "all", label: t("requestsList.all"), count: requests.length, icon: Package },
     {
       id: "pending",
-      label: "Pending",
+      label: t("status.pending"),
       count: requests.filter((r) => r.status === "pending").length,
       icon: Clock,
     },
     {
       id: "accepted",
-      label: "Accepted",
+      label: t("status.accepted"),
       count: requests.filter((r) => r.status === "accepted").length,
       icon: CheckCircle,
     },
     {
       id: "in_transit",
-      label: "In Transit",
+      label: t("status.in_transit"),
       count: requests.filter((r) => r.status === "in_transit").length,
       icon: Truck,
     },
     {
       id: "delivered",
-      label: "Delivered",
+      label: t("status.delivered"),
       count: requests.filter((r) => r.status === "delivered").length,
       icon: CheckCircle,
     },
@@ -214,19 +218,19 @@ const RequestsPage = () => {
             <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
               <Package className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
-            <span className="truncate">{user?.role === "conducteur" ? "Received Requests" : "My Requests"}</span>
+            <span className="truncate">{user?.role === "conducteur" ? t("dashboard.receivedRequests") : t("dashboard.myRequests")}</span>
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             {user?.role === "conducteur"
-              ? "Manage and respond to transport requests"
-              : "Track your transport requests in real-time"}
+              ? t("requests.manageReceivedDesc")
+              : t("requests.trackRequestsDesc")}
           </p>
         </div>
         {user?.role !== "conducteur" && (
           <Link to="/requests/create" className="flex-shrink-0">
             <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg">
               <Plus className="w-4 h-4 mr-2" />
-              Create Request
+              {t("nav.createRequest")}
             </Button>
           </Link>
         )}
@@ -237,7 +241,7 @@ const RequestsPage = () => {
         <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Total</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("common.total")}</p>
               <p className="text-xl sm:text-2xl font-bold text-foreground">{stats.total}</p>
             </div>
             <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0 ml-2">
@@ -248,7 +252,7 @@ const RequestsPage = () => {
         <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Pending</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("status.pending")}</p>
               <p className="text-xl sm:text-2xl font-bold text-warning">{stats.pending}</p>
             </div>
             <div className="p-2 bg-warning/10 rounded-lg flex-shrink-0 ml-2">
@@ -259,7 +263,7 @@ const RequestsPage = () => {
         <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Accepted</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("status.accepted")}</p>
               <p className="text-xl sm:text-2xl font-bold text-success">{stats.accepted}</p>
             </div>
             <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
@@ -270,7 +274,7 @@ const RequestsPage = () => {
         <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">In Transit</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("status.in_transit")}</p>
               <p className="text-xl sm:text-2xl font-bold text-info">{stats.inTransit}</p>
             </div>
             <div className="p-2 bg-info/10 rounded-lg flex-shrink-0 ml-2">
@@ -281,7 +285,7 @@ const RequestsPage = () => {
         <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm text-muted-foreground mb-1">Delivered</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-1">{t("status.delivered")}</p>
               <p className="text-xl sm:text-2xl font-bold text-success">{stats.delivered}</p>
             </div>
             <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
@@ -296,10 +300,10 @@ const RequestsPage = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
           <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            Filters & Search
+            {t("common.filtersAndSearch")}
           </h3>
           <Button variant="ghost" size="small" onClick={() => setShowFilters(!showFilters)} className="flex-shrink-0">
-            {showFilters ? "Hide" : "Show"} Filters
+            {showFilters ? t("common.hideFilters") : t("common.showFilters")}
           </Button>
         </div>
 
@@ -333,7 +337,7 @@ const RequestsPage = () => {
               min="0"
             />
             <Input
-              placeholder="Price (€)"
+              placeholder={t("requests.price")}
               value={filters.prix}
               onChange={(e) => handleFilterChange("prix", e.target.value)}
               type="number"
@@ -342,7 +346,7 @@ const RequestsPage = () => {
           </div>
           <div className="flex items-center justify-end gap-2 pt-4 border-t border-border">
             <Button variant="ghost" size="small" onClick={resetFilters}>
-              Reset
+              {t("common.reset")}
             </Button>
           </div>
         </motion.div>
@@ -435,7 +439,7 @@ const RequestsPage = () => {
                       </div>
                     </div>
                     <div className="text-right ml-4">
-                      <div className="text-2xl font-bold text-primary">{request.price}€</div>
+                      <div className="text-2xl font-bold text-primary">{formatCurrency(request.price)}</div>
                       <div className="text-sm text-muted-foreground flex items-center gap-1">
                         <Weight className="w-3 h-3" />
                         {request.cargo.weight}kg
@@ -694,17 +698,17 @@ const RequestsPage = () => {
               <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
                 <Package className="w-10 h-10 text-muted-foreground opacity-50" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No requests found</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">{t("requestsList.noRequestsFound")}</h3>
               <p className="text-muted-foreground mb-6">
                 {activeTab !== "all"
-                  ? `No ${tabs.find((t) => t.id === activeTab)?.label.toLowerCase()} requests at the moment.`
-                  : "Start by creating your first request."}
+                  ? t("requestsList.adjustFilters")
+                  : t("requestsList.createFirstRequest")}
               </p>
               {user?.role !== "conducteur" && (
                 <Link to="/requests/create">
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Request
+                    {t("nav.createRequest")}
                   </Button>
                 </Link>
               )}

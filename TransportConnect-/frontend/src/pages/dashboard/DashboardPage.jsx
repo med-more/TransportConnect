@@ -22,6 +22,8 @@ import {
   Paperclip,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLocale } from "../../contexts/LocaleContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import { tripsAPI, requestsAPI, usersAPI, notificationsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -32,6 +34,8 @@ import ShipmentTrackingMap from "../../components/ShipmentTrackingMap"
 const DashboardPage = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
+  const { formatCurrency } = useLocale()
 
   const { data: statsResponse, isLoading: statsLoading } = useQuery({
     queryKey: ["user-stats"],
@@ -106,7 +110,7 @@ const DashboardPage = () => {
 
   const statsCards = [
     {
-      title: user?.role === "conducteur" ? "Total Trips" : "Total Requests",
+      title: user?.role === "conducteur" ? t("dashboard.totalTrips") : t("dashboard.totalRequests"),
       value: stats?.totalTrips ?? stats?.totalRequests ?? 0,
       icon: Truck,
       color: "text-primary",
@@ -115,8 +119,8 @@ const DashboardPage = () => {
       trend: "up",
     },
     {
-      title: "Active Shipments",
-      value: recentTrips?.data?.trips?.filter((t) => t.status === "active")?.length || 0,
+      title: t("dashboard.activeShipments"),
+      value: recentTrips?.data?.trips?.filter((trip) => trip.status === "active")?.length || 0,
       icon: Package,
       color: "text-info",
       bgColor: "bg-info/10",
@@ -124,7 +128,7 @@ const DashboardPage = () => {
       trend: "up",
     },
     {
-      title: "Pending Requests",
+      title: t("dashboard.pendingRequests"),
       value: recentRequests?.data?.requests?.filter((r) => r.status === "pending")?.length || 0,
       icon: Clock,
       color: "text-warning",
@@ -133,7 +137,7 @@ const DashboardPage = () => {
       trend: "down",
     },
     {
-      title: "Success Rate",
+      title: t("dashboard.successRate"),
       value: "96%",
       icon: TrendingUp,
       color: "text-success",
@@ -291,13 +295,13 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Tracking</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.shipmentTracking")}</h3>
                   <div className="flex flex-wrap gap-2">
                     <Button variant="outline" size="small" className="text-xs px-2 sm:px-3" onClick={() => navigate("/trips")}>
-                      Trips
+                      {t("dashboard.trips")}
                     </Button>
                     <Button variant="outline" size="small" className="text-xs px-2 sm:px-3" onClick={() => navigate("/requests")}>
-                      Requests
+                      {t("dashboard.requests")}
                     </Button>
                   </div>
                 </div>
@@ -343,7 +347,7 @@ const DashboardPage = () => {
                     <div className="space-y-3 sm:space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs sm:text-sm text-muted-foreground">Distance to arrival</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{t("dashboard.distanceToArrival")}</p>
                           <p className="text-base sm:text-lg font-semibold text-foreground">
                             {distanceToArrival ? distanceToArrival.text : "—"}
                           </p>
@@ -353,16 +357,16 @@ const DashboardPage = () => {
                       <div className="flex flex-col sm:flex-row gap-2">
                         {activeTrip && (
                           <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(`/trips/${activeTrip._id}`)}>
-                            View trip
+                            {t("dashboard.viewTrip")}
                           </Button>
                         )}
                         {activeRequest && !activeTrip && (
                           <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(`/requests/${activeRequest._id}`)}>
-                            View request
+                            {t("dashboard.viewRequest")}
                           </Button>
                         )}
                         <Button variant="outline" size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips" : "/requests")}>
-                          View all
+                          {t("dashboard.viewAll")}
                         </Button>
                       </div>
                     </div>
@@ -372,16 +376,16 @@ const DashboardPage = () => {
                     <div className="w-full h-48 sm:h-56 md:h-64 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border mb-4 flex items-center justify-center">
                       <div className="text-center">
                         <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">No active shipment</p>
-                        <p className="text-xs text-muted-foreground mt-1">Distance to arrival —</p>
+                        <p className="text-sm text-muted-foreground">{t("dashboard.noActiveShipment")}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.distanceToArrival")} —</p>
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
                       <Button size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips/create" : "/requests/create")}>
-                        {user?.role === "conducteur" ? "Create trip" : "Create request"}
+                        {user?.role === "conducteur" ? t("trips.createTrip") : t("requests.createRequest")}
                       </Button>
                       <Button variant="outline" size="small" className="w-full sm:w-auto" onClick={() => navigate(user?.role === "conducteur" ? "/trips" : "/requests")}>
-                        View all
+                        {t("dashboard.viewAll")}
                       </Button>
                     </div>
                   </>
@@ -394,11 +398,11 @@ const DashboardPage = () => {
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                    {user?.role === "conducteur" ? "My Recent Trips" : "Available Trips"}
+                    {user?.role === "conducteur" ? t("dashboard.myRecentTrips") : t("dashboard.availableTrips")}
                   </h3>
                   <Link to="/trips">
                     <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                      {t("dashboard.viewAll")} <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
                 </div>
@@ -428,12 +432,12 @@ const DashboardPage = () => {
                               </p>
                             </div>
                           </div>
-                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0 truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>{Number(trip.pricePerKg).toFixed(2)}€/kg</span>
+                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0 truncate" title={formatCurrency(trip.pricePerKg) + "/kg"}>{formatCurrency(trip.pricePerKg)}/kg</span>
                         </div>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Package className="w-3 h-3" />
-                            {trip.availableCapacity.weight}kg available
+                            {trip.availableCapacity.weight}{t("dashboard.kgAvailable")}
                           </span>
                           {user?.role !== "conducteur" && trip.driver && (
                             <span className="flex items-center gap-1">
@@ -449,7 +453,7 @@ const DashboardPage = () => {
                   ) : (
                     <div className="text-center py-8">
                       <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No trips found</p>
+                      <p className="text-sm text-muted-foreground">{t("dashboard.noTripsFound")}</p>
                     </div>
                   )}
                 </div>
@@ -463,7 +467,7 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Alerts & Notifications</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.alertsNotifications")}</h3>
                   {notifications.some((n) => !n.read) && (
                     <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" title="Unread" />
                   )}
@@ -495,7 +499,7 @@ const DashboardPage = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground py-2">No notifications yet.</p>
+                    <p className="text-sm text-muted-foreground py-2">{t("dashboard.noNotificationsYet")}</p>
                   )}
                 </div>
               </Card>
@@ -505,7 +509,7 @@ const DashboardPage = () => {
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">Shipment Details</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.shipmentDetails")}</h3>
                   {(activeTrip || activeRequest) && (
                     <Button
                       variant="ghost"
@@ -519,7 +523,7 @@ const DashboardPage = () => {
                         )
                       }
                     >
-                      Read more
+                      {t("dashboard.readMore")}
                     </Button>
                   )}
                 </div>
@@ -541,12 +545,12 @@ const DashboardPage = () => {
                   {activeTrip || activeRequest ? (
                     <>
                       <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
-                        <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t("dashboard.totalValue")}</p>
                         <p className="text-lg sm:text-xl font-bold text-foreground">
                           {user?.role !== "conducteur" && activeRequest
-                            ? `${Number(activeRequest.price || 0).toFixed(2)}€`
+                            ? formatCurrency(activeRequest.price || 0)
                             : activeTrip
-                              ? `${acceptedRequests.reduce((s, r) => s + (Number(r.price) || 0), 0).toFixed(2)}€`
+                              ? formatCurrency(acceptedRequests.reduce((s, r) => s + (Number(r.price) || 0), 0))
                               : "—"}
                         </p>
                       </div>
@@ -579,13 +583,13 @@ const DashboardPage = () => {
                   ) : (
                     <>
                       <div className="p-2 sm:p-3 bg-muted/30 dark:bg-muted/50 rounded-xl">
-                        <p className="text-xs text-muted-foreground mb-1">Total Value</p>
+                        <p className="text-xs text-muted-foreground mb-1">{t("dashboard.totalValue")}</p>
                         <p className="text-lg sm:text-xl font-bold text-foreground">—</p>
                       </div>
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Status</span>
-                          <span className="text-muted-foreground">No active shipment</span>
+                          <span className="text-muted-foreground">{t("dashboard.noActiveShipment")}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Type</span>
@@ -614,14 +618,14 @@ const DashboardPage = () => {
               <motion.div variants={itemVariants}>
                 <Card className="p-4 sm:p-5 md:p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-base sm:text-lg font-semibold text-foreground">Current Truck Capacity</h3>
+                    <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.currentTruckCapacity")}</h3>
                     <Button
                       variant="ghost"
                       size="small"
                       className="text-xs sm:text-sm"
                       onClick={() => navigate("/profile")}
                     >
-                      Profile
+                      {t("nav.profile")}
                     </Button>
                   </div>
                   <div className="space-y-3 sm:space-y-4">
@@ -635,23 +639,23 @@ const DashboardPage = () => {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-muted-foreground">Truck ID</span>
+                        <span className="text-muted-foreground">{t("dashboard.truckId")}</span>
                         <span className="font-medium text-foreground text-xs sm:text-sm truncate ml-2">
                           {user?.vehicleInfo?.licensePlate || "—"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-muted-foreground">Capacity</span>
+                        <span className="text-muted-foreground">{t("dashboard.capacity")}</span>
                         <span className="font-bold text-primary">{capacityPercent}%</span>
                       </div>
                       <div className="flex items-center justify-between text-xs sm:text-sm">
                         <span className="text-muted-foreground">Status</span>
                         <span className={activeTrip ? "text-primary font-medium" : "text-muted-foreground"}>
-                          {activeTrip ? "On Route" : "Available"}
+                          {activeTrip ? t("dashboard.onRoute") : t("dashboard.available")}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs sm:text-sm">
-                        <span className="text-muted-foreground">Weight</span>
+                        <span className="text-muted-foreground">{t("dashboard.weight")}</span>
                         <span className="font-medium text-foreground">
                           {truckCapacityKg != null
                             ? `${Number(usedWeight).toLocaleString()} / ${Number(truckCapacityKg).toLocaleString()} kg`
@@ -669,11 +673,11 @@ const DashboardPage = () => {
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
                   <h3 className="text-base sm:text-lg font-semibold text-foreground">
-                    {user?.role === "conducteur" ? "Received Requests" : "My Requests"}
+                    {user?.role === "conducteur" ? t("dashboard.receivedRequests") : t("dashboard.myRequests")}
                   </h3>
                   <Link to="/requests">
                     <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                      {t("dashboard.viewAll")} <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                     </Button>
                   </Link>
                 </div>
@@ -717,14 +721,14 @@ const DashboardPage = () => {
                         </div>
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                           <span>{request.cargo?.weight}kg</span>
-                          <span className="font-medium text-foreground">{request.price}€</span>
+                          <span className="font-medium text-foreground">{formatCurrency(request.price)}</span>
                         </div>
                       </div>
                     ))
                   ) : (
                     <div className="text-center py-8">
                       <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No requests found</p>
+                      <p className="text-sm text-muted-foreground">{t("dashboard.noRequestsFound")}</p>
                     </div>
                   )}
                 </div>

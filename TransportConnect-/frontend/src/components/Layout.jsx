@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
 import { useTheme } from "../contexts/ThemeContext"
+import { useTranslation } from "../i18n/useTranslation"
 import {
   Home,
   Truck,
@@ -34,6 +35,7 @@ import {
   AlertCircle,
   Sun,
   Moon,
+  Settings,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
@@ -56,6 +58,7 @@ const Layout = ({ children }) => {
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -78,11 +81,12 @@ const Layout = ({ children }) => {
   }, [sidebarCollapsed])
 
   const navigationItems = [
-    { name: "Dashboard", href: "/dashboard", icon: Home },
-    { name: "Mes trajets", href: "/trips", icon: Truck },
-    { name: "Mes demandes", href: "/requests", icon: Package },
-    { name: "Conversations", href: "/conversations", icon: MessageCircle },
-    { name: "Profil", href: "/profile", icon: User },
+    { name: t("nav.dashboard"), href: "/dashboard", icon: Home },
+    { name: t("nav.trips"), href: "/trips", icon: Truck },
+    { name: t("nav.requests"), href: "/requests", icon: Package },
+    { name: t("nav.conversations"), href: "/conversations", icon: MessageCircle },
+    { name: t("nav.profile"), href: "/profile", icon: User },
+    { name: t("nav.settings"), href: "/settings", icon: Settings },
   ]
 
   const getCreateButtonHref = () => {
@@ -94,17 +98,17 @@ const Layout = ({ children }) => {
 
   const getCreateButtonLabel = () => {
     if (user?.role === "conducteur") {
-      return "Créer un trajet"
+      return t("nav.createTrip")
     }
-    return "Créer une demande"
+    return t("nav.createRequest")
   }
 
   const adminNavigationItems = [
-    { name: "Dashboard", href: "/admin", icon: BarChart3 },
-    { name: "Utilisateurs", href: "/admin/users", icon: Users },
-    { name: "Trajets", href: "/admin/trips", icon: Truck },
-    { name: "Demandes", href: "/admin/requests", icon: Package },
-    { name: "Vérifications", href: "/admin/verifications", icon: Shield },
+    { name: t("nav.dashboard"), href: "/admin", icon: BarChart3 },
+    { name: t("nav.users"), href: "/admin/users", icon: Users },
+    { name: t("nav.adminTrips"), href: "/admin/trips", icon: Truck },
+    { name: t("nav.adminRequests"), href: "/admin/requests", icon: Package },
+    { name: t("nav.verifications"), href: "/admin/verifications", icon: Shield },
   ]
 
   const currentNavigationItems = user?.role === "admin" ? [...adminNavigationItems] : [...navigationItems]
@@ -528,10 +532,10 @@ const Layout = ({ children }) => {
               "w-full flex items-center rounded-lg text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-accent transition-colors",
               sidebarCollapsed ? "justify-center px-3 py-2" : "gap-2 px-3 py-2"
             )}
-            title={sidebarCollapsed ? "Logout" : ""}
+            title={sidebarCollapsed ? t("nav.logout") : ""}
           >
             <LogOut className="w-4 h-4 flex-shrink-0" />
-            {!sidebarCollapsed && <span>Logout</span>}
+            {!sidebarCollapsed && <span>{t("nav.logout")}</span>}
           </button>
         </div>
       </aside>
@@ -570,8 +574,8 @@ const Layout = ({ children }) => {
             <div className="order-2 hidden md:flex flex-1 items-center justify-center gap-2 sm:gap-3 min-w-0 overflow-hidden lg:max-w-md">
               <div className="min-w-0 flex-1 text-center lg:text-left">
                 <h2 className="text-sm md:text-base lg:text-lg font-semibold text-foreground truncate">
-                  <span className="lg:hidden">Hi, {user?.firstName}!</span>
-                  <span className="hidden lg:inline">Welcome back, {user?.firstName}!</span>
+                  <span className="lg:hidden">{t("dashboard.hi")}, {user?.firstName}!</span>
+                  <span className="hidden lg:inline">{t("dashboard.welcome")}, {user?.firstName}!</span>
                 </h2>
                 <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground hidden md:block truncate">
                   {new Date().toLocaleDateString("en-US", {
@@ -586,7 +590,7 @@ const Layout = ({ children }) => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search trips, requests..."
+                    placeholder={t("common.searchPlaceholder")}
                     value={searchQuery}
                     onChange={handleSearchChange}
                     onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
@@ -599,13 +603,13 @@ const Layout = ({ children }) => {
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>No results found</p>
+                          <p>{t("common.noResults")}</p>
                         </div>
                       ) : (
                         <>
                           {searchResults.trips.length > 0 && (
                             <div className="p-2">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Trips</p>
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">{t("nav.trips")}</p>
                               {searchResults.trips.map((trip) => (
                                 <Link
                                   key={trip._id}
@@ -635,7 +639,7 @@ const Layout = ({ children }) => {
                           
                           {searchResults.requests.length > 0 && (
                             <div className="p-2 border-t border-border">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Requests</p>
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">{t("nav.requests")}</p>
                               {searchResults.requests.map((request) => (
                                 <Link
                                   key={request._id}
@@ -741,7 +745,7 @@ const Layout = ({ children }) => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Bell className="w-4 h-4 text-primary" />
-                            <h3 className="font-semibold text-foreground text-sm">Notifications</h3>
+                            <h3 className="font-semibold text-foreground text-sm">{t("common.notifications")}</h3>
                             {unreadCount > 0 && (
                               <span className="px-2 py-0.5 bg-primary text-white text-[10px] font-bold rounded-full">
                                 {unreadCount > 99 ? "99+" : unreadCount}
@@ -771,7 +775,7 @@ const Layout = ({ children }) => {
                                 className="text-xs text-primary hover:text-primary/80 font-medium transition-colors px-2 py-1 hover:bg-primary/5 rounded"
                                 title="Mark all as read"
                               >
-                                Mark all read
+                                {t("common.markAllRead")}
                               </button>
                             )}
                             <button
@@ -790,15 +794,15 @@ const Layout = ({ children }) => {
                         {notificationsLoading ? (
                           <div className="p-8 text-center">
                             <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent"></div>
-                            <p className="text-sm text-muted-foreground mt-2">Loading notifications...</p>
+                            <p className="text-sm text-muted-foreground mt-2">{t("common.loadingNotifications")}</p>
                           </div>
                         ) : notifications.length === 0 ? (
                           <div className="p-12 text-center">
                             <div className="w-16 h-16 bg-accent rounded-full flex items-center justify-center mx-auto mb-4">
                               <Bell className="w-8 h-8 text-muted-foreground opacity-50" />
                             </div>
-                            <p className="text-sm font-medium text-foreground mb-1">No notifications</p>
-                            <p className="text-xs text-muted-foreground">You're all caught up!</p>
+                            <p className="text-sm font-medium text-foreground mb-1">{t("common.noNotifications")}</p>
+                            <p className="text-xs text-muted-foreground">{t("common.allCaughtUp")}</p>
                           </div>
                         ) : (
                           <div className="divide-y divide-border">
@@ -987,7 +991,7 @@ const Layout = ({ children }) => {
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Search trips, requests..."
+                    placeholder={t("common.searchPlaceholder")}
                     value={searchQuery}
                     onChange={handleSearchChange}
                     onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
@@ -1001,13 +1005,13 @@ const Layout = ({ children }) => {
                       {totalResults === 0 ? (
                         <div className="p-4 text-center text-sm text-muted-foreground">
                           <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p>No results found</p>
+                          <p>{t("common.noResults")}</p>
                         </div>
                       ) : (
                         <>
                           {searchResults.trips.length > 0 && (
                             <div className="p-2">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Trips</p>
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">{t("nav.trips")}</p>
                               {searchResults.trips.map((trip) => (
                                 <Link
                                   key={trip._id}
@@ -1038,7 +1042,7 @@ const Layout = ({ children }) => {
                           
                           {searchResults.requests.length > 0 && (
                             <div className="p-2 border-t border-border">
-                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">Requests</p>
+                              <p className="text-xs font-semibold text-muted-foreground uppercase px-2 py-1">{t("nav.requests")}</p>
                               {searchResults.requests.map((request) => (
                                 <Link
                                   key={request._id}

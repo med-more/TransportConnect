@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../contexts/AuthContext"
+import { useTranslation } from "../i18n/useTranslation"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
 import { useQuery } from "@tanstack/react-query"
@@ -33,6 +34,7 @@ import { normalizeAvatarUrl } from "../utils/avatar"
 
 const ProfilePage = () => {
   const { user, updateUser, setAuthState } = useAuth()
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -116,9 +118,9 @@ const ProfilePage = () => {
       const response = await usersAPI.updateProfile(data)
       updateUser(response.data.data || response.data)
       setIsEditing(false)
-      toast.success("Profile updated successfully!")
+      toast.success(t("profile.profileUpdated"))
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating profile")
+      toast.error(error.response?.data?.message || t("profile.errorUpdatingProfile"))
     } finally {
       setIsLoading(false)
     }
@@ -131,18 +133,18 @@ const ProfilePage = () => {
 
   const handleRoleChange = async (newRole) => {
     if (user?.role === newRole) {
-      toast.info("You are already using this role")
+      toast.info(t("profile.alreadyThisRole"))
       return
     }
 
     if (user?.role === "admin") {
-      toast.error("Admin role cannot be changed")
+      toast.error(t("profile.adminCannotChangeRole"))
       return
     }
 
     setIsChangingRole(true)
-    const roleLabel = newRole === "conducteur" ? "Driver" : "Shipper"
-    setRoleChangeMessage(`Preparing ${roleLabel} mode...`)
+    const roleLabel = newRole === "conducteur" ? t("profile.driver") : t("profile.shipper")
+    setRoleChangeMessage(t("profile.preparingMode").replace("{role}", roleLabel))
 
     try {
       const response = await usersAPI.updateProfile({ role: newRole })
@@ -159,7 +161,7 @@ const ProfilePage = () => {
         localStorage.setItem("user", JSON.stringify(fullUser))
         setAuthState(fullUser, token)
 
-        toast.success(`Successfully switched to ${roleLabel} mode!`)
+        toast.success(t("profile.switchedToMode").replace("{role}", roleLabel))
         
         // Wait a bit to show the success message, then redirect
         setTimeout(() => {
@@ -170,7 +172,7 @@ const ProfilePage = () => {
       }
     } catch (error) {
       console.error("Error changing role:", error)
-      toast.error(error.response?.data?.message || "Error changing role. Please try again.")
+      toast.error(error.response?.data?.message || t("profile.errorChangingRole"))
       setIsChangingRole(false)
       setRoleChangeMessage("")
     }
@@ -186,13 +188,13 @@ const ProfilePage = () => {
 
     // Validate file type
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select an image file")
+      toast.error(t("profile.selectImageFile"))
       return
     }
 
     // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size must be less than 5MB")
+      toast.error(t("profile.imageSizeMax"))
       return
     }
 
@@ -223,10 +225,10 @@ const ProfilePage = () => {
         updateUser(updatedUserData)
       }
       setAvatarPreview(null)
-      toast.success("Avatar uploaded successfully!")
+      toast.success(t("profile.avatarUploaded"))
     } catch (error) {
       console.error("Error uploading avatar:", error)
-      toast.error(error.response?.data?.message || "Error uploading avatar")
+      toast.error(error.response?.data?.message || t("profile.errorUploadingAvatar"))
       setAvatarPreview(null)
     } finally {
       setIsUploadingAvatar(false)
@@ -240,13 +242,13 @@ const ProfilePage = () => {
   const getRoleLabel = (role) => {
     switch (role) {
       case "conducteur":
-        return "Driver"
+        return t("profile.driver")
       case "admin":
-        return "Administrator"
+        return t("profile.administrator")
       case "expediteur":
-        return "Shipper"
+        return t("profile.shipper")
       default:
-        return "User"
+        return t("profile.user")
     }
   }
 
@@ -260,9 +262,9 @@ const ProfilePage = () => {
           className="bg-card p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4 text-center"
         >
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <h3 className="text-2xl font-bold text-foreground mb-2">Switching Role</h3>
+          <h3 className="text-2xl font-bold text-foreground mb-2">{t("profile.switchingRole")}</h3>
           <p className="text-muted-foreground mb-4">{roleChangeMessage}</p>
-          <p className="text-sm text-muted-foreground">Please wait while we prepare your new dashboard...</p>
+          <p className="text-sm text-muted-foreground">{t("profile.pleaseWaitPrepare")}</p>
         </motion.div>
       </div>
     )
@@ -270,7 +272,7 @@ const ProfilePage = () => {
 
   const statsCards = [
     {
-      title: user?.role === "conducteur" ? "Total Trips" : "Total Requests",
+      title: user?.role === "conducteur" ? t("profile.totalTrips") : t("profile.totalRequests"),
       value: user?.role === "conducteur" 
         ? (stats.totalTrips || 0)
         : (stats.totalRequests || 0),
@@ -279,14 +281,14 @@ const ProfilePage = () => {
       bgColor: "bg-primary/10",
     },
     {
-      title: "Average Rating",
+      title: t("profile.averageRating"),
       value: stats.averageRating && stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "0.0",
       icon: Star,
       color: "text-warning",
       bgColor: "bg-warning/10",
     },
     {
-      title: "Total Reviews",
+      title: t("profile.totalReviews"),
       value: stats.totalReviews || stats.totalRatings || 0,
       icon: Award,
       color: "text-info",
@@ -298,8 +300,8 @@ const ProfilePage = () => {
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">My Profile</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Manage your personal information and view your statistics</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">{t("profile.myProfile")}</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">{t("profile.subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
@@ -367,7 +369,7 @@ const ProfilePage = () => {
                 disabled={isUploadingAvatar}
                 className="text-xs text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
               >
-                {isUploadingAvatar ? "Uploading..." : "Click to change photo"}
+                {isUploadingAvatar ? t("profile.uploading") : t("profile.clickToChangePhoto")}
               </button>
               <h2 className="text-2xl font-semibold text-foreground mb-1">
                 {user?.firstName} {user?.lastName}
@@ -401,7 +403,7 @@ const ProfilePage = () => {
                 variant={isEditing ? "outline" : "primary"}
               >
                 <Edit className="w-4 h-4 mr-2" />
-                {isEditing ? "Cancel Editing" : "Edit Profile"}
+                {isEditing ? t("profile.cancelEditing") : t("profile.editProfile")}
               </Button>
             </div>
           </Card>
@@ -445,7 +447,7 @@ const ProfilePage = () => {
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
                 <User className="w-5 h-5 text-primary" />
-                Personal Information
+                {t("profile.personalInformation")}
               </h3>
               {isEditing && (
                 <div className="flex gap-2">
@@ -455,11 +457,11 @@ const ProfilePage = () => {
                     size="small"
                   >
                     <Save className="w-4 h-4 mr-2" />
-                    Save
+                    {t("common.save")}
                   </Button>
                   <Button onClick={handleCancelEdit} variant="outline" size="small">
                     <X className="w-4 h-4 mr-2" />
-                    Cancel
+                    {t("common.cancel")}
                   </Button>
                 </div>
               )}
@@ -468,52 +470,52 @@ const ProfilePage = () => {
             <form onSubmit={handleSubmit(handleUpdateProfile)} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Input
-                  label="First name"
+                  label={t("profile.firstName")}
                   disabled={!isEditing}
                   error={errors.firstName?.message}
                   {...register("firstName", {
-                    required: "First name is required",
-                    minLength: { value: 2, message: "First name must be at least 2 characters" },
+                    required: t("profile.firstNameRequired"),
+                    minLength: { value: 2, message: t("profile.firstNameMinLength") },
                   })}
                 />
 
                 <Input
-                  label="Last name"
+                  label={t("profile.lastName")}
                   disabled={!isEditing}
                   error={errors.lastName?.message}
                   {...register("lastName", {
-                    required: "Last name is required",
-                    minLength: { value: 2, message: "Last name must be at least 2 characters" },
+                    required: t("profile.lastNameRequired"),
+                    minLength: { value: 2, message: t("profile.lastNameMinLength") },
                   })}
                 />
               </div>
 
               <Input
-                label="Email"
+                label={t("auth.email")}
                 type="email"
                 disabled={true}
                 value={user?.email}
-                helperText="Email cannot be changed"
+                helperText={t("profile.emailCannotBeChanged")}
               />
 
               <Input
-                label="Phone"
+                label={t("profile.phone")}
                 disabled={!isEditing}
                 error={errors.phone?.message}
                 {...register("phone", {
                   pattern: {
                     value: /^[0-9+\-\s()]+$/,
-                    message: "Invalid phone number format",
+                    message: t("profile.invalidPhoneFormat"),
                   },
                 })}
               />
 
               <Input
-                label="Address"
+                label={t("profile.address")}
                 disabled={!isEditing}
                 error={errors.address?.message}
                 {...register("address", {
-                  minLength: { value: 10, message: "Address must be at least 10 characters" },
+                  minLength: { value: 10, message: t("profile.addressMinLength") },
                 })}
               />
             </form>
@@ -525,7 +527,7 @@ const ProfilePage = () => {
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
                   <Truck className="w-5 h-5 text-primary" />
-                  Vehicle Information
+                  {t("profile.vehicleInformation")}
                 </h3>
                 {!isEditing && (
                   <Button
@@ -534,7 +536,7 @@ const ProfilePage = () => {
                     size="small"
                   >
                     <Edit className="w-4 h-4 mr-2" />
-                    Edit
+                    {t("common.edit")}
                   </Button>
                 )}
               </div>
@@ -555,24 +557,24 @@ const ProfilePage = () => {
                     const response = await usersAPI.updateProfile({ vehicleInfo })
                     updateUser(response.data.data || response.data)
                     setIsEditing(false)
-                    toast.success("Vehicle information updated successfully!")
+                    toast.success(t("profile.vehicleUpdated"))
                   } catch (error) {
-                    toast.error(error.response?.data?.message || "Error updating vehicle information")
+                    toast.error(error.response?.data?.message || t("profile.errorUpdatingVehicle"))
                   } finally {
                     setIsLoading(false)
                   }
                 })} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">Vehicle Type</label>
+                      <label className="block text-sm font-medium text-foreground mb-2">{t("profile.vehicleType")}</label>
                       <select
                         className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         {...register("vehicleType", {
-                          required: "Vehicle type is required",
+                          required: t("profile.vehicleTypeRequired"),
                         })}
                         defaultValue={user?.vehicleInfo?.type || ""}
                       >
-                        <option value="">Select type</option>
+                        <option value="">{t("profile.selectType")}</option>
                         <option value="camion">Camion</option>
                         <option value="camionnette">Camionnette</option>
                         <option value="voiture">Voiture</option>
@@ -580,30 +582,30 @@ const ProfilePage = () => {
                       </select>
                     </div>
                     <Input
-                      label="Capacity (kg)"
+                      label={t("profile.capacityKg")}
                       type="number"
                       step="0.1"
                       defaultValue={user?.vehicleInfo?.capacity || ""}
                       error={errors.vehicleCapacity?.message}
                       {...register("vehicleCapacity", {
-                        required: "Capacity is required",
-                        min: { value: 0.1, message: "Capacity must be greater than 0" },
+                        required: t("profile.capacityRequired"),
+                        min: { value: 0.1, message: t("profile.capacityMin") },
                       })}
                     />
                   </div>
                   <Input
-                    label="License Plate"
+                    label={t("profile.licensePlate")}
                     defaultValue={user?.vehicleInfo?.licensePlate || ""}
                     error={errors.vehicleLicensePlate?.message}
                     {...register("vehicleLicensePlate", {
-                      required: "License plate is required",
+                      required: t("profile.licensePlateRequired"),
                     })}
                   />
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">Dimensions (cm) - Optional</label>
+                    <label className="block text-sm font-medium text-foreground mb-2">{t("profile.dimensionsOptional")}</label>
                     <div className="grid grid-cols-3 gap-2">
                       <Input
-                        placeholder="Length"
+                        placeholder={t("profile.length")}
                         type="number"
                         step="0.1"
                         defaultValue={user?.vehicleInfo?.dimensions?.length || ""}
@@ -611,7 +613,7 @@ const ProfilePage = () => {
                         {...register("vehicleLength")}
                       />
                       <Input
-                        placeholder="Width"
+                        placeholder={t("profile.width")}
                         type="number"
                         step="0.1"
                         defaultValue={user?.vehicleInfo?.dimensions?.width || ""}
@@ -619,7 +621,7 @@ const ProfilePage = () => {
                         {...register("vehicleWidth")}
                       />
                       <Input
-                        placeholder="Height"
+                        placeholder={t("profile.height")}
                         type="number"
                         step="0.1"
                         defaultValue={user?.vehicleInfo?.dimensions?.height || ""}
@@ -635,7 +637,7 @@ const ProfilePage = () => {
                       size="small"
                     >
                       <Save className="w-4 h-4 mr-2" />
-                      Save
+                      {t("common.save")}
                     </Button>
                     <Button
                       type="button"
@@ -644,33 +646,33 @@ const ProfilePage = () => {
                       size="small"
                     >
                       <X className="w-4 h-4 mr-2" />
-                      Cancel
+                      {t("common.cancel")}
                     </Button>
                   </div>
                 </form>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Vehicle Type</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("profile.vehicleType")}</p>
                     <p className="font-medium text-foreground capitalize">
-                      {user?.vehicleInfo?.type || "Not set"}
+                      {user?.vehicleInfo?.type || t("profile.notSet")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Capacity</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("dashboard.capacity")}</p>
                     <p className="font-medium text-foreground">
-                      {user?.vehicleInfo?.capacity ? `${user.vehicleInfo.capacity} kg` : "Not set"}
+                      {user?.vehicleInfo?.capacity ? `${user.vehicleInfo.capacity} kg` : t("profile.notSet")}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">License Plate</p>
+                    <p className="text-sm text-muted-foreground mb-1">{t("profile.licensePlate")}</p>
                     <p className="font-medium text-foreground">
-                      {user?.vehicleInfo?.licensePlate || "Not set"}
+                      {user?.vehicleInfo?.licensePlate || t("profile.notSet")}
                     </p>
                   </div>
                   {user?.vehicleInfo?.dimensions && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">Dimensions</p>
+                      <p className="text-sm text-muted-foreground mb-1">{t("trips.dimensions")}</p>
                       <p className="font-medium text-foreground">
                         {user.vehicleInfo.dimensions.length} × {user.vehicleInfo.dimensions.width} ×{" "}
                         {user.vehicleInfo.dimensions.height} cm
@@ -687,10 +689,10 @@ const ProfilePage = () => {
             <Card className="p-4 sm:p-5 md:p-6">
               <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-primary" />
-                Switch Role
+                {t("profile.switchRole")}
               </h3>
               <p className="text-sm text-muted-foreground mb-6">
-                Change your role to access different features. You can switch between Shipper and Driver modes.
+                {t("profile.switchRoleDescription")}
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <motion.div
@@ -717,8 +719,8 @@ const ProfilePage = () => {
                         )} />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">Shipper Mode</h4>
-                        <p className="text-xs text-muted-foreground">Send packages and find transport</p>
+                        <h4 className="font-semibold text-foreground">{t("profile.shipperMode")}</h4>
+                        <p className="text-xs text-muted-foreground">{t("profile.shipperModeDesc")}</p>
                       </div>
                       {user?.role === "expediteur" && (
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -750,8 +752,8 @@ const ProfilePage = () => {
                         )} />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">Driver Mode</h4>
-                        <p className="text-xs text-muted-foreground">Offer transport services</p>
+                        <h4 className="font-semibold text-foreground">{t("profile.driverMode")}</h4>
+                        <p className="text-xs text-muted-foreground">{t("profile.driverModeDesc")}</p>
                       </div>
                       {user?.role === "conducteur" && (
                         <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -767,14 +769,14 @@ const ProfilePage = () => {
           <Card className="p-4 sm:p-5 md:p-6">
             <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
-              Account Status
+              {t("profile.accountStatus")}
             </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">Verification Status</p>
+                  <p className="font-medium text-foreground">{t("profile.verificationStatus")}</p>
                   <p className="text-sm text-muted-foreground">
-                    {user?.isVerified ? "Your account is verified" : "Your account is pending verification"}
+                    {user?.isVerified ? t("profile.accountVerified") : t("profile.accountPendingVerification")}
                   </p>
                 </div>
                 <div
@@ -785,13 +787,13 @@ const ProfilePage = () => {
                       : "bg-warning/10 text-warning"
                   )}
                 >
-                  {user?.isVerified ? "Verified" : "Pending"}
+                  {user?.isVerified ? t("profile.verified") : t("status.pending")}
                 </div>
               </div>
               {user?.lastLogin && (
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                   <div>
-                    <p className="font-medium text-foreground">Last Login</p>
+                    <p className="font-medium text-foreground">{t("profile.lastLogin")}</p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(user.lastLogin).toLocaleString("en-US")}
                     </p>
