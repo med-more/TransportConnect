@@ -109,8 +109,17 @@ server.timeout = 30000
 server.keepAliveTimeout = 30000
 server.headersTimeout = 31000
 
-server.listen(PORT, async () => {
-  await connectDB()
-  console.log(`Serveur en marche sur le port ${PORT}`)
-  console.log(`⏱️  Server timeout set to ${server.timeout}ms for file uploads`)
-})
+// Connect to DB first, then start accepting requests (avoids buffering timeout on Railway)
+const start = async () => {
+  try {
+    await connectDB()
+    server.listen(PORT, () => {
+      console.log(`Serveur en marche sur le port ${PORT}`)
+      console.log(`⏱️  Server timeout set to ${server.timeout}ms for file uploads`)
+    })
+  } catch (err) {
+    console.error("Failed to start server:", err)
+    process.exit(1)
+  }
+}
+start()

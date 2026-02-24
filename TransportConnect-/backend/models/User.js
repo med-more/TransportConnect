@@ -28,11 +28,18 @@ const userSchema = new mongoose.Schema({
       },
       phone: {
         type: String,
+        default: "",
         required: function() {
-          // Phone is required only if user is not using OAuth
-          return !this.googleId
+          // Phone not required for OAuth users or admin
+          return !this.googleId && this.role !== "admin";
         },
-        match: [/^[0-9+\-\s()]+$/, "Numéro de téléphone invalide"],
+        validate: {
+          validator: function(v) {
+            if (v == null || v === "") return true;
+            return /^[0-9+\-\s()]+$/.test(v);
+          },
+          message: "Numéro de téléphone invalide",
+        },
       },
       password: {
         type: String,
