@@ -28,6 +28,8 @@ import {
   ArrowRight,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
+import { useLocale } from "../../contexts/LocaleContext"
+import { useTranslation } from "../../i18n/useTranslation"
 import { tripsAPI, requestsAPI } from "../../services/api"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -41,6 +43,8 @@ import { generatePageNumbers } from "../../utils/pagination"
 
 const TripsPage = () => {
   const { user } = useAuth()
+  const { t } = useTranslation()
+  const { formatCurrency } = useLocale()
   const [filters, setFilters] = useState({
     departure: "",
     destination: "",
@@ -134,11 +138,11 @@ const TripsPage = () => {
   const getStatusLabel = (status) => {
     switch (status) {
       case "active":
-        return "Active"
+        return t("trips.active")
       case "completed":
-        return "Completed"
+        return t("trips.completed")
       case "cancelled":
-        return "Cancelled"
+        return t("trips.cancelled")
       default:
         return status
     }
@@ -208,12 +212,12 @@ const TripsPage = () => {
             <div className="p-2 bg-primary/10 rounded-lg flex-shrink-0">
               <Truck className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             </div>
-            <span className="truncate">{user?.role === "conducteur" ? "My Trips" : "Search Trips"}</span>
+            <span className="truncate">{user?.role === "conducteur" ? t("trips.title") : t("trips.titleShipper")}</span>
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             {user?.role === "conducteur"
-              ? "Manage your trips and track requests"
-              : "Find the perfect trip for your packages"}
+              ? t("trips.manageTrips")
+              : t("trips.findTrips")}
           </p>
         </div>
         {user?.role === "conducteur" && (
@@ -291,7 +295,7 @@ const TripsPage = () => {
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <p className="text-xs sm:text-sm text-muted-foreground mb-1">Avg. Price</p>
-                <p className="text-xl sm:text-2xl font-bold text-success">{shipperStats.averagePrice}€/kg</p>
+                <p className="text-xl sm:text-2xl font-bold text-success">{formatCurrency(shipperStats.averagePrice)}/kg</p>
               </div>
               <div className="p-2 bg-success/10 rounded-lg flex-shrink-0 ml-2">
                 <Euro className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
@@ -370,7 +374,7 @@ const TripsPage = () => {
               </>
             )}
             <Button variant="ghost" size="small" onClick={() => setShowFilters(!showFilters)} className="flex-shrink-0">
-              {showFilters ? "Hide" : "Show"} Filters
+              {showFilters ? t("common.hideFilters") : t("common.showFilters")}
             </Button>
           </div>
         </div>
@@ -382,18 +386,18 @@ const TripsPage = () => {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pb-3 sm:pb-4">
             <Input
-              placeholder="Departure city"
+              placeholder={t("trips.departureCity")}
               value={filters.departure}
               onChange={(e) => handleFilterChange("departure", e.target.value)}
             />
             <Input
-              placeholder="Destination city"
+              placeholder={t("trips.destinationCity")}
               value={filters.destination}
               onChange={(e) => handleFilterChange("destination", e.target.value)}
             />
             <Input
               type="date"
-              placeholder="Departure date"
+              placeholder={t("trips.departureDate")}
               value={filters.date}
               onChange={(e) => handleFilterChange("date", e.target.value)}
             />
@@ -517,8 +521,8 @@ const TripsPage = () => {
                         </div>
                       </div>
                       <div className={clsx("text-right shrink-0 min-w-0", isBestDeal && "pt-6")}>
-                        <div className="text-2xl font-bold text-primary truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>
-                          {Number(trip.pricePerKg).toFixed(2)}€/kg
+                        <div className="text-2xl font-bold text-primary truncate" title={formatCurrency(trip.pricePerKg) + "/kg"}>
+                          {formatCurrency(trip.pricePerKg)}/kg
                         </div>
                         <div className="text-sm text-muted-foreground flex items-center justify-end gap-1">
                           <Weight className="w-3 h-3" />
@@ -680,8 +684,8 @@ const TripsPage = () => {
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-sm text-muted-foreground">
                     {filteredTrips.length === 0
-                      ? "Showing 0 of 0 trips"
-                      : `Showing ${startIndex + 1} to ${Math.min(endIndex, filteredTrips.length)} of ${filteredTrips.length} trip${filteredTrips.length !== 1 ? "s" : ""}`}
+                      ? `${t("trips.showing")} 0 ${t("trips.of")} 0 ${filteredTrips.length === 1 ? t("trips.trip") : t("trips.trips")}`
+                      : `${t("trips.showing")} ${startIndex + 1}-${Math.min(endIndex, filteredTrips.length)} ${t("trips.of")} ${filteredTrips.length} ${filteredTrips.length !== 1 ? t("trips.trips") : t("trips.trip")}`}
                   </div>
                   {totalPages > 1 && (
                     <div className="flex items-center gap-2">
@@ -785,17 +789,17 @@ const TripsPage = () => {
               <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mb-4">
                 <Truck className="w-10 h-10 text-muted-foreground opacity-50" />
               </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">No trips found</h3>
+              <h3 className="text-xl font-semibold text-foreground mb-2">{t("trips.noTripsFound")}</h3>
               <p className="text-muted-foreground mb-6">
                 {user?.role === "conducteur"
-                  ? "Start by creating your first trip."
-                  : "No trips match your search criteria. Try adjusting your filters."}
+                  ? t("trips.createFirstTrip")
+                  : t("trips.adjustFilters")}
               </p>
               {user?.role === "conducteur" && (
                 <Link to="/trips/create">
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
-                    Create Trip
+                    {t("trips.createTrip")}
                   </Button>
                 </Link>
               )}
