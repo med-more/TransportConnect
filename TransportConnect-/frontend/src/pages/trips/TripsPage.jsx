@@ -200,7 +200,7 @@ const TripsPage = () => {
   const isShipper = user?.role !== "conducteur"
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-3 py-4 sm:px-4 sm:py-4 md:px-5 md:py-5 lg:px-6 space-y-3 sm:space-y-4 md:space-y-5">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div className="min-w-0">
@@ -228,7 +228,7 @@ const TripsPage = () => {
 
       {/* Stats Cards */}
       {user?.role === "conducteur" ? (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -275,7 +275,7 @@ const TripsPage = () => {
           </Card>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <Card className="p-3 sm:p-4 hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -328,8 +328,8 @@ const TripsPage = () => {
       )}
 
       {/* Filters */}
-      <Card className="p-4 sm:p-5 md:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
+      <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-3 sm:mb-4">
           <h3 className="text-base sm:text-lg font-semibold text-foreground flex items-center gap-2">
             <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
             Search Filters
@@ -380,7 +380,7 @@ const TripsPage = () => {
           transition={{ duration: 0.3 }}
           className="overflow-hidden"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pb-3 sm:pb-4">
             <Input
               placeholder="Departure city"
               value={filters.departure}
@@ -443,9 +443,9 @@ const TripsPage = () => {
       {/* Trips List */}
       <div>
         {isLoading ? (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="p-4 sm:p-5 md:p-6 h-full flex flex-col">
+              <Card key={i} className="p-3 sm:p-4 md:p-5 h-full flex flex-col">
                 <div className="flex justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Skeleton className="h-9 w-9 rounded-lg" />
@@ -466,7 +466,7 @@ const TripsPage = () => {
           </div>
         ) : sortedTrips.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-5">
               {paginatedTrips.map((trip, index) => {
               const isBestDeal =
                 isShipper && trip.pricePerKg <= parseFloat(shipperStats.averagePrice) && shipperStats.averagePrice > 0
@@ -481,7 +481,7 @@ const TripsPage = () => {
                   <Card
                     hover
                     className={clsx(
-                      "p-4 sm:p-5 md:p-6 h-full flex flex-col relative overflow-visible",
+                      "p-3 sm:p-4 md:p-5 lg:p-6 h-full flex flex-col relative overflow-visible",
                       isBestDeal && "border-2 border-warning/30"
                     )}
                   >

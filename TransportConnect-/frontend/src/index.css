@@ -255,11 +255,13 @@ body {
   backdrop-filter: blur(4px);
 }
 
-/* Shipment map: full responsive Leaflet container */
+/* Shipment map: full responsive Leaflet/MapLibre container - contained stacking so it stays below header when scrolling */
 .shipment-map-wrapper {
   position: relative;
   width: 100%;
   min-height: 200px;
+  z-index: 0;
+  isolation: isolate;
 }
 .shipment-map-wrapper .leaflet-container {
   height: 100% !important;

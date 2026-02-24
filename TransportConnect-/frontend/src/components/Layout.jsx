@@ -545,9 +545,9 @@ const Layout = ({ children }) => {
       >
         {/* Top Header - responsive with safe area */}
         <header className="sticky top-0 z-30 bg-card dark:bg-[#0a0a0a] border-b border-border pt-[env(safe-area-inset-top)]">
-          <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 py-3 md:py-4 gap-2 min-h-[44px] sm:min-h-0">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-2 px-2 py-2.5 min-h-[52px] sm:px-4 sm:py-3 md:px-5 md:py-3.5 lg:gap-x-4 lg:px-6 lg:min-h-0">
             {/* Left: Sidebar Toggle - touch-friendly on mobile */}
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 order-1">
               {/* Desktop Sidebar Toggle */}
               <button
                 onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -559,30 +559,29 @@ const Layout = ({ children }) => {
               {/* Mobile Menu Button */}
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2.5 hover:bg-accent rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                 aria-label="Open menu"
               >
-                <Menu className="w-6 h-6 text-foreground" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-foreground" />
               </button>
             </div>
 
-            {/* Center: Welcome (short on mobile) & Search */}
-            <div className="flex-1 flex items-center justify-center gap-2 sm:gap-4 min-w-0">
-              <div className="text-center min-w-0 flex-1 lg:flex-initial">
-                <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-foreground truncate">
+            {/* Center: Welcome & Search - hidden on mobile, visible from md */}
+            <div className="order-2 hidden md:flex flex-1 items-center justify-center gap-2 sm:gap-3 min-w-0 overflow-hidden lg:max-w-md">
+              <div className="min-w-0 flex-1 text-center lg:text-left">
+                <h2 className="text-sm md:text-base lg:text-lg font-semibold text-foreground truncate">
                   <span className="lg:hidden">Hi, {user?.firstName}!</span>
                   <span className="hidden lg:inline">Welcome back, {user?.firstName}!</span>
                 </h2>
-                <p className="text-xs lg:text-sm text-muted-foreground hidden xl:block">
+                <p className="text-[10px] sm:text-xs lg:text-sm text-muted-foreground hidden md:block truncate">
                   {new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
+                    weekday: "short",
+                    month: "short",
                     day: "numeric",
                   })}
                 </p>
               </div>
-              <div className="hidden md:flex max-w-md w-full min-w-0">
+              <div className="hidden md:flex flex-1 max-w-[200px] lg:max-w-md min-w-0">
                 <form onSubmit={handleSearchSubmit} className="relative w-full" ref={searchRef}>
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
@@ -672,12 +671,12 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Right: Search (Mobile), Theme toggle, Notifications & User Menu */}
-            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <div className="order-3 flex items-center gap-1 sm:gap-2 flex-shrink-0">
               {/* Theme toggle */}
               <button
                 type="button"
                 onClick={toggleTheme}
-                className="p-2.5 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="p-2 rounded-lg hover:bg-accent transition-colors text-foreground min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
                 aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
                 title={theme === "dark" ? "Light mode" : "Dark mode"}
               >
@@ -690,7 +689,7 @@ const Layout = ({ children }) => {
               {/* Mobile Search Icon */}
               <button
                 onClick={() => setShowMobileSearch(true)}
-                className="md:hidden p-2.5 rounded-lg hover:bg-accent transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="md:hidden p-2 rounded-lg hover:bg-accent transition-colors min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
                 aria-label="Search"
               >
                 <Search className="w-5 h-5 text-foreground" />
@@ -700,7 +699,7 @@ const Layout = ({ children }) => {
               {user?.role !== "admin" && (
                 <Link
                   to="/conversations"
-                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
                   aria-label="Conversations"
                 >
                   <MessageCircle className="w-5 h-5 text-foreground" />
@@ -713,10 +712,10 @@ const Layout = ({ children }) => {
               )}
 
               {/* Notifications */}
-              <div className="relative">
+              <div className="relative flex items-center justify-center">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center"
                 >
                   <Bell className="w-5 h-5 text-foreground" />
                   {unreadCount > 0 && (
@@ -927,7 +926,7 @@ const Layout = ({ children }) => {
               </div>
 
               {/* User Avatar */}
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                 {user?.avatar ? (
                   <img
                     src={normalizeAvatarUrl(user.avatar)}
