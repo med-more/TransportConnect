@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { useParams, useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import {
@@ -46,12 +46,29 @@ const RequestDetailPage = () => {
   const [rejectDialog, setRejectDialog] = useState(false)
   const [deliverySignatureDialog, setDeliverySignatureDialog] = useState(false)
   const [ratingDialog, setRatingDialog] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
+  const [scrollActive, setScrollActive] = useState(false)
 
   const { data: requestData, isLoading } = useQuery({
     queryKey: ["request", id],
     queryFn: () => requestsAPI.getRequestById(id),
     enabled: !!id,
   })
+
+  useEffect(() => {
+    let timeoutId = null
+    const onScroll = () => {
+      setScrollY(window.scrollY)
+      setScrollActive(true)
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setScrollActive(false), 1200)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [])
 
   const acceptRequestMutation = useMutation({
     mutationFn: ({ id, message }) => requestsAPI.acceptRequest(id, message),
@@ -203,7 +220,7 @@ const RequestDetailPage = () => {
 
   if (isLoading) {
     return (
-      <div className="p-3 sm:p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto px-3 py-4 sm:px-4 md:px-5 lg:px-6 space-y-4 sm:space-y-5">
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-full shrink-0" />
           <div className="space-y-2">
@@ -211,7 +228,7 @@ const RequestDetailPage = () => {
             <Skeleton className="h-4 w-32" />
           </div>
         </div>
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-5 md:p-6 space-y-4">
           <Skeleton className="h-5 w-40" />
           <Skeleton variant="text" lines={4} />
           <div className="flex gap-3 pt-2">
@@ -219,7 +236,7 @@ const RequestDetailPage = () => {
             <Skeleton className="h-10 w-28" />
           </div>
         </Card>
-        <Card className="p-6 space-y-4">
+        <Card className="p-4 sm:p-5 md:p-6 space-y-4">
           <Skeleton className="h-5 w-56" />
           <Skeleton variant="text" lines={3} />
         </Card>
@@ -229,8 +246,8 @@ const RequestDetailPage = () => {
 
   if (!requestData?.data?.request) {
     return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold text-foreground mb-4">Request not found</h1>
+      <div className="w-full max-w-7xl mx-auto px-3 py-6 sm:px-4 md:px-6 text-center">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-4">Request not found</h1>
         <Button onClick={() => navigate("/requests")}>Back to Requests</Button>
       </div>
     )
@@ -311,164 +328,177 @@ const RequestDetailPage = () => {
     }
   }
 
+  const showStickyCta = (isDriver || isSender) && request.status !== "pending" && request.status !== "rejected" && request.status !== "cancelled"
+  const showFloatingCta = scrollY > 120 && scrollActive
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto space-y-4 md:space-y-6">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
-      >
-        <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Back</span>
-          </Button>
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Request Details</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-1 hidden sm:block">
-              Created on {new Date(request.createdAt).toLocaleDateString("en-US", { dateStyle: "long" })}
-            </p>
-          </div>
-        </div>
-
-        <div
-          className={clsx(
-            "flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border font-semibold text-sm sm:text-base flex-shrink-0",
-            getStatusColor(request.status)
-          )}
+    <>
+    <div
+      className={clsx(
+        "min-h-screen",
+        showStickyCta ? "pb-20 sm:pb-[max(1rem,env(safe-area-inset-bottom))]" : "pb-[max(1rem,env(safe-area-inset-bottom))]"
+      )}
+    >
+      <div className="w-full max-w-7xl mx-auto px-3 py-4 sm:px-4 sm:py-4 md:px-5 md:py-5 lg:px-6 space-y-3 sm:space-y-4 md:space-y-5">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
         >
-          {getStatusIcon(request.status)}
-          <span>{getStatusLabel(request.status)}</span>
-        </div>
-      </motion.div>
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-w-0 sm:min-h-0 p-2 sm:px-3"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-foreground truncate">Request Details</h1>
+              <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1">
+                {new Date(request.createdAt).toLocaleDateString("en-US", { dateStyle: "medium" })}
+              </p>
+            </div>
+          </div>
+          <div
+            className={clsx(
+              "flex items-center justify-center gap-2 px-3 py-2 rounded-lg border font-semibold text-sm w-full sm:w-auto sm:flex-shrink-0 min-h-[44px] sm:min-h-0",
+              getStatusColor(request.status)
+            )}
+          >
+            {getStatusIcon(request.status)}
+            <span>{getStatusLabel(request.status)}</span>
+          </div>
+        </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Cargo Information */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="p-4 sm:p-5 md:p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Package className="w-6 h-6 text-primary" />
-                </div>
-                <h2 className="text-xl font-semibold text-foreground">Package Information</h2>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground mb-2">Description</h3>
-                  <p className="text-foreground text-lg">{request.cargo.description}</p>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="p-4 bg-accent rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Package className="w-4 h-4 text-muted-foreground" />
-                      <h3 className="text-sm font-medium text-muted-foreground">Type</h3>
-                    </div>
-                    <p className="text-foreground font-semibold capitalize">{request.cargo.type}</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
+            {/* Cargo Information */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+                <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
+                    <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <div className="p-4 bg-accent rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Weight className="w-4 h-4 text-muted-foreground" />
-                      <h3 className="text-sm font-medium text-muted-foreground">Weight</h3>
-                    </div>
-                    <p className="text-foreground font-semibold">{request.cargo.weight} kg</p>
-                  </div>
-                  <div className="p-4 bg-accent rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Ruler className="w-4 h-4 text-muted-foreground" />
-                      <h3 className="text-sm font-medium text-muted-foreground">Dimensions</h3>
-                    </div>
-                    <p className="text-foreground font-semibold text-sm">
-                      {request.cargo.dimensions.length} × {request.cargo.dimensions.width} ×{" "}
-                      {request.cargo.dimensions.height} cm
-                    </p>
-                  </div>
-                  <div className="p-4 bg-primary/10 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Euro className="w-4 h-4 text-primary" />
-                      <h3 className="text-sm font-medium text-primary">Price</h3>
-                    </div>
-                    <p className="text-primary font-bold text-lg">{request.price}€</p>
-                  </div>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Package</h2>
                 </div>
 
-                {request.cargo.value && (
-                  <div className="p-4 bg-accent rounded-lg">
-                    <h3 className="text-sm font-medium text-muted-foreground mb-1">Declared Value</h3>
-                    <p className="text-foreground font-semibold">{request.cargo.value}€</p>
+                <div className="space-y-4 sm:space-y-5">
+                  <div>
+                    <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Description</h3>
+                    <p className="text-foreground text-sm sm:text-base break-words">{request.cargo?.description}</p>
                   </div>
-                )}
-              </div>
-            </Card>
-          </motion.div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <Package className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Type</h3>
+                      </div>
+                      <p className="text-foreground font-semibold text-sm sm:text-base capitalize">{request.cargo?.type ?? "—"}</p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <Weight className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Weight</h3>
+                      </div>
+                      <p className="text-foreground font-semibold text-sm sm:text-base">{request.cargo?.weight ?? "—"} kg</p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <Ruler className="w-4 h-4 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Dimensions</h3>
+                      </div>
+                      <p className="text-foreground font-semibold text-xs sm:text-sm break-words">
+                        {request.cargo?.dimensions
+                          ? `${request.cargo.dimensions.length} × ${request.cargo.dimensions.width} × ${request.cargo.dimensions.height} cm`
+                          : "—"}
+                      </p>
+                    </div>
+                    <div className="p-3 sm:p-4 bg-primary/10 rounded-xl border border-primary/20 min-w-0 sm:col-span-2 md:col-span-1">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <Euro className="w-4 h-4 text-primary shrink-0" />
+                        <h3 className="text-xs sm:text-sm font-medium text-primary truncate">Price</h3>
+                      </div>
+                      <p className="text-primary font-bold text-lg truncate">{request.price ?? "—"}€</p>
+                    </div>
+                  </div>
+
+                  {request.cargo?.value && (
+                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
+                      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Declared Value</h3>
+                      <p className="text-foreground font-semibold">{request.cargo.value}€</p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            </motion.div>
 
           {/* Addresses */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="p-4 sm:p-5 md:p-6">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <MapPin className="w-6 h-6 text-primary" />
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+              <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
+                  <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <h2 className="text-xl font-semibold text-foreground">Addresses</h2>
+                <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Addresses</h2>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-4 bg-accent rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
+                <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
                       <Navigation className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Pickup Location</h3>
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Pickup</h3>
                   </div>
-                  <p className="text-foreground mb-1">{request.pickup.address}</p>
-                  <p className="text-muted-foreground">{request.pickup.city}</p>
-                  {request.pickup.contactPerson?.name && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <div className="flex items-center gap-2 mb-1">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground">
-                          {request.pickup.contactPerson.name}
-                        </span>
+                  <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{request.pickup?.address}</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm">{request.pickup?.city}</p>
+                  {request.pickup?.contactPerson?.name && (
+                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border">
+                      <div className="flex items-center gap-2 mb-0.5 text-xs sm:text-sm">
+                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
+                        <span className="font-medium text-foreground truncate">{request.pickup.contactPerson.name}</span>
                       </div>
                       {request.pickup.contactPerson.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            {request.pickup.contactPerson.phone}
-                          </span>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground truncate">
+                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{request.pickup.contactPerson.phone}</span>
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
-                <div className="p-4 bg-accent rounded-lg">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 bg-success rounded-full flex items-center justify-center">
+                <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <Navigation className="w-4 h-4 text-muted-foreground rotate-90" />
+                  </div>
+                </div>
+
+                <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
+                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                    <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0">
                       <MapPin className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="font-semibold text-foreground">Delivery Location</h3>
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Delivery</h3>
                   </div>
-                  <p className="text-foreground mb-1">{request.delivery.address}</p>
-                  <p className="text-muted-foreground">{request.delivery.city}</p>
-                  {request.delivery.contactPerson?.name && (
-                    <div className="mt-4 pt-4 border-t border-border">
-                      <div className="flex items-center gap-2 mb-1">
-                        <User className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-sm font-medium text-foreground">
-                          {request.delivery.contactPerson.name}
-                        </span>
+                  <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{request.delivery?.address}</p>
+                  <p className="text-muted-foreground text-xs sm:text-sm">{request.delivery?.city}</p>
+                  {request.delivery?.contactPerson?.name && (
+                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border">
+                      <div className="flex items-center gap-2 mb-0.5 text-xs sm:text-sm">
+                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
+                        <span className="font-medium text-foreground truncate">{request.delivery.contactPerson.name}</span>
                       </div>
                       {request.delivery.contactPerson.phone && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-sm text-muted-foreground">
-                            {request.delivery.contactPerson.phone}
-                          </span>
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground truncate">
+                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{request.delivery.contactPerson.phone}</span>
                         </div>
                       )}
                     </div>
@@ -480,42 +510,51 @@ const RequestDetailPage = () => {
 
           {/* Trip Information */}
           {request.trip && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <Truck className="w-6 h-6 text-primary" />
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+                <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
+                    <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <h2 className="text-xl font-semibold text-foreground">Associated Trip</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Trip</h2>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Navigation className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Route</p>
-                      <p className="text-foreground font-semibold">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Navigation className="w-5 h-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Route</p>
+                      <p className="text-foreground font-semibold text-sm sm:text-base truncate">
                         {request.trip.departure?.city} → {request.trip.destination?.city}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Departure</p>
-                      <p className="text-foreground font-semibold">
-                        {new Date(request.trip.departureDate).toLocaleString("en-US", { dateStyle: "long" })}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Calendar className="w-5 h-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Departure</p>
+                      <p className="text-foreground font-semibold text-sm sm:text-base">
+                        {new Date(request.trip.departureDate).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Arrival</p>
-                      <p className="text-foreground font-semibold">
-                        {new Date(request.trip.arrivalDate).toLocaleString("en-US", { dateStyle: "long" })}
+                  <div className="flex items-center gap-3 min-w-0">
+                    <Calendar className="w-5 h-5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Arrival</p>
+                      <p className="text-foreground font-semibold text-sm sm:text-base">
+                        {new Date(request.trip.arrivalDate).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
                       </p>
                     </div>
                   </div>
+                  {request.trip._id && (
+                    <Link
+                      to={`/trips/${request.trip._id}`}
+                      className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline mt-2"
+                    >
+                      View trip details
+                      <ArrowLeft className="w-4 h-4 rotate-180" />
+                    </Link>
+                  )}
                 </div>
               </Card>
             </motion.div>
@@ -523,28 +562,28 @@ const RequestDetailPage = () => {
 
           {/* Messages */}
           {(request.message || request.driverResponse?.message) && (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-primary/10 rounded-lg">
-                    <MessageCircle className="w-6 h-6 text-primary" />
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+                <div className="flex items-center gap-3 mb-4 sm:mb-5">
+                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
+                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                   </div>
-                  <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Messages</h2>
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {request.message && (
-                    <div className="p-4 bg-accent rounded-lg border border-border">
+                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
                       <div className="flex items-center gap-2 mb-2">
                         <User className="w-4 h-4 text-primary" />
                         <h3 className="font-medium text-foreground">From Sender</h3>
                       </div>
-                      <p className="text-muted-foreground">{request.message}</p>
+                      <p className="text-muted-foreground text-sm sm:text-base break-words">{request.message}</p>
                     </div>
                   )}
                   {request.driverResponse?.message && (
                     <div
                       className={clsx(
-                        "p-4 rounded-lg border",
+                        "p-3 sm:p-4 rounded-xl border",
                         request.status === "rejected"
                           ? "bg-destructive/5 border-destructive/20"
                           : request.status === "accepted"
@@ -573,7 +612,7 @@ const RequestDetailPage = () => {
                           )}
                         </h3>
                       </div>
-                      <p className="text-foreground mb-2">{request.driverResponse.message}</p>
+                      <p className="text-foreground text-sm sm:text-base mb-2 break-words">{request.driverResponse.message}</p>
                       {request.driverResponse.respondedAt && (
                         <p className="text-xs text-muted-foreground">
                           {new Date(request.driverResponse.respondedAt).toLocaleString("en-US", {
@@ -595,16 +634,16 @@ const RequestDetailPage = () => {
             request.status !== "cancelled" &&
             request.tracking && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.25 }}
               >
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Tracking Status</h2>
-                  <div className="space-y-4">
+                <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+                  <h2 className="text-base font-semibold text-foreground mb-4 sm:mb-5 sm:text-lg">Tracking</h2>
+                  <div className="space-y-3 sm:space-y-4">
                     <div
                       className={clsx(
-                        "flex items-center gap-3 p-4 rounded-lg",
+                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
                         request.tracking?.pickupConfirmed?.confirmed
                           ? "bg-success/10 border border-success/20"
                           : "bg-accent"
@@ -631,7 +670,7 @@ const RequestDetailPage = () => {
 
                     <div
                       className={clsx(
-                        "flex items-center gap-3 p-4 rounded-lg",
+                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
                         request.tracking?.inTransit?.confirmed
                           ? "bg-info/10 border border-info/20"
                           : "bg-accent"
@@ -658,7 +697,7 @@ const RequestDetailPage = () => {
 
                     <div
                       className={clsx(
-                        "flex items-center gap-3 p-4 rounded-lg",
+                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
                         request.tracking?.delivered?.confirmed
                           ? "bg-success/10 border border-success/20"
                           : "bg-accent"
@@ -689,55 +728,54 @@ const RequestDetailPage = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {/* User Info */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="p-4 sm:p-5 md:p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
+          <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+              <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2 sm:text-lg">
+                <User className="w-5 h-5 text-primary shrink-0" />
                 {isDriver ? "Shipper" : "Driver"}
               </h2>
 
               {isDriver ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-row items-center gap-3 sm:flex-col sm:items-center sm:text-center sm:gap-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center overflow-hidden shrink-0">
                       {request.sender?.avatar ? (
                         <img
                           src={normalizeAvatarUrl(request.sender.avatar)}
                           alt={`${request.sender.firstName} ${request.sender.lastName}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            console.error("Sender avatar failed to load:", normalizeAvatarUrl(request.sender.avatar))
                             e.target.style.display = "none"
                             const parent = e.target.parentElement
                             if (parent && !parent.querySelector("span")) {
                               const initials = document.createElement("span")
-                              initials.className = "text-white text-xl font-bold"
+                              initials.className = "text-white text-lg sm:text-xl font-bold"
                               initials.textContent = request.sender?.firstName?.charAt(0) || "?"
                               parent.appendChild(initials)
                             }
                           }}
                         />
                       ) : (
-                        <span className="text-white text-xl font-bold">
+                        <span className="text-white text-lg sm:text-xl font-bold">
                           {request.sender?.firstName?.charAt(0)}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
+                    <div className="min-w-0 flex-1 sm:flex-none">
+                      <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">
                         {request.sender?.firstName} {request.sender?.lastName}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Shipper</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Shipper</p>
+                      {request.sender?.email && (
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1 truncate sm:justify-center">
+                          <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{request.sender.email}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {request.sender?.email && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">{request.sender.email}</span>
-                    </div>
-                  )}
                   {/* Show rating received from sender (if they rated the driver) */}
                   {senderHasRated && (
                     <div className="p-3 bg-info/10 border border-info/20 rounded-lg mt-4">
@@ -769,45 +807,44 @@ const RequestDetailPage = () => {
                   )}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex flex-row items-center gap-3 sm:flex-col sm:items-center sm:text-center sm:gap-4">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary flex items-center justify-center overflow-hidden shrink-0">
                       {request.trip?.driver?.avatar ? (
                         <img
                           src={normalizeAvatarUrl(request.trip.driver.avatar)}
                           alt={`${request.trip.driver.firstName} ${request.trip.driver.lastName}`}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            console.error("Driver avatar failed to load:", normalizeAvatarUrl(request.trip.driver.avatar))
                             e.target.style.display = "none"
                             const parent = e.target.parentElement
                             if (parent && !parent.querySelector("span")) {
                               const initials = document.createElement("span")
-                              initials.className = "text-white text-xl font-bold"
+                              initials.className = "text-white text-lg sm:text-xl font-bold"
                               initials.textContent = request.trip?.driver?.firstName?.charAt(0) || "?"
                               parent.appendChild(initials)
                             }
                           }}
                         />
                       ) : (
-                        <span className="text-white text-xl font-bold">
+                        <span className="text-white text-lg sm:text-xl font-bold">
                           {request.trip?.driver?.firstName?.charAt(0)}
                         </span>
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-foreground">
+                    <div className="min-w-0 flex-1 sm:flex-none">
+                      <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">
                         {request.trip?.driver?.firstName} {request.trip?.driver?.lastName}
                       </h3>
-                      <p className="text-sm text-muted-foreground">Driver</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Driver</p>
+                      {request.trip?.driver?.email && (
+                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1 truncate sm:justify-center">
+                          <Mail className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                          <span className="truncate">{request.trip.driver.email}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  {request.trip?.driver?.email && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-muted-foreground">{request.trip.driver.email}</span>
-                    </div>
-                  )}
                   {/* Show rating received from driver (if they rated the sender) */}
                   {driverHasRated && (
                     <div className="p-3 bg-info/10 border border-info/20 rounded-lg mt-4">
@@ -843,14 +880,14 @@ const RequestDetailPage = () => {
           </motion.div>
 
           {/* Actions */}
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-            <Card className="p-4 sm:p-5 md:p-6">
-              <h2 className="text-lg font-semibold text-foreground mb-4">Actions</h2>
-              <div className="space-y-3">
+          <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
+              <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 sm:text-lg">Actions</h2>
+              <div className="space-y-2.5 sm:space-y-3">
                 {(isDriver || isSender) && (
                   <Button
                     variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary/10"
+                    className="w-full min-h-[44px] sm:min-h-0 border-primary text-primary hover:bg-primary/10"
                     onClick={() => navigate(`/conversations/${request._id}`)}
                   >
                     <MessageCircle className="w-4 h-4 mr-2" />
@@ -860,7 +897,7 @@ const RequestDetailPage = () => {
                 {isDriver && request.status === "pending" && (
                   <>
                     <Button
-                      className="w-full bg-gradient-to-r from-success to-success/90"
+                      className="w-full min-h-[44px] sm:min-h-0 bg-gradient-to-r from-success to-success/90"
                       onClick={handleAcceptRequest}
                       loading={acceptRequestMutation.isLoading}
                     >
@@ -869,7 +906,7 @@ const RequestDetailPage = () => {
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full min-h-[44px] sm:min-h-0"
                       onClick={handleRejectRequest}
                       loading={rejectRequestMutation.isLoading}
                     >
@@ -881,7 +918,7 @@ const RequestDetailPage = () => {
 
                 {isDriver && request.status === "accepted" && (
                   <Button
-                    className="w-full bg-gradient-to-r from-info to-info/90"
+                    className="w-full min-h-[44px] sm:min-h-0 bg-gradient-to-r from-info to-info/90"
                     onClick={handleConfirmPickup}
                     loading={confirmPickupMutation.isLoading}
                   >
@@ -892,7 +929,7 @@ const RequestDetailPage = () => {
 
                 {isDriver && request.status === "in_transit" && (
                   <Button
-                    className="w-full bg-gradient-to-r from-success to-success/90"
+                    className="w-full min-h-[44px] sm:min-h-0 bg-gradient-to-r from-success to-success/90"
                     onClick={handleConfirmDelivery}
                     loading={confirmDeliveryMutation.isLoading}
                   >
@@ -904,7 +941,7 @@ const RequestDetailPage = () => {
                 {isSender && (request.status === "pending" || request.status === "accepted") && (
                   <Button
                     variant="outline"
-                    className="w-full border-destructive text-destructive hover:bg-destructive/10"
+                    className="w-full min-h-[44px] sm:min-h-0 border-destructive text-destructive hover:bg-destructive/10"
                     onClick={handleCancelRequest}
                     loading={cancelRequestMutation.isLoading}
                   >
@@ -918,7 +955,7 @@ const RequestDetailPage = () => {
                   request.trip?._id && (
                     <Button
                       variant="outline"
-                      className="w-full"
+                      className="w-full min-h-[44px] sm:min-h-0"
                       onClick={() => navigate(`/requests/create/${request.trip._id}`)}
                     >
                       <Package className="w-4 h-4 mr-2" />
@@ -928,7 +965,7 @@ const RequestDetailPage = () => {
 
                 {/* Rating Section - Show when delivered */}
                 {request.status === "delivered" && (
-                  <>
+                  <div className="mt-4">
                     {canRateAsDriver && (
                       <Card className="p-4 border-2 border-warning/30 bg-warning/5">
                         <div className="flex items-center gap-3 mb-3">
@@ -1051,7 +1088,7 @@ const RequestDetailPage = () => {
                         )}
                       </Card>
                     )}
-                  </>
+                  </div>
                 )}
               </div>
             </Card>
@@ -1059,8 +1096,30 @@ const RequestDetailPage = () => {
         </div>
       </div>
 
-      {/* Confirmation Dialogs */}
-      <ConfirmationDialog
+        {/* Mobile floating CTA: shows while scrolling, hides when scroll stops; slide + fade */}
+        {showStickyCta && (
+          <div
+            className={clsx(
+              "fixed bottom-0 left-0 right-0 z-40 flex justify-center p-3 pt-2 sm:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all duration-300 ease-out",
+              showFloatingCta
+                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                : "opacity-0 translate-y-4 scale-95 pointer-events-none"
+            )}
+          >
+            <Button
+              className="min-h-[44px] px-5 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-[0.98] transition-all border-none outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-background"
+              onClick={() => navigate(`/conversations/${request._id}`)}
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Chat
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+
+    {/* Confirmation Dialogs */}
+    <ConfirmationDialog
         isOpen={cancelDialog}
         onClose={() => setCancelDialog(false)}
         onConfirm={handleConfirmCancel}
@@ -1154,7 +1213,7 @@ const RequestDetailPage = () => {
         loading={submitRatingMutation.isLoading}
         existingRating={null}
       />
-    </div>
+    </>
   )
 }
 

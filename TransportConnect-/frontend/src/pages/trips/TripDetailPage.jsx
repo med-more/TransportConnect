@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
@@ -39,6 +39,8 @@ const TripDetailPage = () => {
   const { user } = useAuth()
   const [deleteDialog, setDeleteDialog] = useState(false)
   const [completeDialog, setCompleteDialog] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
+  const [scrollActive, setScrollActive] = useState(false)
 
   const { data: tripData, isLoading } = useQuery({
     queryKey: ["trip", id],
@@ -198,13 +200,24 @@ const TripDetailPage = () => {
   const showStickyCta =
     user?.role !== "conducteur" && trip.status === "active" && (hasActiveRequest || !hasActiveRequest)
 
+  useEffect(() => {
+    let timeoutId = null
+    const onScroll = () => {
+      setScrollY(window.scrollY)
+      setScrollActive(true)
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setScrollActive(false), 1200)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [])
+  const showFloatingCta = scrollY > 120 && scrollActive
+
   return (
-    <div
-      className={clsx(
-        "min-h-screen pb-[max(1rem,env(safe-area-inset-bottom))]",
-        showStickyCta && "pb-24 sm:pb-[max(1rem,env(safe-area-inset-bottom))]"
-      )}
-    >
+    <div className="min-h-screen pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
         {/* Header */}
         <motion.div
@@ -601,21 +614,28 @@ const TripDetailPage = () => {
           </div>
         </div>
 
-        {/* Mobile sticky CTA (shippers only) */}
+        {/* Mobile floating CTA (shippers only): shows while scrolling, hides when scroll stops; slide + fade */}
         {user?.role !== "conducteur" && trip.status === "active" && (
-          <div className="fixed bottom-0 left-0 right-0 z-40 p-3 sm:hidden bg-card/95 border-t border-border backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div
+            className={clsx(
+              "fixed bottom-0 left-0 right-0 z-40 flex justify-center p-3 pt-2 sm:hidden pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all duration-300 ease-out",
+              showFloatingCta
+                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+                : "opacity-0 translate-y-4 scale-95 pointer-events-none"
+            )}
+          >
             {hasActiveRequest ? (
-              <Link to={`/requests/${existingRequest._id}`} className="block">
-                <Button className="w-full min-h-[48px] bg-primary">
+              <Link to={`/requests/${existingRequest._id}`}>
+                <Button className="min-h-[44px] px-5 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-[0.98] transition-all border-none outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-background">
                   <Eye className="w-4 h-4 mr-2" />
-                  View my request
+                  My request
                 </Button>
               </Link>
             ) : (
-              <Link to={`/requests/create/${trip._id}`} className="block">
-                <Button className="w-full min-h-[48px] bg-gradient-to-r from-primary to-primary/90 shadow-lg">
+              <Link to={`/requests/create/${trip._id}`}>
+                <Button className="min-h-[44px] px-5 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl active:scale-[0.98] transition-all border-none outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2 focus:ring-offset-background">
                   <Package className="w-4 h-4 mr-2" />
-                  Create request
+                  Request trip
                 </Button>
               </Link>
             )}
