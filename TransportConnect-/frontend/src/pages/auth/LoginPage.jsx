@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { Eye, EyeOff, Truck, Mail, Lock, ArrowLeft, ArrowRight, Facebook, Twitter, Linkedin, Instagram, Home, AlertCircle } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { useTranslation } from "../../i18n/useTranslation"
+import { API_BASE_URL } from "../../config/constants"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import toast from "react-hot-toast"
@@ -271,7 +272,7 @@ const LoginPage = () => {
 
             {/* Social Login */}
             <a
-              href={`${import.meta.env.VITE_API_BASE_URL || "http://localhost:7000/api"}/auth/google`}
+              href={`${API_BASE_URL}/auth/google`}
               className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg border border-border hover:bg-accent transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

@@ -125,9 +125,8 @@ export const login = async (req, res) => {
         return res.status(403).json({ msg: "Votre compte a été suspendu" });
       }
 
-      // Update last login
-      adminUser.lastLogin = new Date();
-      await adminUser.save();
+      // Update last login (avoid full document validation; admin may have no phone)
+      await User.updateOne({ _id: adminUser._id }, { $set: { lastLogin: new Date() } });
 
       // Generate token for admin
       const token = generateToken(adminUser._id);
@@ -165,8 +164,8 @@ export const login = async (req, res) => {
       return res.status(403).json({ msg: "Votre compte a été suspendu" });
     }
 
-    user.lastLogin = new Date();
-    await user.save();
+    // Update last login without re-validating the whole document
+    await User.updateOne({ _id: user._id }, { $set: { lastLogin: new Date() } });
 
     const token = generateToken(user._id); 
 

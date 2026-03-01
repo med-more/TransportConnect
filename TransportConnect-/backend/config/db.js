@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 
-const mongoUri = process.env.MONGO_URL || process.env.MONGODB_URI;
-
 export const connectDB = async () => {
+  const mongoUri = process.env.MONGO_URL || process.env.MONGODB_URI;
   if (!mongoUri) {
     console.error("Missing MONGO_URL or MONGODB_URI in environment")
     process.exit(1)

@@ -47,7 +47,7 @@
 
    | Key | Value |
    |-----|--------|
-   | `MONGO_URL` | Your MongoDB connection string (e.g. `mongodb+srv://user:pass@cluster.xxxxx.mongodb.net/dbname`) |
+   | `MONGO_URL` or `MONGODB_URI` | Your MongoDB connection string (e.g. `mongodb+srv://user:pass@cluster.xxxxx.mongodb.net/dbname`) |
    | `JWT_SECRET` | Long random string (32+ chars) |
    | `FRONTEND_URL` | Leave empty for now; set after Vercel deploy (e.g. `https://your-app.vercel.app`) |
 
@@ -156,4 +156,13 @@ The backend needs **MONGO_URL** (and other secrets) as **environment variables i
 2. Add **MONGO_URL** = your MongoDB connection string (e.g. from [MongoDB Atlas](https://www.mongodb.com/cloud/atlas): `mongodb+srv://USER:PASSWORD@cluster0.xxxxx.mongodb.net/DBNAME?retryWrites=true&w=majority`). Replace `USER`, `PASSWORD`, cluster host, and `DBNAME` with your values.
 3. Add **JWT_SECRET** (long random string) and **FRONTEND_URL** (your Vercel URL, e.g. `https://your-app.vercel.app`).
 4. Optional: **GOOGLE_CLIENT_ID**, **GOOGLE_CLIENT_SECRET**, **GOOGLE_CALLBACK_URL** (use your Railway backend URL in the callback), **CLOUDINARY_***, **EMAIL_***, etc., same as in your local `.env`.
-5. Save (Railway will redeploy). The app reads `process.env.MONGO_URL`; Railway injects Variables into `process.env`.
+5. Save (Railway will redeploy). The app reads `process.env.MONGO_URL` or `process.env.MONGODB_URI`; Railway injects Variables into `process.env`.
+
+**“MongooseError: Operation \`users.findOne()\` buffering timed out after 10000ms”**
+
+This means the app accepted a request before MongoDB was connected (or the DB is unreachable).
+
+1. **Code fix (done):** The server now connects to the database **before** calling `listen()`, so no requests are handled until the DB is ready.
+2. **MongoDB Atlas – Network Access:** Railway’s IPs are dynamic. In [Atlas](https://cloud.mongodb.com) → **Network Access** → **Add IP Address** → choose **“Allow Access from Anywhere”** (`0.0.0.0/0`). Save. Without this, Atlas blocks Railway’s requests.
+3. **Env var on Railway:** Ensure **MONGO_URL** (or **MONGODB_URI**) is set in Railway → your service → **Variables** to your full Atlas connection string (with password encoded if it contains special characters).
+4. **Redeploy** after changing Variables so the new connection logic and env are used.
