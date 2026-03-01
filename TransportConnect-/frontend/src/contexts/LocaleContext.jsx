@@ -101,8 +101,15 @@ export function LocaleProvider({ children }) {
   )
 }
 
+const defaultLocale = {
+  language: "en",
+  setLanguage: () => {},
+  currency: "EUR",
+  setCurrency: () => {},
+  formatCurrency: (amount, opts) => (amount != null && !Number.isNaN(Number(amount)) ? `${Number(amount).toFixed(2)} €` : "—"),
+}
+
 export function useLocale() {
   const ctx = useContext(LocaleContext)
-  if (!ctx) throw new Error("useLocale must be used within LocaleProvider")
-  return ctx
+  return ctx ?? defaultLocale
 }

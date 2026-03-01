@@ -89,6 +89,22 @@ const TripDetailPage = () => {
     },
   })
 
+  // Scroll effect - must run before any early returns to satisfy Rules of Hooks
+  useEffect(() => {
+    let timeoutId = null
+    const onScroll = () => {
+      setScrollY(window.scrollY)
+      setScrollActive(true)
+      if (timeoutId) clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => setScrollActive(false), 1200)
+    }
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+      if (timeoutId) clearTimeout(timeoutId)
+    }
+  }, [])
+
   const handleDeleteTrip = () => {
     setDeleteDialog(true)
   }
@@ -204,20 +220,6 @@ const TripDetailPage = () => {
   const showStickyCta =
     user?.role !== "conducteur" && trip.status === "active" && (hasActiveRequest || !hasActiveRequest)
 
-  useEffect(() => {
-    let timeoutId = null
-    const onScroll = () => {
-      setScrollY(window.scrollY)
-      setScrollActive(true)
-      if (timeoutId) clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => setScrollActive(false), 1200)
-    }
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => {
-      window.removeEventListener("scroll", onScroll)
-      if (timeoutId) clearTimeout(timeoutId)
-    }
-  }, [])
   const showFloatingCta = scrollY > 120 && scrollActive
 
   return (
