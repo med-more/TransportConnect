@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { Link, NavLink } from "react-router-dom"
-import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X, ArrowRight } from "../utils/icons"
+import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X, ArrowRight, Lock, User, LogOut } from "../utils/icons"
 import Button from "./ui/Button"
 import logo from "../assets/logo.svg"
 import { useTheme } from "../contexts/ThemeContext"
+import { useAuth } from "../contexts/AuthContext"
 
 const heroNavLinks = [
   { to: "/", label: "Home" },
@@ -15,9 +16,13 @@ const heroNavLinks = [
 
 export const PublicHeader = () => {
   const { theme, toggleTheme } = useTheme()
+  const { user, logout } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isDark = theme === "dark"
+  const isDriver = user?.role === "conducteur"
+  const isAdmin = user?.role === "admin"
+  const dashboardHref = isAdmin ? "/admin" : "/dashboard"
 
   return (
     <header
@@ -68,12 +73,12 @@ export const PublicHeader = () => {
             ))}
           </nav>
 
-          {/* Desktop: theme + two CTAs */}
+          {/* Desktop: theme + auth-aware CTAs */}
           <div className="hidden md:flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+              className={`p-2 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
                 isDark ? "text-white/90 hover:text-white hover:bg-white/10" : "text-foreground hover:bg-slate-100"
               }`}
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
@@ -81,26 +86,68 @@ export const PublicHeader = () => {
             >
               {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <Link to="/trips">
-              <Button
-                variant="outline"
-                size="medium"
-                className={
-                  isDark
-                    ? "border-white/60 text-white hover:bg-white/10 hover:border-white/80 hover:text-white"
-                    : "border-border text-foreground hover:bg-slate-50"
-                }
-              >
-                Track Shipment
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </Link>
-            <Link to="/contact">
-              <Button size="medium" className="bg-primary hover:bg-primary/90 text-white">
-                Get in touch
-                <ArrowRight className="w-4 h-4 ml-1.5" />
-              </Button>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link to={dashboardHref}>
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isDark
+                        ? "border border-white/40 text-white hover:bg-white/10"
+                        : "border border-border text-foreground hover:bg-slate-50"
+                    }`}
+                  >
+                    {isDriver ? "Check your trips" : isAdmin ? "Admin panel" : "Check your shipping"}
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+                <Link to={dashboardHref}>
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors"
+                  >
+                    Dashboard
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => { logout(); setMobileMenuOpen(false); }}
+                  className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 ${
+                    isDark ? "text-white/90 hover:text-white hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+                  }`}
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="text-sm font-medium hidden sm:inline">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link to="/login">
+                  <button
+                    type="button"
+                    className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isDark
+                        ? "border border-white/40 text-white hover:bg-white/10"
+                        : "border border-border text-foreground hover:bg-slate-50"
+                    }`}
+                  >
+                    <Lock className="w-4 h-4" />
+                    Login
+                  </button>
+                </Link>
+                <Link to="/register">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Register
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile: theme + hamburger */}
@@ -108,7 +155,7 @@ export const PublicHeader = () => {
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2.5 rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
+              className={`p-2 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
                 isDark ? "text-white/90 hover:bg-white/10" : "text-foreground hover:bg-slate-100"
               }`}
               aria-label={isDark ? "Light mode" : "Dark mode"}
@@ -171,21 +218,60 @@ export const PublicHeader = () => {
                 {theme === "dark" ? "Light mode" : "Dark mode"}
               </button>
               <div className={`border-t my-2 ${isDark ? "border-white/10" : "border-border"}`} />
-              <Link to="/trips" onClick={() => setMobileMenuOpen(false)} className="block">
-                <Button
-                  variant="outline"
-                  className={`w-full justify-center py-3 text-base ${isDark ? "border-white/60 text-white" : "border-border text-foreground"}`}
-                >
-                  Track Shipment
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="block">
-                <Button className="w-full justify-center py-3 text-base bg-primary text-white">
-                  Get in touch
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)} className="block">
+                    <Button
+                      variant="outline"
+                      className={`w-full justify-center py-3 text-base ${isDark ? "border-white/60 text-white" : "border-border text-foreground"}`}
+                    >
+                      {isDriver ? "Check your trips" : isAdmin ? "Admin panel" : "Check your shipping"}
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                  <Link to={dashboardHref} onClick={() => setMobileMenuOpen(false)} className="block">
+                    <Button className="w-full justify-center py-3 text-base bg-primary text-white">
+                      Dashboard
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                    className={`py-3 px-3 rounded-lg text-base font-medium text-left w-full flex items-center gap-2 ${
+                      isDark ? "text-white/90 hover:bg-white/10" : "text-foreground hover:bg-slate-100"
+                    }`}
+                  >
+                    <LogOut className="w-5 h-5" />
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="flex-1 min-w-0">
+                    <button
+                      type="button"
+                      className={`w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                        isDark
+                          ? "border border-white/40 text-white hover:bg-white/10"
+                          : "border border-border text-foreground hover:bg-slate-50"
+                      }`}
+                    >
+                      <Lock className="w-4 h-4 shrink-0" />
+                      Login
+                    </button>
+                  </Link>
+                  <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="flex-1 min-w-0">
+                    <button
+                      type="button"
+                      className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 rounded-lg text-sm font-medium bg-primary text-white hover:bg-primary/90 transition-colors"
+                    >
+                      <User className="w-4 h-4 shrink-0" />
+                      Register
+                    </button>
+                  </Link>
+                </div>
+              )}
             </div>
           </nav>
         </>
