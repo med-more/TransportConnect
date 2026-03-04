@@ -120,16 +120,19 @@ body {
   .dark input[type="time"] {
     color-scheme: dark;
   }
+
   input[type="date"],
   input[type="time"] {
     min-height: 2.75rem;
   }
+
   .dark input[type="date"]::-webkit-calendar-picker-indicator,
   .dark input[type="time"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
     opacity: 0.8;
     cursor: pointer;
   }
+
   .dark input[type="date"]::-webkit-datetime-edit,
   .dark input[type="time"]::-webkit-datetime-edit {
     color: var(--foreground);
@@ -143,6 +146,7 @@ body {
   .divider {
     @apply border-border-subtle;
   }
+
   .divider-strong {
     @apply border-border;
   }
@@ -160,23 +164,72 @@ body {
   .admin-section-padding {
     @apply px-6 py-4;
   }
+
   .admin-label {
     @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
   }
+
   .admin-description {
     @apply text-xs leading-tight text-muted-foreground;
   }
+
   .admin-card-title {
     @apply text-base sm:text-lg font-semibold text-foreground;
   }
+
   .admin-card-subtitle {
     @apply text-xs text-muted-foreground;
   }
+
   .admin-list-gap {
     @apply gap-2;
   }
+
   .admin-list-item-gap {
     @apply gap-3;
+  }
+
+  /* --- Static / landing pages (UX-inspired: WANDER, real estate, Apex Arc) --- */
+  .headline-premium {
+    @apply font-bold tracking-tight text-foreground;
+    letter-spacing: -0.02em;
+  }
+
+  .section-title {
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight;
+    letter-spacing: -0.02em;
+  }
+
+  .section-subtitle {
+    @apply text-base sm:text-lg text-muted-foreground max-w-2xl;
+  }
+
+  .glass-card {
+    @apply bg-card backdrop-blur-sm border border-border shadow-sm;
+  }
+
+  .static-metric-card {
+    @apply rounded-2xl p-6 sm:p-8 text-center border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md;
+  }
+
+  .static-metric-card-highlight {
+    @apply static-metric-card bg-primary text-primary-foreground border-primary;
+  }
+
+  .static-metric-card-highlight .text-muted-foreground {
+    @apply text-primary-foreground opacity-85;
+  }
+
+  .btn-glow {
+    @apply shadow-lg hover:shadow-xl transition-shadow duration-200;
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.1), 0 4px 20px rgba(239, 68, 68, 0.15);
+  }
+
+  .shadow-glow-lg {
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.15), 0 8px 30px rgba(239, 68, 68, 0.2);
   }
 }
 
@@ -188,12 +241,15 @@ body {
 
   /* Hide scrollbar */
   .scrollbar-hide {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 
   .scrollbar-hide::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
+    /* Chrome, Safari and Opera */
   }
 
   /* Chat thread background - transport / tracks theme */
@@ -202,6 +258,7 @@ body {
     background-image:
       url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20h80M0 40h80M0 60h80' stroke='%23000000' stroke-opacity='0.04' stroke-width='.5' stroke-dasharray='4 4' fill='none'/%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Ccircle cx='50' cy='40' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Ccircle cx='70' cy='60' r='1.5' fill='%23000000' fill-opacity='0.05'/%3E%3Cpath d='M35 35l4-2 4 2v3l-4 2-4-2z' fill='%23000000' fill-opacity='0.03'/%3E%3C/svg%3E");
   }
+
   .dark .chat-wallpaper {
     background-color: #262626;
     background-image:
@@ -212,15 +269,19 @@ body {
   .safe-top {
     padding-top: env(safe-area-inset-top, 0);
   }
+
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0);
   }
+
   .safe-left {
     padding-left: env(safe-area-inset-left, 0);
   }
+
   .safe-right {
     padding-right: env(safe-area-inset-right, 0);
   }
+
   /* Min touch target for accessibility (44px) */
   .touch-target {
     min-height: 44px;
@@ -248,6 +309,7 @@ body {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -283,39 +345,59 @@ body {
   z-index: 0;
   isolation: isolate;
 }
+
 .shipment-map-wrapper .leaflet-container {
   height: 100% !important;
   min-height: inherit;
   font-family: inherit;
   border-radius: inherit;
 }
+
 .shipment-map-wrapper .leaflet-control-zoom {
   border: none !important;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   border-radius: 8px;
   overflow: hidden;
 }
+
 .shipment-map-wrapper .leaflet-control-zoom a {
   width: 36px !important;
   height: 36px !important;
   line-height: 36px !important;
   font-size: 18px !important;
 }
+
 @media (min-width: 640px) {
-  .shipment-map-wrapper { min-height: 280px; }
+  .shipment-map-wrapper {
+    min-height: 280px;
+  }
 }
+
 @media (min-width: 768px) {
-  .shipment-map-wrapper { min-height: 320px; }
+  .shipment-map-wrapper {
+    min-height: 320px;
+  }
 }
+
 @media (min-width: 1024px) {
-  .shipment-map-wrapper { min-height: 360px; }
+  .shipment-map-wrapper {
+    min-height: 360px;
+  }
 }
 
 /* Vehicle marker (inDrive-style): subtle pulse */
 .vehicle-marker-wrap .vehicle-marker-inner {
   animation: vehicle-marker-pulse 2.5s ease-in-out infinite;
 }
+
 @keyframes vehicle-marker-pulse {
-  0%, 100% { box-shadow: 0 2px 10px rgba(0,0,0,0.28); }
-  50% { box-shadow: 0 3px 14px rgba(255,130,0,0.25), 0 2px 10px rgba(0,0,0,0.28); }
+
+  0%,
+  100% {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  }
+
+  50% {
+    box-shadow: 0 3px 14px rgba(255, 130, 0, 0.25), 0 2px 10px rgba(0, 0, 0, 0.28);
+  }
 }

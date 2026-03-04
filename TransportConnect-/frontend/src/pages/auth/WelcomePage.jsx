@@ -264,16 +264,17 @@ const WelcomePage = () => {
                   <p className="text-sm min-[400px]:text-base sm:text-lg md:text-xl text-white/85 leading-relaxed max-w-xl">
                     {heroSlides[heroSlide].description}
                   </p>
-                  <Link to="/features" className="inline-block mt-4 sm:mt-6 md:mt-8 w-full sm:w-auto">
-                    <Button
-                      size="large"
-                      variant="outline"
-                      className="w-full sm:w-auto min-h-[44px] border-white/70 text-white hover:bg-white/10 hover:border-white hover:text-white text-sm sm:text-base"
-                    >
-                      See How It Works
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 flex-shrink-0" />
-                    </Button>
-                  </Link>
+                  <div className="flex flex-col xs:flex-row gap-3 mt-4 sm:mt-6 md:mt-8">
+                    <Link to="/register" className="inline-flex w-full xs:w-auto">
+                      <Button
+                        size="large"
+                        className="w-full sm:w-auto min-h-[48px] bg-white text-slate-900 hover:bg-white/95 border-0 shadow-lg px-6"
+                      >
+                        Plan Your Trip
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 flex-shrink-0" />
+                      </Button>
+                    </Link>
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -357,6 +358,185 @@ const WelcomePage = () => {
               </span>
             ))}
         </motion.div>
+      </section>
+
+      {/* Find your shipment — category cards only */}
+      <section className="py-10 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 bg-background">
+        <div className="container mx-auto max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ ...transitionSmooth, delay: 0.1 }}
+            viewport={viewportDefaults}
+            className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-6"
+          >
+            {[
+              { label: "Freight", icon: Truck },
+              { label: "Express", icon: Zap },
+              { label: "Pallet", icon: Package },
+              { label: "Fragile", icon: Shield },
+            ].map((item, i) => (
+              <Link key={item.label} to="/trips" className="block">
+                <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 text-center">
+                  <item.icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-2" />
+                  <span className="text-sm font-semibold text-foreground">{item.label}</span>
+                </div>
+              </Link>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why Thousands Choose TransportConnect — WANDER.ph clone: heading + stats circles + 3 feature cards */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-muted/40 dark:bg-muted/20">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
+              className="lg:col-span-5"
+            >
+              <h2 className="section-title mb-4 text-2xl sm:text-3xl md:text-4xl">
+                Why Thousands of Travelers Choose TransportConnect
+              </h2>
+              <p className="section-subtitle mb-6">
+                Discover reliable freight across Morocco with verified drivers, real-time tracking, and hassle-free booking—all in one platform.
+              </p>
+              <div className="flex items-center gap-3">
+                <a href="#" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors" aria-label="Facebook"><Facebook className="w-5 h-5" /></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors" aria-label="Twitter"><Twitter className="w-5 h-5" /></a>
+                <a href="#" className="w-10 h-10 rounded-full bg-primary/10 hover:bg-primary/20 flex items-center justify-center text-primary transition-colors" aria-label="LinkedIn"><Linkedin className="w-5 h-5" /></a>
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
+              className="lg:col-span-7 space-y-6"
+            >
+              <div className="grid grid-cols-3 gap-4 sm:gap-6">
+                {[
+                  { number: "12k+", label: "Happy & Satisfied Users" },
+                  { number: "10+", label: "Years Logistics Experience" },
+                  { number: "50+", label: "Cities Covered in Morocco" },
+                ].map((stat, i) => (
+                  <div key={stat.label} className="text-center">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                      <span className="text-xl sm:text-2xl font-bold text-primary">{stat.number}</span>
+                    </div>
+                    <p className="text-xs sm:text-sm text-muted-foreground font-medium">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { icon: MapPin, title: "Local Expertise", desc: "Network of verified drivers across Morocco" },
+                  { icon: Package, title: "All-in-One Booking", desc: "From request to delivery in one platform" },
+                  { icon: Clock, title: "24/7 Support", desc: "Get help whenever you need it" },
+                ].map((item, i) => (
+                  <div key={item.title} className="rounded-2xl border border-border bg-card p-4 sm:p-5 hover:shadow-lg transition-all duration-300">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                      <item.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-foreground mb-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Popular Routes — WANDER Top Destinations clone */}
+      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-background">
+        <div className="container mx-auto max-w-7xl">
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
+            className="text-center mb-8 sm:mb-12"
+          >
+            <h2 className="section-title mb-3">Popular Routes</h2>
+            <p className="section-subtitle mx-auto">From city to city across Morocco—find your next shipment or trip.</p>
+          </motion.div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { from: "Casablanca", to: "Rabat", price: "from 150€", desc: "Express freight | Central Morocco", rating: "4.9", reviews: "2.1k", image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80" },
+              { from: "Marrakech", to: "Agadir", price: "from 280€", desc: "Coastal route | South Morocco", rating: "4.8", reviews: "1.8k", image: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=600&q=80" },
+              { from: "Fès", to: "Tanger", price: "from 220€", desc: "North corridor | Northern Morocco", rating: "4.9", reviews: "1.2k", image: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=600&q=80" },
+              { from: "Oujda", to: "Casablanca", price: "from 450€", desc: "Long haul | East to West", rating: "4.7", reviews: "890", image: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&q=80" },
+            ].map((route, i) => (
+              <motion.div
+                key={`${route.from}-${route.to}`}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ ...transitionSmooth, delay: i * 0.08 }}
+                viewport={viewportDefaults}
+              >
+                <Link to="/trips" className="block group">
+                  <div className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-all duration-300">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img src={route.image} alt={`${route.from} to ${route.to}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <span className="absolute top-3 right-3 px-2.5 py-1 bg-white dark:bg-slate-900 rounded-lg text-xs font-semibold text-foreground shadow">{route.price}</span>
+                    </div>
+                    <div className="p-4 sm:p-5">
+                      <h3 className="font-bold text-foreground mb-1">{route.from} → {route.to}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">{route.desc}</p>
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                        <span className="font-medium text-foreground">{route.rating}</span>
+                        <span className="text-muted-foreground">({route.reviews})</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+          <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={viewportDefaults} className="mt-8 text-center">
+            <Link to="/trips"><Button variant="outline" size="large">View more routes <ArrowRight className="w-4 h-4 ml-2" /></Button></Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Booking made as easy as 1-2-3 — WANDER clone */}
+      <section className="py-10 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 bg-muted/40 dark:bg-muted/20">
+        <div className="container mx-auto max-w-4xl text-center">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={transitionSmooth}
+            viewport={viewportDefaults}
+            className="section-title mb-10 sm:mb-12"
+          >
+            Booking made as easy as 1-2-3.
+          </motion.h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10">
+            {[
+              { step: "1", title: "Pick Your Route", desc: "Search trips or post your request" },
+              { step: "2", title: "Customize Your Shipment", desc: "Choose capacity, dates & price" },
+              { step: "3", title: "Confirm & Track", desc: "Pay securely and track in real-time" },
+            ].map((item, i) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ ...transitionSmooth, delay: i * 0.1 }}
+                viewport={viewportDefaults}
+                className="flex flex-col items-center"
+              >
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl sm:text-2xl font-bold mb-4">{item.step}</div>
+                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground max-w-[200px]">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Stats Section */}

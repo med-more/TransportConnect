@@ -1,15 +1,17 @@
 /**
  * MapLibre GL tracking map configuration.
  * Free and open-source: no API key required.
- * Carto basemaps: streets, roads, city names, full detail (Uber/Glovo-style).
+ * Voyager: full street names, neighborhoods (quartiers), POIs.
+ * Dark Matter: dark theme with same detail level.
+ * Note: Live traffic layers require a separate provider (e.g. Google/TomTom) and are not included here.
  */
+const CARTO_VOYAGER =
+  "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
 const CARTO_DARK =
   "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
-const CARTO_POSITRON =
-  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 
 export const MAPLIBRE_STYLES = {
-  day: CARTO_POSITRON,
+  day: CARTO_VOYAGER,
   night: CARTO_DARK,
 }
 

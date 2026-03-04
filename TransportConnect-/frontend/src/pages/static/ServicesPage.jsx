@@ -1,110 +1,124 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { Package, Truck, Shield, Clock, CheckCircle, ArrowRight } from "../../utils/icons"
+import { ArrowRight, Truck, Package } from "../../utils/icons"
 import Button from "../../components/ui/Button"
-import Card from "../../components/ui/Card"
 import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const ServicesPage = () => {
-  const services = [
+  const serviceCards = [
     {
-      icon: Package,
       title: "Freight Transport",
-      description: "Connect with verified transporters for your shipping needs across Morocco",
-      features: ["Real-time tracking", "Verified drivers", "Secure payments", "24/7 support"],
+      description: "Connect with verified transporters for your shipping needs across Morocco. Real-time tracking and secure payments.",
+      image: "/home/2/1.webp",
+      accent: "tl-br", // top-left + bottom-right L-shape
     },
     {
-      icon: Truck,
       title: "Driver Network",
-      description: "Join our network of professional drivers and grow your business",
-      features: ["Flexible schedules", "Fair pricing", "Direct payments", "Route optimization"],
+      description: "Join our network of professional drivers. Flexible schedules, fair pricing, and direct payments.",
+      image: "/home/3/1.webp",
+      accent: null,
     },
     {
-      icon: Shield,
       title: "Secure Platform",
-      description: "Your shipments are protected with our comprehensive security measures",
-      features: ["Insurance coverage", "Verified users", "Secure transactions", "Data protection"],
-    },
-    {
-      icon: Clock,
-      title: "24/7 Support",
-      description: "Get help whenever you need it with our dedicated support team",
-      features: ["Live chat", "Phone support", "Email support", "Help center"],
+      description: "Your shipments are protected with insurance, verified users, and secure transactions.",
+      image: "/home/4/1.webp",
+      accent: "tr-bl", // top-right + bottom-left L-shape
     },
   ]
 
+  const skills = [
+    { label: "On-time delivery", value: 98 },
+    { label: "Verified partners", value: 100 },
+    { label: "Customer satisfaction", value: 95 },
+    { label: "Coverage", value: 100 },
+  ]
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
+      {/* Breadcrumb */}
+      <nav className="border-b border-border bg-background px-4 sm:px-6 md:px-8 py-3">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-center lg:text-left"
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
-                Our Services
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                Comprehensive logistics solutions designed to simplify freight transport in Morocco
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="w-full h-64 sm:h-80 md:h-96"
-            >
-              <VisualSection
-                type="image"
-                src="/home/2/1.webp"
-                alt="TransportConnect Services"
-                className="w-full h-full rounded-lg"
-                fallbackIcon={Truck}
-              />
-            </motion.div>
-          </div>
+          <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            </li>
+            <li aria-hidden className="text-muted-foreground/60">/</li>
+            <li className="font-medium text-foreground" aria-current="page">Services</li>
+          </ol>
+        </div>
+      </nav>
+
+      {/* Hero — same style as About Us: full-width image, overlay, centered title + CTA */}
+      <section className="relative min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-center items-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          style={{ backgroundImage: "url(/home/2/1.webp)" }}
+        />
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+        <div className="relative z-10 text-center max-w-4xl mx-auto text-white">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-white/80 mb-4"
+          >
+            Our Services
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
+          >
+            Transport solutions for Morocco
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-8 sm:mt-10"
+          >
+            <Link to="/trips">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-white/20 uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
+                Get started
+                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* Process Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+      {/* How It Works — 3 steps */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-10 sm:mb-14"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              How It Works
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Simple steps to get your shipments moving
-            </p>
+            <h2 className="section-title mb-3">How it works</h2>
+            <p className="section-subtitle mx-auto">Simple steps to get your shipments moving</p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
             {[
-              { step: "1", title: "Post Your Request", desc: "Create a shipping request with details about your cargo" },
-              { step: "2", title: "Get Matched", desc: "Receive offers from verified drivers in your area" },
-              { step: "3", title: "Track & Deliver", desc: "Monitor your shipment in real-time until delivery" },
+              { step: "01", title: "Post your request", desc: "Create a shipping request with details about your cargo" },
+              { step: "02", title: "Get matched", desc: "Receive offers from verified drivers in your area" },
+              { step: "03", title: "Track & deliver", desc: "Monitor your shipment in real-time until delivery" },
             ].map((item, index) => (
               <motion.div
                 key={item.step}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
+                transition={{ delay: index * 0.1 }}
                 className="text-center"
               >
-                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl sm:text-3xl font-bold text-primary">{item.step}</span>
+                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <span className="text-lg sm:text-xl font-bold text-primary">{item.step}</span>
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{item.title}</h3>
                 <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
@@ -114,83 +128,158 @@ const ServicesPage = () => {
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section className="py-8 sm:py-12 md:py-16 px-3 sm:px-4 md:px-6">
+      {/* Service cards — 3 columns, L-shaped red accents, image at bottom */}
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-10 sm:mb-14"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              What We Offer
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to streamline your logistics operations
+            <h2 className="section-title mb-3">What we offer</h2>
+            <p className="section-subtitle mx-auto">Everything you need to streamline your logistics</p>
+          </motion.div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {serviceCards.map((card, index) => (
+              <motion.div
+                key={card.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.08 }}
+                className="relative rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow duration-300"
+              >
+                {/* L-shaped accent — top-left + bottom-right */}
+                {card.accent === "tl-br" && (
+                  <>
+                    <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-primary rounded-tl-2xl z-10" />
+                    <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-primary rounded-br-2xl z-10" />
+                  </>
+                )}
+                {/* L-shaped accent — top-right + bottom-left */}
+                {card.accent === "tr-bl" && (
+                  <>
+                    <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-primary rounded-tr-2xl z-10" />
+                    <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-primary rounded-bl-2xl z-10" />
+                  </>
+                )}
+                <div className="p-6 sm:p-8">
+                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3">{card.title}</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+                    {card.description}
+                  </p>
+                </div>
+                <div className="h-48 sm:h-56 relative">
+                  <VisualSection
+                    type="image"
+                    src={card.image}
+                    alt={card.title}
+                    className="w-full h-full object-cover"
+                    fallbackIcon={Package}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="mt-10 sm:mt-12 flex justify-center"
+          >
+            <Link to="/features">
+              <Button size="large" variant="outline" className="min-h-[48px] px-6">
+                Explore all features
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Our Company Skills — circular progress indicators */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+        <div className="container mx-auto max-w-5xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="section-title mb-3">Our platform strengths</h2>
+            <p className="section-subtitle mx-auto">
+              Trusted by shippers and drivers across Morocco for reliability, security, and support.
             </p>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {services.map((service, index) => {
-              const Icon = service.icon
-              return (
-                <motion.div
-                  key={service.title}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Card className="p-6 sm:p-8 hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
-                    <div className="flex items-start gap-4 mb-6">
-                      <div className="p-3 bg-primary/5 rounded-lg flex-shrink-0">
-                        <Icon className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">{service.title}</h3>
-                        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{service.description}</p>
-                      </div>
-                    </div>
-                    <ul className="space-y-3">
-                      {service.features.map((feature, idx) => (
-                        <li key={idx} className="flex items-center gap-3">
-                          <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
-                          <span className="text-sm sm:text-base text-foreground">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </Card>
-                </motion.div>
-              )
-            })}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
+            {skills.map((skill, index) => (
+              <motion.div
+                key={skill.label}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: index * 0.08 }}
+                className="flex flex-col items-center"
+              >
+                <div className="relative w-24 h-24 sm:w-28 sm:h-28">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="42"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                      className="text-muted/30"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="42"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      className="text-primary transition-all duration-1000"
+                      strokeDasharray={`${skill.value * 2.64} 264`}
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl font-bold text-foreground">
+                    {skill.value}%
+                  </span>
+                </div>
+                <p className="mt-4 text-sm sm:text-base font-medium text-foreground text-center">
+                  {skill.label}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6 bg-accent/30">
-        <div className="container mx-auto max-w-4xl text-center">
+      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
+        <div className="container mx-auto max-w-3xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
-              Ready to Get Started?
-            </h2>
+            <h2 className="section-title mb-3 sm:mb-4">Ready to get started?</h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of shippers and drivers already using TransportConnect
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register">
                 <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
-                  Get Started Free
+                  Get started free
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
               <Link to="/contact">
                 <Button variant="outline" size="large" className="w-full sm:w-auto">
-                  Contact Sales
+                  Contact sales
                 </Button>
               </Link>
             </div>

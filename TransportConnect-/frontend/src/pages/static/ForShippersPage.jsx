@@ -3,31 +3,14 @@ import { Link } from "react-router-dom"
 import { Package, Search, Shield, Clock, TrendingUp, CheckCircle, ArrowRight } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
-import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const ForShippersPage = () => {
   const benefits = [
-    {
-      icon: Search,
-      title: "Find Transporters Easily",
-      description: "Browse through verified drivers and compare prices in real-time",
-    },
-    {
-      icon: Shield,
-      title: "Secure Transactions",
-      description: "Your shipments are protected with insurance and verified partners",
-    },
-    {
-      icon: Clock,
-      title: "Real-Time Tracking",
-      description: "Monitor your shipments from pickup to delivery with live updates",
-    },
-    {
-      icon: TrendingUp,
-      title: "Competitive Pricing",
-      description: "Get the best rates by comparing multiple transport offers",
-    },
+    { icon: Search, title: "Find Transporters Easily", description: "Browse verified drivers and compare prices in real-time." },
+    { icon: Shield, title: "Secure Transactions", description: "Your shipments are protected with insurance and verified partners." },
+    { icon: Clock, title: "Real-Time Tracking", description: "Monitor your shipments from pickup to delivery with live updates." },
+    { icon: TrendingUp, title: "Competitive Pricing", description: "Get the best rates by comparing multiple transport offers." },
   ]
 
   const features = [
@@ -41,61 +24,95 @@ const ForShippersPage = () => {
     "Transparent pricing",
   ]
 
+  const testimonials = [
+    { name: "Ahmed Benali", company: "Tech Solutions", quote: "TransportConnect has revolutionized how we handle our logistics. Fast, reliable, and cost-effective." },
+    { name: "Fatima Alami", company: "Retail Plus", quote: "The real-time tracking feature gives us complete visibility. Our customers love the transparency." },
+  ]
+
+  const steps = [
+    { step: "01", title: "Create Your Account", desc: "Sign up in minutes with your email" },
+    { step: "02", title: "Post Your Request", desc: "Describe your shipment and requirements" },
+    { step: "03", title: "Choose & Ship", desc: "Compare offers and select the best driver" },
+  ]
+
+  const pricingPoints = [
+    { title: "No Hidden Fees", desc: "See all costs upfront before booking" },
+    { title: "Competitive Rates", desc: "Compare multiple offers to get the best price" },
+    { title: "Secure Payments", desc: "Pay safely through our secure platform" },
+  ]
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
+      {/* Breadcrumb */}
+      <nav className="border-b border-border bg-background px-4 sm:px-6 md:px-8 py-3">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
-                For Shippers
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 leading-relaxed">
-                Simplify your logistics and connect with trusted transporters. Ship your goods safely and efficiently across Morocco.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/register">
-                  <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
-                    Start Shipping Now
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-                <Link to="/features">
-                  <Button variant="outline" size="large" className="w-full sm:w-auto">
-                    View Features
-                  </Button>
-                </Link>
-              </div>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex justify-center"
-            >
-              <div className="w-full max-w-md h-64 sm:h-80 md:h-96">
-                <VisualSection
-                  type="image"
-                  src="/home/2/1.webp"
-                  alt="For Shippers"
-                  className="w-full h-full rounded-2xl"
-                  fallbackIcon={Package}
-                />
-              </div>
-            </motion.div>
-          </div>
+          <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            </li>
+            <li aria-hidden className="text-muted-foreground/60">/</li>
+            <li className="font-medium text-foreground" aria-current="page">For Shippers</li>
+          </ol>
+        </div>
+      </nav>
+
+      {/* Hero — full-width image + overlay, centered title + CTA */}
+      <section className="relative min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-center items-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          style={{ backgroundImage: "url(/home/2/1.webp)" }}
+        />
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+        <div className="relative z-10 text-center max-w-4xl mx-auto text-white">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-white/80 mb-4"
+          >
+            Ship with confidence
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
+          >
+            For Shippers
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mt-6 text-base sm:text-lg text-white/85 max-w-2xl mx-auto"
+          >
+            Simplify your logistics and connect with trusted transporters. Ship your goods safely and efficiently across Morocco.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Link to="/register">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-white/20 min-h-[48px] px-6 uppercase font-semibold tracking-wider">
+                Start shipping now
+                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </Button>
+            </Link>
+            <Link to="/features">
+              <Button variant="outline" className="min-h-[48px] px-6 border-2 border-white/70 text-white hover:bg-white/10 hover:border-white">
+                View features
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* Benefits Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+      {/* Why Choose — benefits grid */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -103,30 +120,38 @@ const ForShippersPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              Why Choose TransportConnect?
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Everything you need to streamline your shipping operations
-            </p>
+            <p className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-3">Why choose us</p>
+            <h2 className="section-title mb-3">Why choose TransportConnect?</h2>
+            <p className="section-subtitle mx-auto">Everything you need to streamline your shipping operations</p>
           </motion.div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {benefits.map((benefit, index) => {
               const Icon = benefit.icon
+              const isHighlight = index === 0
               return (
                 <motion.div
                   key={benefit.title}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ delay: index * 0.08 }}
                 >
-                  <Card className="p-6 text-center hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
-                    <div className="p-3 bg-primary/5 rounded-lg w-fit mx-auto mb-4">
-                      <Icon className="w-6 h-6 text-primary" />
+                  <Card
+                    className={`p-6 sm:p-8 h-full text-center transition-all duration-300 rounded-2xl border ${
+                      isHighlight
+                        ? "bg-primary text-primary-foreground border-primary shadow-lg"
+                        : "glass-card border-border hover:shadow-md"
+                    }`}
+                  >
+                    <div className={`p-3 rounded-xl w-fit mx-auto mb-4 ${isHighlight ? "bg-white/20" : "bg-primary/10"}`}>
+                      <Icon className={`w-6 h-6 ${isHighlight ? "text-primary-foreground" : "text-primary"}`} />
                     </div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{benefit.title}</h3>
-                    <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{benefit.description}</p>
+                    <h3 className={`text-lg sm:text-xl font-bold mb-2 ${isHighlight ? "text-primary-foreground" : "text-foreground"}`}>
+                      {benefit.title}
+                    </h3>
+                    <p className={`text-sm sm:text-base leading-relaxed ${isHighlight ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
+                      {benefit.description}
+                    </p>
                   </Card>
                 </motion.div>
               )
@@ -135,8 +160,8 @@ const ForShippersPage = () => {
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+      {/* What Shippers Say — testimonials */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -144,31 +169,23 @@ const ForShippersPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              What Shippers Say
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Trusted by businesses across Morocco
-            </p>
+            <h2 className="section-title mb-3">What shippers say</h2>
+            <p className="section-subtitle mx-auto">Trusted by businesses across Morocco</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {[
-              { name: "Ahmed Benali", company: "Tech Solutions", quote: "TransportConnect has revolutionized how we handle our logistics. Fast, reliable, and cost-effective." },
-              { name: "Fatima Alami", company: "Retail Plus", quote: "The real-time tracking feature gives us complete visibility. Our customers love the transparency." },
-            ].map((testimonial, index) => (
+            {testimonials.map((t, i) => (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
+                key={t.name}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.2 }}
+                transition={{ delay: i * 0.1 }}
               >
-                <Card className="p-6 sm:p-8 border border-border">
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
-                  <div>
-                    <p className="font-semibold text-foreground">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.company}</p>
-                  </div>
+                <Card className={`p-6 sm:p-8 h-full rounded-2xl border ${i === 1 ? "border-primary/50" : "border-border"} glass-card`}>
+                  <span className="text-3xl sm:text-4xl font-serif text-muted-foreground leading-none">"</span>
+                  <p className="text-foreground text-sm sm:text-base mt-2 mb-6 leading-relaxed">{t.quote}</p>
+                  <p className="font-semibold text-foreground">{t.name}</p>
+                  <p className="text-sm text-muted-foreground">{t.company}</p>
                 </Card>
               </motion.div>
             ))}
@@ -176,50 +193,45 @@ const ForShippersPage = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/30">
+      {/* Everything You Need + Get Started in 3 Steps */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8 headline-premium">
-                Everything You Need to Ship
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-3">Features</p>
+              <h2 className="section-title mb-6">Everything you need to ship</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 {features.map((feature, index) => (
                   <motion.div
                     key={index}
                     initial={{ opacity: 0, x: -10 }}
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
+                    transition={{ delay: index * 0.04 }}
                     className="flex items-start gap-3"
                   >
-                    <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
                     <span className="text-sm sm:text-base text-foreground">{feature}</span>
                   </motion.div>
                 ))}
               </div>
             </motion.div>
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="bg-background rounded-2xl p-6 sm:p-8 md:p-10 shadow-lg border border-border"
+              className="rounded-2xl border-2 border-primary/40 p-6 sm:p-8 bg-card"
             >
-              <h3 className="text-xl sm:text-2xl font-semibold text-foreground mb-6">Get Started in 3 Steps</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-6">Get started in 3 steps</h3>
               <div className="space-y-6">
-                {[
-                  { step: "1", title: "Create Your Account", desc: "Sign up in minutes with your email" },
-                  { step: "2", title: "Post Your Request", desc: "Describe your shipment and requirements" },
-                  { step: "3", title: "Choose & Ship", desc: "Compare offers and select the best driver" },
-                ].map((item, idx) => (
+                {steps.map((item, idx) => (
                   <div key={idx} className="flex gap-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold">
-                      {item.step}
+                    <div className="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <span className="text-lg font-bold text-primary">{item.step}</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-foreground mb-1">{item.title}</h4>
@@ -233,8 +245,8 @@ const ForShippersPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+      {/* Transparent Pricing */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -242,28 +254,20 @@ const ForShippersPage = () => {
             viewport={{ once: true }}
             className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              Transparent Pricing
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Compare prices and choose the best deal for your shipment
-            </p>
+            <h2 className="section-title mb-3">Transparent pricing</h2>
+            <p className="section-subtitle mx-auto">Compare prices and choose the best deal for your shipment</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {[
-              { title: "No Hidden Fees", desc: "See all costs upfront before booking" },
-              { title: "Competitive Rates", desc: "Compare multiple offers to get the best price" },
-              { title: "Secure Payments", desc: "Pay safely through our secure platform" },
-            ].map((item, index) => (
+            {pricingPoints.map((item, index) => (
               <motion.div
                 key={item.title}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
+                transition={{ delay: index * 0.08 }}
               >
-                <Card className="p-6 sm:p-8 text-center border border-border">
-                  <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{item.title}</h3>
+                <Card className="p-6 sm:p-8 text-center h-full glass-card border border-border hover:border-primary/20 transition-colors duration-300">
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">{item.title}</h3>
                   <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
                 </Card>
               </motion.div>
@@ -272,26 +276,31 @@ const ForShippersPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
-        <div className="container mx-auto max-w-4xl text-center">
+      {/* CTA */}
+      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
+        <div className="container mx-auto max-w-3xl text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
-              Ready to Start Shipping?
-            </h2>
+            <h2 className="section-title mb-3 sm:mb-4">Ready to start shipping?</h2>
             <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
               Join thousands of shippers already using TransportConnect
             </p>
-            <Link to="/register">
-              <Button size="large" className="btn-glow shadow-glow hover:shadow-glow-lg">
-                Create Free Account
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/register">
+                <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
+                  Create free account
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Link to="/trips">
+                <Button variant="outline" size="large" className="w-full sm:w-auto">
+                  Browse trips
+                </Button>
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>

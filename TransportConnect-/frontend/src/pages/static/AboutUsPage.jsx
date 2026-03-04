@@ -1,326 +1,197 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { Target, Users, Award, Heart, CheckCircle, ArrowRight } from "../../utils/icons"
+import { ArrowRight } from "../../utils/icons"
 import Button from "../../components/ui/Button"
-import Card from "../../components/ui/Card"
-import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
 const AboutUsPage = () => {
-  const values = [
-    {
-      icon: Target,
-      title: "Our Mission",
-      description: "To revolutionize freight transport in Morocco by connecting shippers with trusted drivers through innovative technology.",
-    },
-    {
-      icon: Heart,
-      title: "Our Vision",
-      description: "To become the leading logistics platform in North Africa, making transport accessible, affordable, and reliable for everyone.",
-    },
-    {
-      icon: Users,
-      title: "Our Team",
-      description: "A dedicated team of logistics experts, developers, and customer service professionals working to serve you better every day.",
-    },
-    {
-      icon: Award,
-      title: "Our Commitment",
-      description: "We're committed to providing the best service, ensuring security, and building trust in every transaction on our platform.",
-    },
+  const perks = [
+    { title: "Verified Drivers", desc: "Every transporter is background-checked and verified for your peace of mind." },
+    { title: "Real-time Tracking", desc: "Follow your shipment from pickup to delivery with live GPS updates." },
+    { title: "Secure Payments", desc: "Safe, transparent payments with protection for shippers and drivers." },
+    { title: "24/7 Support", desc: "Our team is here whenever you need help or have questions." },
+    { title: "Fair Pricing", desc: "Compare offers and choose the best rate for your shipment." },
   ]
 
-  const stats = [
-    { value: "10,000+", label: "Active Users" },
-    { value: "50,000+", label: "Successful Deliveries" },
-    { value: "500+", label: "Verified Drivers" },
-    { value: "98%", label: "Satisfaction Rate" },
+  const testimonials = [
+    { quote: "TransportConnect cut our logistics headaches in half. We ship across Morocco every week—reliable, transparent, and simple.", border: "border-border" },
+    { quote: "As a driver, I get more loads and get paid on time. The platform is easy to use and the support team is always helpful.", border: "border-primary/50" },
+    { quote: "Finally a platform that connects shippers and drivers without the hassle. Real-time tracking and verified partners make all the difference.", border: "border-primary" },
   ]
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6">
+      {/* Breadcrumb */}
+      <nav className="border-b border-border bg-background px-4 sm:px-6 md:px-8 py-3">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-foreground mb-4 sm:mb-6 leading-tight headline-premium tracking-tight">
-                About TransportConnect
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-                Connecting shippers and drivers across Morocco with innovative logistics solutions
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="w-full h-64 sm:h-80 md:h-96"
-            >
-              <VisualSection
-                type="image"
-                src="/home/4/1.webp"
-                alt="About TransportConnect"
-                className="w-full h-full rounded-lg"
-                fallbackIcon={Users}
-              />
-            </motion.div>
-          </div>
+          <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+            <li>
+              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
+            </li>
+            <li aria-hidden className="text-muted-foreground/60">/</li>
+            <li className="font-medium text-foreground" aria-current="page">About Us</li>
+          </ol>
+        </div>
+      </nav>
+
+      {/* Hero — image bg with overlay; text stays light on overlay for contrast */}
+      <section className="relative min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-center items-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
+          style={{ backgroundImage: "url(/home/4/1.webp)" }}
+        />
+        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+        <div className="relative z-10 text-center max-w-4xl mx-auto text-white">
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-white/80 mb-4"
+          >
+            Our Platform
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
+          >
+            About Us
+          </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mt-8 sm:mt-10"
+          >
+            <Link to="/trips">
+              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-white/20 uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
+                Find Trips
+                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* Timeline Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/20">
+      {/* All the Perks — two columns: left = label + title + text, right = bordered perks grid */}
+      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              Our Journey
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Building the future of logistics in Morocco
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
-            <div className="lg:col-span-2 space-y-8 sm:space-y-12">
-              {[
-                { year: "2020", title: "Founded", desc: "Started with a vision to transform logistics" },
-                { year: "2021", title: "First 1000 Users", desc: "Reached our first milestone" },
-                { year: "2023", title: "National Expansion", desc: "Covering all major cities in Morocco" },
-                { year: "2024", title: "10,000+ Users", desc: "Continuing to grow and serve more customers" },
-              ].map((milestone, index) => (
-                <motion.div
-                  key={milestone.year}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.2 }}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
-                >
-                  <div className="flex-shrink-0">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <span className="text-lg sm:text-xl font-bold text-primary">{milestone.year}</span>
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{milestone.title}</h3>
-                    <p className="text-sm sm:text-base text-muted-foreground">{milestone.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="w-full lg:w-auto"
+              transition={{ duration: 0.5 }}
             >
-              <div className="w-full aspect-square rounded-lg overflow-hidden max-w-md mx-auto lg:max-w-none">
-                <VisualSection
-                  type="image"
-                  src="/home/4/2.webp"
-                  alt="Our Journey"
-                  className="w-full h-full"
-                  fallbackIcon={Target}
-                />
+              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-4">About Us</p>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">All the Perks.</h2>
+              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-lg">
+                We built TransportConnect to make freight in Morocco simple, secure, and fair. From verified drivers and real-time tracking to 24/7 support and transparent pricing—everything you need is in one place.
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="border-2 border-primary/40 rounded-2xl p-6 sm:p-8 bg-card"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
+                {perks.map((item, i) => (
+                  <div key={item.title} className="space-y-2">
+                    <h3 className="text-lg font-bold text-foreground">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+      {/* Our Story — small red label centered, justified text block */}
+      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/50 dark:bg-muted/30">
         <div className="container mx-auto max-w-4xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="prose prose-lg max-w-none"
+            className="text-center text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-8"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-6 sm:mb-8 headline-premium">
-              Our Story
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground mb-4 sm:mb-6 leading-relaxed">
-              TransportConnect was founded with a simple mission: to make freight transport in Morocco more accessible,
-              efficient, and reliable. We recognized the challenges that both shippers and drivers face in the traditional
-              logistics industry and set out to create a solution that benefits everyone.
+            Our Story
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-muted-foreground text-base sm:text-lg leading-relaxed text-justify space-y-4"
+          >
+            <p>
+              TransportConnect was founded with a simple mission: to make freight transport in Morocco more accessible, efficient, and reliable. We recognized the challenges that both shippers and drivers face in the traditional logistics industry and set out to create a solution that benefits everyone.
             </p>
-            <p className="text-base sm:text-lg text-muted-foreground mb-4 sm:mb-6 leading-relaxed">
-              Since our launch, we've grown from a small startup to a trusted platform serving thousands of users across
-              Morocco. Our commitment to innovation, security, and customer satisfaction has made us a leader in the
-              logistics technology space.
+            <p>
+              Since our launch, we have grown from a small startup to a trusted platform serving thousands of users across Morocco. Our commitment to innovation, security, and customer satisfaction has made us a leader in the logistics technology space.
             </p>
-            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed">
-              Today, we continue to evolve our platform, adding new features and expanding our network to better serve
-              our community of shippers and drivers.
+            <p>
+              Today, we continue to evolve our platform, adding new features and expanding our network to better serve our community of shippers and drivers.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Partners Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
+      {/* Why Choose Us — HAPPY USERS (red), title, 3 testimonial cards with quote + different borders */}
+      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
+            className="text-center text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-3"
           >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              Trusted Partners
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Working with leading companies across Morocco
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
-            {["Partner 1", "Partner 2", "Partner 3", "Partner 4"].map((partner, index) => (
+            Happy Users
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-12 sm:mb-16"
+          >
+            Why Choose Us
+          </motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {testimonials.map((card, i) => (
               <motion.div
-                key={partner}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                key={i}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
+                transition={{ delay: i * 0.1 }}
+                className={`rounded-2xl border-2 ${card.border} bg-card p-6 sm:p-8 min-h-[220px] flex flex-col`}
               >
-                <Card className="p-6 sm:p-8 glass-card border border-white/30">
-                  <div className="text-sm sm:text-base font-medium text-muted-foreground">{partner}</div>
-                </Card>
+                <span className="text-4xl sm:text-5xl font-serif text-muted-foreground leading-none">"</span>
+                <p className="text-foreground text-sm sm:text-base leading-relaxed mt-2 flex-1">{card.quote}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-accent/30">
-        <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 headline-premium">
-              Our Impact
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Numbers that speak for themselves
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
-              >
-                <Card className="p-6 sm:p-8 hover:shadow-lg transition-shadow glass-card border border-white/30">
-                  <div className="text-3xl sm:text-4xl md:text-5xl font-semibold text-primary mb-2 sm:mb-3">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm sm:text-base md:text-lg text-muted-foreground font-medium">
-                    {stat.label}
-                  </div>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Values Section */}
-      <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6">
-        <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4">
-              What We Stand For
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our core values guide everything we do
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-            {values.map((value, index) => {
-              const Icon = value.icon
-              return (
-                <motion.div
-                  key={value.title}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <Card className="p-6 sm:p-8 md:p-10 hover:shadow-lg transition-all duration-300 h-full glass-card border border-white/30">
-                    <div className="flex items-start gap-4 sm:gap-6">
-                      <div className="p-3 sm:p-4 bg-primary/5 rounded-lg flex-shrink-0">
-                        <Icon className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-xl sm:text-2xl md:text-3xl font-semibold text-foreground mb-2 sm:mb-3">
-                          {value.title}
-                        </h3>
-                        <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed">
-                          {value.description}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-3 sm:px-4 md:px-6 bg-accent/30">
-        <div className="container mx-auto max-w-4xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-foreground mb-4 sm:mb-6 headline-premium">
-              Join Our Community
-            </h2>
-            <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Be part of the future of logistics in Morocco
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register">
-                <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
-                  Get Started
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/contact">
-                <Button variant="outline" size="large" className="w-full sm:w-auto">
-                  Contact Us
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
+      {/* CTA strip — blurred / dark bg, single button */}
+      <section className="relative py-16 sm:py-20 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url(/home/2/1.webp)" }}
+        />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+        <div className="relative z-10 text-center">
+          <Link to="/trips">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-border uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
+              See All Trips and Offers
+            </Button>
+          </Link>
         </div>
       </section>
 
