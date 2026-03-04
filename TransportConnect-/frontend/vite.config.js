@@ -29,6 +29,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', '@tanstack/react-query', 'maplibre-gl'],
+    include: ['react', 'react-dom', '@tanstack/react-query', 'maplibre-gl', 'three'],
   },
 })

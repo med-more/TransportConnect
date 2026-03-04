@@ -53,7 +53,7 @@ const TripsPage = () => {
     status: "active",
   })
   const [showFilters, setShowFilters] = useState(false)
-  const [sortBy, setSortBy] = useState("departureDate")
+  const [sortBy, setSortBy] = useState("departureDateDesc")
   const [bestDealOnly, setBestDealOnly] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
@@ -68,8 +68,15 @@ const TripsPage = () => {
       if (user?.role === "conducteur") {
         return tripsAPI.getMyTrips(filters)
       } else {
-        // Shippers: fetch all trips (high limit) for client-side filtering, sorting & pagination
-        return tripsAPI.getTrips({ ...filters, sortBy, limit: 2000 })
+        const isDateSort = sortBy === "departureDateAsc" || sortBy === "departureDateDesc"
+        const params = {
+          ...filters,
+          limit: 2000,
+          ...(isDateSort
+            ? { sortBy: "departureDate", sortOrder: sortBy === "departureDateDesc" ? "desc" : "asc" }
+            : { sortBy }),
+        }
+        return tripsAPI.getTrips(params)
       }
     },
     enabled: !!user,
@@ -164,7 +171,7 @@ const TripsPage = () => {
     totalCapacity: trips.reduce((sum, t) => sum + (t.availableCapacity?.weight || 0), 0),
   }
 
-  // Sort trips
+  // Sort trips (by date asc/desc, price, or capacity)
   const sortedTrips = [...trips].sort((a, b) => {
     switch (sortBy) {
       case "priceAsc":
@@ -173,9 +180,11 @@ const TripsPage = () => {
         return (b.pricePerKg || 0) - (a.pricePerKg || 0)
       case "capacityDesc":
         return (b.availableCapacity?.weight || 0) - (a.availableCapacity?.weight || 0)
-      case "departureDate":
-      default:
+      case "departureDateAsc":
         return new Date(a.departureDate) - new Date(b.departureDate)
+      case "departureDateDesc":
+      default:
+        return new Date(b.departureDate) - new Date(a.departureDate)
     }
   })
 
@@ -361,17 +370,31 @@ const TripsPage = () => {
                 <div className="flex items-center gap-2">
                   <ArrowUpDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                   <select
-                    className="input-field py-1.5 text-xs sm:text-sm min-w-[120px]"
+                    className="input-field py-1.5 text-xs sm:text-sm min-w-[140px]"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
                   >
-                    <option value="departureDate">Sort by Date</option>
-                    <option value="priceAsc">Price: Low to High</option>
-                    <option value="priceDesc">Price: High to Low</option>
-                    <option value="capacityDesc">Capacity: High to Low</option>
+                    <option value="departureDateDesc">Date: Plus récents d'abord</option>
+                    <option value="departureDateAsc">Date: Plus anciens d'abord</option>
+                    <option value="priceAsc">Prix: croissant</option>
+                    <option value="priceDesc">Prix: décroissant</option>
+                    <option value="capacityDesc">Capacité: décroissant</option>
                   </select>
                 </div>
               </>
+            )}
+            {user?.role === "conducteur" && (
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                <select
+                  className="input-field py-1.5 text-xs sm:text-sm min-w-[140px]"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  <option value="departureDateDesc">Date: Plus récents d'abord</option>
+                  <option value="departureDateAsc">Date: Plus anciens d'abord</option>
+                </select>
+              </div>
             )}
             <Button variant="ghost" size="small" onClick={() => setShowFilters(!showFilters)} className="flex-shrink-0">
               {showFilters ? t("common.hideFilters") : t("common.showFilters")}

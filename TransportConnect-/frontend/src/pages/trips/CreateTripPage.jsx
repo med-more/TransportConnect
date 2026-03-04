@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { tripsAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
+import PlaceAutocompleteInput from "../../components/ui/PlaceAutocompleteInput"
 import Card from "../../components/ui/Card"
 import { CARGO_TYPES } from "../../config/constants"
 import toast from "react-hot-toast"
@@ -14,18 +15,20 @@ const CreateTripPage = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [selectedCargoTypes, setSelectedCargoTypes] = useState([])
+  const [otherCargoType, setOtherCargoType] = useState("")
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm()
 
   const createTripMutation = useMutation({
     mutationFn: tripsAPI.createTrip,
     onSuccess: () => {
-      queryClient.invalidateQueries("trips")
+      queryClient.invalidateQueries({ queryKey: ["trips"] })
       toast.success("Trip created successfully!")
       navigate("/trips")
     },
@@ -37,6 +40,10 @@ const CreateTripPage = () => {
   const onSubmit = async (data) => {
     if (selectedCargoTypes.length === 0) {
       toast.error("Please select at least one cargo type")
+      return
+    }
+    if (selectedCargoTypes.includes("autre") && !otherCargoType?.trim()) {
+      toast.error("Précisez le type de cargaison pour « Autre »")
       return
     }
 
@@ -60,6 +67,7 @@ const CreateTripPage = () => {
         },
       },
       acceptedCargoTypes: selectedCargoTypes,
+      ...(selectedCargoTypes.includes("autre") && otherCargoType?.trim() && { otherCargoType: otherCargoType.trim() }),
       pricePerKg: Number.parseFloat(data.pricePerKg),
       description: data.description,
     }
@@ -68,7 +76,11 @@ const CreateTripPage = () => {
   }
 
   const toggleCargoType = (type) => {
-    setSelectedCargoTypes((prev) => (prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]))
+    setSelectedCargoTypes((prev) => {
+      const next = prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      if (type === "autre" && !next.includes("autre")) setOtherCargoType("")
+      return next
+    })
   }
 
   return (
@@ -91,33 +103,33 @@ const CreateTripPage = () => {
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Departure</h3>
-              <Input
-                label="Departure city"
-                placeholder="Paris"
-                error={errors.departureCity?.message}
-                {...register("departureCity", { required: "Departure city is required" })}
-              />
-              <Input
-                label="Departure address"
-                placeholder="123 Rue de la Paix"
-                error={errors.departureAddress?.message}
-                {...register("departureAddress", { required: "Departure address is required" })}
+              <h3 className="font-medium text-foreground">Départ</h3>
+              <PlaceAutocompleteInput
+                label="Lieu de départ (Maroc)"
+                cityField="departureCity"
+                addressField="departureAddress"
+                setValue={setValue}
+                register={register}
+                watch={watch}
+                error={errors.departureCity?.message || errors.departureAddress?.message}
+                placeholder="Casablanca, Rabat, Fès..."
+                cityRules={{ required: "Ville de départ requise" }}
+                addressRules={{ required: "Adresse de départ requise" }}
               />
             </div>
             <div className="space-y-4">
               <h3 className="font-medium text-foreground">Destination</h3>
-              <Input
-                label="Destination city"
-                placeholder="Lyon"
-                error={errors.destinationCity?.message}
-                {...register("destinationCity", { required: "Destination city is required" })}
-              />
-              <Input
-                label="Destination address"
-                placeholder="456 Avenue de la République"
-                error={errors.destinationAddress?.message}
-                {...register("destinationAddress", { required: "Destination address is required" })}
+              <PlaceAutocompleteInput
+                label="Lieu d'arrivée (Maroc)"
+                cityField="destinationCity"
+                addressField="destinationAddress"
+                setValue={setValue}
+                register={register}
+                watch={watch}
+                error={errors.destinationCity?.message || errors.destinationAddress?.message}
+                placeholder="Marrakech, Tanger, Oujda..."
+                cityRules={{ required: "Ville de destination requise" }}
+                addressRules={{ required: "Adresse de destination requise" }}
               />
             </div>
           </div>
@@ -241,6 +253,17 @@ const CreateTripPage = () => {
               </label>
             ))}
           </div>
+          {selectedCargoTypes.includes("autre") && (
+            <div className="mt-4">
+              <Input
+                label="Précisez le type (autre)"
+                placeholder="Ex: machines, pièces détachées..."
+                value={otherCargoType}
+                onChange={(e) => setOtherCargoType(e.target.value)}
+                maxLength={200}
+              />
+            </div>
+          )}
         </Card>
         <Card className="p-4 sm:p-5 md:p-6">
           <div className="flex items-center mb-6">

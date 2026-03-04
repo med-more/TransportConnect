@@ -14,15 +14,20 @@
         cargoType,
         maxWeight,
         minCapacity,
+        status: statusParam,
         page = 1,
         limit: limitParam = 10,
         sortBy = "departureDate",
+        sortOrder: sortOrderParam,
       } = req.query
 
       // Allow up to 2000 trips per request (for shippers browsing all trips); default 10
       const limit = Math.min(Math.max(1, parseInt(limitParam, 10) || 10), 2000)
 
-      const filter = { status: "active" }
+      const statusFilter = ["active", "completed", "cancelled"].includes(statusParam)
+        ? statusParam
+        : "active"
+      const filter = { status: statusFilter }
 
       if (departure) {
         filter["departure.city"] = { $regex: departure, $options: "i" }
@@ -49,10 +54,11 @@
         if (minCapacity) filter["availableCapacity.weight"].$gte = parseFloat(minCapacity)
       }
 
+      const sortOrder = sortOrderParam === "desc" ? -1 : 1
       const options = {
         page: parseInt(page, 10) || 1,
         limit,
-        sort: { [sortBy]: 1 },
+        sort: { [sortBy]: sortOrder },
         populate: {
           path: "driver",
           select: "firstName lastName avatar stats isVerified vehicleInfo",
@@ -134,8 +140,8 @@
     const tripData = {
       ...req.body,
       driver: req.user._id,
-      status: "active", 
     }
+    tripData.status = "active"
 
     const trip = new Trip(tripData)
     await trip.save()

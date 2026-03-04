@@ -10,10 +10,10 @@ export default function StartMarkerMapbox({ position }) {
   const [lat, lng] = position
 
   return (
-    <Marker longitude={lng} latitude={lat} anchor="bottom">
+    <Marker longitude={lng} latitude={lat} anchor="bottom" title="Départ">
       <img
         src={MAP_ICONS.pinStart}
-        alt="Start"
+        alt="Départ"
         style={{
           width: 40,
           height: 48,

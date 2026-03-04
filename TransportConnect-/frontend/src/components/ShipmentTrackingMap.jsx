@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from "react"
+import { createPortal } from "react-dom"
 import { MapContainer, TileLayer, Polyline, Marker, useMap } from "react-leaflet"
 import L from "leaflet"
 import "leaflet/dist/leaflet.css"
@@ -11,6 +12,7 @@ import VehicleMarker from "./map/VehicleMarker"
 import CameraFollow from "./map/CameraFollow"
 import TrackingMapMapbox from "./map/TrackingMapMapbox"
 import { createStartPinIcon, createEndPinIcon, INDRIVE_ORANGE } from "./map/IndriveStyleMarkers"
+import { Target, MapPin, Route, ChevronDown, Fullscreen, FullscreenExit } from "../utils/icons"
 
 function FitBoundsOnce({ points }) {
   const map = useMap()
@@ -58,7 +60,7 @@ export default function ShipmentTrackingMap({
   className = "",
   height,
   showLiveOverlay = true,
-  showLegend = true,
+  showLegend = false,
   showRouteStrip = true,
   cameraFollow = true,
 }) {
@@ -174,6 +176,37 @@ export default function ShipmentTrackingMap({
   const tiles = MAP_TILES[theme === "dark" ? "dark" : "light"]
 
   const [followEnabled, setFollowEnabled] = useState(false)
+  const [mobileOverlayExpanded, setMobileOverlayExpanded] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const mapControlRef = useRef(null)
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    let cancelled = false
+    const resizeAndFit = () => {
+      const map = mapControlRef.current?.getMap?.()
+      if (cancelled || !map) return
+      map.resize()
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!cancelled) mapControlRef.current?.fitRoute?.()
+        })
+      })
+    }
+    const t1 = setTimeout(resizeAndFit, 100)
+    const t2 = setTimeout(resizeAndFit, 400)
+    return () => {
+      cancelled = true
+      clearTimeout(t1)
+      clearTimeout(t2)
+    }
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (isFullscreen) document.body.style.overflow = "hidden"
+    else document.body.style.overflow = ""
+    return () => { document.body.style.overflow = "" }
+  }, [isFullscreen])
   useEffect(() => {
     if (!vehiclePosition || !cameraFollow) return
     const t = setTimeout(() => setFollowEnabled(true), 1200)
@@ -183,8 +216,8 @@ export default function ShipmentTrackingMap({
   if (loading || !startCoords || !endCoords) {
     return (
       <div
-        className={`shipment-map-wrapper flex flex-col items-center justify-center rounded-xl border border-border bg-muted/20 ${className}`}
-        style={height ? { height } : { minHeight: "200px" }}
+        className={`shipment-map-wrapper flex flex-col items-center justify-center rounded-2xl border border-border bg-muted/20 ${className}`}
+        style={height ? { height } : { minHeight: "280px" }}
       >
         <div className="w-full flex-1 min-h-[200px] sm:min-h-[280px] flex flex-col items-center justify-center gap-4 p-6">
           <div className="w-12 h-12 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
@@ -204,26 +237,48 @@ export default function ShipmentTrackingMap({
     (startCoords[1] + endCoords[1]) / 2,
   ]
 
-  const style = height ? { height } : { minHeight: "200px" }
-  // MapLibre GL map (free, no API key) is used by default
+  const style = height ? { height } : { minHeight: "280px" }
   const useGlMap = true
 
-  return (
-    <div
-      className={`shipment-map-wrapper relative rounded-xl overflow-hidden border border-border bg-background ${className}`}
-      style={style}
-    >
+  const fullscreenWrapperClass = "fixed inset-0 z-[9999] w-full max-w-[100vw] h-[100dvh] max-h-[100dvh] overflow-hidden bg-black [&_.mapboxgl-canvas-container]:pointer-events-auto [&_.mapboxgl-map]:pointer-events-auto"
+  const fullscreenWrapperStyle = { width: "100vw", height: "100dvh", minHeight: "100dvh" }
+
+  const normalWrapperClass = `shipment-map-wrapper relative w-full overflow-hidden rounded-xl sm:rounded-2xl border border-border bg-card shadow-sm ${className}`
+  const wrapperClass = isFullscreen ? fullscreenWrapperClass : normalWrapperClass
+  const wrapperStyle = isFullscreen ? fullscreenWrapperStyle : style
+
+  const content = (
+    <div className={wrapperClass} style={wrapperStyle}>
+      {/* Back button: top-left, only in fullscreen (rendered first so it's on top) */}
+      {isFullscreen && (
+        <button
+          type="button"
+          onClick={() => setIsFullscreen(false)}
+          className="absolute top-3 left-3 z-[10002] flex items-center justify-center w-12 h-12 rounded-full bg-black/80 hover:bg-black text-white backdrop-blur-sm border border-white/20 touch-manipulation shadow-lg min-w-[48px] min-h-[48px]"
+          aria-label="Réduire la carte"
+        >
+          <FullscreenExit className="w-6 h-6" />
+        </button>
+      )}
+
+      {/* Top bar: en agrandi = ville départ + flèche + ville arrivée au centre ; sinon spread */}
       {showRouteStrip && (fromLabel || toLabel) && (
-        <div className="absolute top-0 left-0 right-0 z-[999] flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2.5 bg-gradient-to-b from-black/60 to-transparent pointer-events-none rounded-t-xl">
+        <div
+          className={`absolute top-0 left-0 right-0 z-[999] flex items-center pointer-events-none rounded-t-xl sm:rounded-t-2xl
+            ${isFullscreen
+              ? "justify-center gap-3 pl-14 pr-4 py-3 bg-black/60 backdrop-blur-md"
+              : "gap-2 px-3 py-2 sm:px-4 sm:py-3 bg-black/60 backdrop-blur-md sm:bg-gradient-to-b sm:from-black/70 sm:to-transparent"
+            }`}
+        >
           <span
-            className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0"
+            className={`text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] ${isFullscreen ? "text-base sm:text-lg shrink-0" : "text-[13px] sm:text-sm truncate flex-1 min-w-0"}`}
             title={fromLabel}
           >
             {fromLabel || "Start"}
           </span>
-          <span className="text-white/80 shrink-0">→</span>
+          <span className={`text-white/90 shrink-0 font-medium ${isFullscreen ? "text-lg sm:text-xl" : "text-xs sm:text-sm"}`} aria-hidden>→</span>
           <span
-            className="text-white font-medium text-xs sm:text-sm truncate flex-1 min-w-0 text-right"
+            className={`text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)] ${isFullscreen ? "text-base sm:text-lg shrink-0" : "text-[13px] sm:text-sm truncate flex-1 min-w-0 text-right"}`}
             title={toLabel}
           >
             {toLabel || "End"}
@@ -231,15 +286,68 @@ export default function ShipmentTrackingMap({
         </div>
       )}
 
+      {useGlMap && (
+        <div
+          className="absolute top-11 sm:top-14 right-2 sm:right-3 z-[1001] flex flex-col gap-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 p-2 shadow-xl pointer-events-auto"
+          role="group"
+          aria-label="Map controls"
+        >
+          <button
+            type="button"
+            onClick={() => mapControlRef.current?.flyToCurrentLocation?.()}
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg text-white hover:bg-white/20 active:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation"
+            title="Center on current location"
+            aria-label="Center on current location"
+          >
+            <Target className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => mapControlRef.current?.flyToDestination?.()}
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg text-white hover:bg-white/20 active:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation"
+            title="Go to destination"
+            aria-label="Go to destination"
+          >
+            <MapPin className="w-5 h-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => mapControlRef.current?.fitRoute?.()}
+            className="flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg text-white hover:bg-white/20 active:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation"
+            title="Fit route in view"
+            aria-label="Fit route in view"
+          >
+            <Route className="w-5 h-5" />
+          </button>
+          {!isFullscreen && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setIsFullscreen(true)
+              }}
+              className="flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg text-white hover:bg-white/20 active:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation"
+              title="Agrandir la carte"
+              aria-label="Agrandir la carte en plein écran"
+            >
+              <Fullscreen className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {useGlMap ? (
-        <div className="h-full w-full rounded-xl" style={{ minHeight: "200px" }}>
+        <div className={`absolute inset-0 top-11 sm:top-14 min-h-0 rounded-b-xl sm:rounded-b-2xl pointer-events-auto ${isFullscreen ? "z-[1000]" : ""}`}>
           <TrackingMapMapbox
+            ref={mapControlRef}
             routePoints={displayPoints}
             startCoords={startCoords}
             endCoords={endCoords}
             vehiclePosition={vehiclePosition}
             vehicleBearing={bearing}
             cameraFollow={cameraFollow}
+            isFullscreen={isFullscreen}
           />
         </div>
       ) : (
@@ -283,55 +391,132 @@ export default function ShipmentTrackingMap({
       )}
 
       {showLiveOverlay && (departureDate || arrivalDate) && (
-        <div className="absolute bottom-0 left-0 right-0 z-[1000] p-3 sm:p-4 pb-3 sm:pb-4 safe-bottom bg-gradient-to-t from-black/75 via-black/40 to-transparent pointer-events-none rounded-b-xl">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-white text-xs font-semibold shadow-sm" style={{ backgroundColor: INDRIVE_ORANGE }}>
-              <span
-                className="w-2 h-2 rounded-full bg-white animate-pulse"
-                aria-hidden
-              />
-              Live
-            </span>
-            {etaMinutes != null && (
-              <span className="text-white text-xs sm:text-sm font-medium">
-                {etaMinutes <= 0 ? "Arrived" : `ETA ${etaMinutes} min`}
-              </span>
-            )}
-          </div>
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-[10px] sm:text-xs text-white/90">
-              <span>Progress</span>
-              <span>{progressPercent}%</span>
+        <>
+          {/* Mobile: compact bottom sheet — map-first; clear, readable strip */}
+          <div
+            className={`absolute bottom-0 left-0 right-0 z-[1000] safe-bottom pointer-events-auto sm:hidden ${
+              mobileOverlayExpanded ? "hidden" : "block"
+            }`}
+          >
+            <div
+              className="mx-2 mb-2 rounded-t-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 border-b-0 shadow-2xl"
+              onClick={() => setMobileOverlayExpanded(true)}
+              onKeyDown={(e) => e.key === "Enter" && setMobileOverlayExpanded(true)}
+              role="button"
+              tabIndex={0}
+              aria-label="Afficher les détails du trajet"
+            >
+              <div className="flex justify-center pt-2.5 pb-1" aria-hidden>
+                <span className="w-10 h-1 rounded-full bg-white/30" />
+              </div>
+              <div className="px-4 pb-4 pt-1">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <span className="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-full text-white text-[13px] font-semibold" style={{ backgroundColor: INDRIVE_ORANGE }}>
+                    <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" aria-hidden />
+                    En direct
+                  </span>
+                  {etaMinutes != null && (
+                    <span className="text-white text-base font-semibold tabular-nums">
+                      {etaMinutes <= 0 ? "Arrivé" : `ETA ${etaMinutes} min`}
+                    </span>
+                  )}
+                  <ChevronDown className="w-6 h-6 text-white/80 shrink-0" aria-hidden />
+                </div>
+                <div className="flex justify-between items-center text-[13px] text-white/95 mb-2">
+                  <span>Progression</span>
+                  <span className="font-medium tabular-nums">{progressPercent}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-white/20 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ width: `${progressPercent}%`, backgroundColor: INDRIVE_ORANGE }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="h-2 rounded-full bg-white/25 overflow-hidden backdrop-blur-sm">
-              <div
-                className="h-full rounded-full transition-all duration-300 ease-out"
-                style={{ width: `${progressPercent}%`, backgroundColor: INDRIVE_ORANGE }}
-              />
+          </div>
+          {/* Full overlay: desktop = floating compact card (map stays visible); mobile when expanded = full card */}
+          <div
+            className={`absolute z-[1000] safe-bottom pointer-events-auto ${
+              mobileOverlayExpanded ? "block bottom-0 left-0 right-0" : "hidden sm:block sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-[320px]"
+            }`}
+          >
+            <div className="sm:rounded-xl sm:border sm:border-white/10 sm:bg-gray-900/90 sm:backdrop-blur-md sm:shadow-xl sm:overflow-hidden">
+              {/* Mobile expanded: full-width card */}
+              <div className="mx-2 mb-2 rounded-t-2xl bg-gray-900/95 backdrop-blur-xl border border-white/10 border-b-0 shadow-2xl sm:mx-0 sm:mb-0 sm:rounded-xl sm:border sm:border-white/10 sm:shadow-xl">
+                <div className="flex justify-center pt-2.5 pb-1 sm:hidden" aria-hidden>
+                  <span className="w-10 h-1 rounded-full bg-white/30" />
+                </div>
+                <div className="p-4 sm:p-3 sm:pt-3 pb-4 sm:pb-3">
+                  {mobileOverlayExpanded && (
+                    <button
+                      type="button"
+                      className="sm:hidden flex items-center justify-center gap-2 w-full text-white/90 text-[13px] font-medium py-2 -mt-1 mb-2 rounded-xl bg-white/5 touch-manipulation min-h-[44px]"
+                      onClick={() => setMobileOverlayExpanded(false)}
+                      aria-label="Réduire"
+                    >
+                      <ChevronDown className="w-5 h-5 rotate-180" />
+                      Réduire
+                    </button>
+                  )}
+                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2 sm:mb-2">
+                    <span className="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full text-white text-[13px] sm:text-xs font-semibold" style={{ backgroundColor: INDRIVE_ORANGE }}>
+                      <span className="w-2.5 h-2.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" aria-hidden />
+                      En direct
+                    </span>
+                    {etaMinutes != null && (
+                      <span className="text-white text-base sm:text-sm font-semibold tabular-nums">
+                        {etaMinutes <= 0 ? "Arrived" : `ETA ${etaMinutes} min`}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-1 gap-1 sm:gap-1.5 mb-2 sm:mb-2 text-[13px] sm:text-xs text-white/95">
+                    <p className="truncate sm:flex sm:items-center sm:gap-1.5">
+                      <span className="text-white/70 font-medium shrink-0">Départ:</span>
+                      <span className="truncate block sm:inline">{fromLabel || "—"}</span>
+                    </p>
+                    <p className="truncate sm:flex sm:items-center sm:gap-1.5">
+                      <span className="text-white/70 font-medium shrink-0">Arrivée:</span>
+                      <span className="truncate block sm:inline">{toLabel || "—"}</span>
+                    </p>
+                  </div>
+                  <div className="space-y-1.5 sm:space-y-1.5">
+                    <div className="flex justify-between text-[13px] sm:text-xs text-white/95">
+                      <span>Progression</span>
+                      <span className="font-medium tabular-nums">{progressPercent}%</span>
+                    </div>
+                    <div className="h-2 sm:h-1.5 rounded-full bg-white/20 sm:bg-white/25 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-300 ease-out"
+                        style={{ width: `${progressPercent}%`, backgroundColor: INDRIVE_ORANGE }}
+                      />
+                    </div>
+                  </div>
+                  {routeInfo && (
+                    <p className="text-white/80 text-[13px] sm:text-[11px] mt-2 sm:mt-1.5">
+                      {formatDistance(routeInfo.distanceMeters)} · ~{formatDuration(routeInfo.durationSeconds)}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-          {routeInfo && (
-            <p className="text-white/80 text-[10px] sm:text-xs mt-2">
-              {formatDistance(routeInfo.distanceMeters)} · ~
-              {formatDuration(routeInfo.durationSeconds)}
-            </p>
-          )}
-        </div>
+        </>
       )}
 
       {showLegend && (
-        <div className="absolute top-12 sm:top-14 left-3 sm:left-4 z-[998] flex flex-col gap-1.5 pointer-events-none">
+        <div className="absolute top-11 sm:top-14 left-2 sm:left-4 z-[998] flex flex-col gap-1.5 pointer-events-none">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: "#00c853" }} />
+            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/90 shadow-sm" style={{ background: "#00c853" }} />
               Départ
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: "#e53935" }} />
+            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/90 shadow-sm" style={{ background: "#e53935" }} />
               Arrivée
             </span>
-            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-xs text-white/95 drop-shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full border border-white/80 shadow" style={{ background: INDRIVE_ORANGE }} />
+            <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+              <span className="w-2.5 h-2.5 rounded-full border border-white/90 shadow-sm" style={{ background: INDRIVE_ORANGE }} />
               Véhicule
             </span>
           </div>
@@ -339,7 +524,7 @@ export default function ShipmentTrackingMap({
             href="https://www.flaticon.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[9px] text-white/60 hover:text-white/80 drop-shadow-sm w-fit pointer-events-auto"
+            className="text-[9px] text-white/50 hover:text-white/70 drop-shadow-sm w-fit pointer-events-auto"
             title="Truck &amp; destination icons by Freepik from Flaticon"
           >
             Icons by Freepik from flaticon.com
@@ -348,4 +533,6 @@ export default function ShipmentTrackingMap({
       )}
     </div>
   )
+
+  return isFullscreen ? createPortal(content, document.body) : content
 }

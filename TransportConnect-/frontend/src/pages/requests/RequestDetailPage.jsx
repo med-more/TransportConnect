@@ -29,6 +29,7 @@ import Button from "../../components/ui/Button"
 import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
+import ShipmentTrackingMap from "../../components/ShipmentTrackingMap"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import InputDialog from "../../components/ui/InputDialog"
 import RatingDialog from "../../components/ui/RatingDialog"
@@ -563,6 +564,58 @@ const RequestDetailPage = () => {
               </Card>
             </motion.div>
           )}
+
+          {/* Shipper: live map + message/call */}
+          {isSender &&
+            request.trip &&
+            (request.status === "accepted" || request.status === "in_transit") && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
+                <Card className="p-3 sm:p-4 md:p-5 overflow-hidden">
+                  <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                    <h2 className="text-base font-semibold text-foreground sm:text-lg flex items-center gap-2">
+                      <MapPin className="w-5 h-5 text-primary shrink-0" />
+                      Où est le chauffeur ?
+                    </h2>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="small"
+                        className="min-h-[40px]"
+                        onClick={() => navigate(`/conversations/${request._id}`)}
+                      >
+                        <MessageCircle className="w-4 h-4 mr-1.5 sm:mr-2" />
+                        Message
+                      </Button>
+                      {request.trip?.driver?.phone && (
+                        <a href={`tel:${request.trip.driver.phone}`} className="inline-flex">
+                          <Button variant="outline" size="small" className="min-h-[40px] w-full">
+                            <Phone className="w-4 h-4 mr-1.5 sm:mr-2" />
+                            Appeler
+                          </Button>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div className="rounded-xl overflow-hidden border border-border min-h-[50vh] sm:min-h-[320px] h-[50vh] sm:h-[340px]">
+                    <ShipmentTrackingMap
+                      departure={request.trip.departure || { city: request.pickup?.city, address: request.pickup?.address }}
+                      destination={request.trip.destination || { city: request.delivery?.city, address: request.delivery?.address }}
+                      departureDate={request.trip.departureDate}
+                      arrivalDate={request.trip.arrivalDate}
+                      fromLabel={request.trip.departure?.city || request.pickup?.city || "Départ"}
+                      toLabel={request.trip.destination?.city || request.delivery?.city || "Arrivée"}
+                      height="100%"
+                      className="w-full h-full"
+                      showRouteStrip
+                      cameraFollow={false}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Position du chauffeur en temps réel · Utilisez Message ou Appeler pour le contacter
+                  </p>
+                </Card>
+              </motion.div>
+            )}
 
           {/* Messages */}
           {(request.message || request.driverResponse?.message) && (

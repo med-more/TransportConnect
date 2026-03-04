@@ -34,6 +34,7 @@ import RequestDetailPage from "./pages/requests/RequestDetailPage"
 import CreateRequestPage from "./pages/requests/CreateRequestPage"
 import ProfilePage from "./pages/ProfilePage"
 import SettingsPage from "./pages/SettingsPage"
+import LiveMapPage from "./pages/LiveMapPage"
 import ConversationsPage from "./pages/conversations/ConversationsPage"
 import ConversationThreadPage from "./pages/conversations/ConversationThreadPage"
 
@@ -191,6 +192,16 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <SettingsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/live-map"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <LiveMapPage />
             </Layout>
           </ProtectedRoute>
         }

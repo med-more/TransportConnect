@@ -308,7 +308,8 @@ const DashboardPage = () => {
 
                 {activeTrip || activeRequest ? (
                   <>
-                    <div className="mb-4 w-full rounded-xl overflow-hidden h-[220px] sm:h-[300px] md:h-[340px] lg:h-[380px]">
+                    {/* Mobile: map 60vh so driver sees it clearly; desktop: fixed heights */}
+                    <div className="mb-4 w-full rounded-xl overflow-hidden min-h-[60vh] h-[60vh] sm:min-h-[300px] sm:h-[300px] md:h-[360px] lg:h-[400px]">
                       <ShipmentTrackingMap
                         departure={
                           activeTrip?.departure ||
@@ -333,7 +334,6 @@ const DashboardPage = () => {
                         height="100%"
                         className="w-full h-full"
                         showRouteStrip
-                        showLegend
                       />
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-center">

@@ -6,6 +6,7 @@ import { ArrowLeft, Package, MapPin, User, Euro, AlertCircle } from "../../utils
 import { tripsAPI, requestsAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
+import PlaceAutocompleteInput from "../../components/ui/PlaceAutocompleteInput"
 import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import { CARGO_TYPES } from "../../config/constants"
@@ -37,6 +38,7 @@ const CreateRequestPage = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm()
 
@@ -172,23 +174,24 @@ const CreateRequestPage = () => {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto space-y-4 md:space-y-6">
-      {/* Header */}
+      {/* Header — même structure que Create Trip */}
       <div className="flex items-center gap-2 sm:gap-4">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
         </Button>
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">New Transport Request</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">New Transport Request</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             For trip {trip.departure.city} → {trip.destination.city}
           </p>
         </div>
       </div>
 
-      {/* Trip Summary */}
-      <Card className="p-4 sm:p-5 md:p-6">
-        <h2 className="text-xl font-semibold text-foreground mb-4">Trip Summary</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+      <div className="space-y-6">
+        {/* Trip Summary */}
+        <Card className="p-4 sm:p-5 md:p-6">
+          <h2 className="text-xl font-semibold text-foreground mb-4">Trip Summary</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
           <div>
             <h3 className="font-medium text-foreground">Route</h3>
             <p className="text-muted-foreground">
@@ -364,18 +367,17 @@ const CreateRequestPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Pickup city"
-              placeholder="Paris"
-              error={errors.pickupCity?.message}
-              {...register("pickupCity", { required: "Pickup city is required" })}
-            />
-
-            <Input
-              label="Pickup address"
-              placeholder="123 Rue de la Paix"
-              error={errors.pickupAddress?.message}
-              {...register("pickupAddress", { required: "Pickup address is required" })}
+            <PlaceAutocompleteInput
+              label="Lieu de ramassage (Maroc)"
+              cityField="pickupCity"
+              addressField="pickupAddress"
+              setValue={setValue}
+              register={register}
+              watch={watch}
+              error={errors.pickupCity?.message || errors.pickupAddress?.message}
+              placeholder="Casablanca, Rabat..."
+              cityRules={{ required: "Ville de ramassage requise" }}
+              addressRules={{ required: "Adresse de ramassage requise" }}
             />
 
             <Input
@@ -401,18 +403,17 @@ const CreateRequestPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              label="Delivery city"
-              placeholder="Lyon"
-              error={errors.deliveryCity?.message}
-              {...register("deliveryCity", { required: "Delivery city is required" })}
-            />
-
-            <Input
-              label="Delivery address"
-              placeholder="456 Avenue de la République"
-              error={errors.deliveryAddress?.message}
-              {...register("deliveryAddress", { required: "Delivery address is required" })}
+            <PlaceAutocompleteInput
+              label="Lieu de livraison (Maroc)"
+              cityField="deliveryCity"
+              addressField="deliveryAddress"
+              setValue={setValue}
+              register={register}
+              watch={watch}
+              error={errors.deliveryCity?.message || errors.deliveryAddress?.message}
+              placeholder="Marrakech, Fès, Tanger..."
+              cityRules={{ required: "Ville de livraison requise" }}
+              addressRules={{ required: "Adresse de livraison requise" }}
             />
 
             <Input
@@ -486,6 +487,7 @@ const CreateRequestPage = () => {
           </Button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

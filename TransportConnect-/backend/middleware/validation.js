@@ -181,5 +181,15 @@ export const validateTripSearch = [
     .isInt({ min: 1, max: 2000 })
     .withMessage("La limite doit être entre 1 et 2000"),
 
+  query("status")
+    .optional({ checkFalsy: true })
+    .isIn(["active", "completed", "cancelled"])
+    .withMessage("Statut invalide"),
+
+  query("sortOrder")
+    .optional({ checkFalsy: true })
+    .isIn(["asc", "desc"])
+    .withMessage("Ordre de tri invalide (asc ou desc)"),
+
   handleValidationErrors,
 ]

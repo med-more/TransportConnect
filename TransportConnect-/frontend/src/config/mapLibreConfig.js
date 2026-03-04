@@ -1,14 +1,16 @@
 /**
  * MapLibre GL tracking map configuration.
  * Free and open-source: no API key required.
- * Uses MapLibre demo tiles (or optional free MapTiler/OSM styles).
+ * Carto basemaps: streets, roads, city names, full detail (Uber/Glovo-style).
  */
-// Free styles (no token). MapLibre demo tiles work out of the box.
-const DEMO_STYLE = "https://demotiles.maplibre.org/style.json"
+const CARTO_DARK =
+  "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
+const CARTO_POSITRON =
+  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
 
 export const MAPLIBRE_STYLES = {
-  day: DEMO_STYLE,
-  night: DEMO_STYLE,
+  day: CARTO_POSITRON,
+  night: CARTO_DARK,
 }
 
 export const TRACKING_MAP_VIEW = {
@@ -18,8 +20,23 @@ export const TRACKING_MAP_VIEW = {
   maxZoom: 18,
 }
 
+/** Main route line: high-contrast orange, readable on all basemaps */
 export const ROUTE_LINE_PAINT = {
   "line-color": "#ff8200",
-  "line-width": 5,
-  "line-opacity": 0.92,
+  "line-width": 6,
+  "line-opacity": 1,
+}
+
+/** Outline behind route on light basemaps — dark so orange pops */
+export const ROUTE_LINE_OUTLINE_PAINT = {
+  "line-color": "#1a1a1a",
+  "line-width": 12,
+  "line-opacity": 0.85,
+}
+
+/** Outline on dark basemaps — subtle so route stays readable */
+export const ROUTE_LINE_OUTLINE_PAINT_DARK = {
+  "line-color": "rgba(0,0,0,0.6)",
+  "line-width": 12,
+  "line-opacity": 0.9,
 }

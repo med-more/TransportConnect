@@ -73,6 +73,10 @@ const tripSchema = new mongoose.Schema(
         enum: ["fragile", "liquide", "dangereux", "alimentaire", "electronique", "textile", "mobilier", "autre"],
       },
     ],
+    otherCargoType: {
+      type: String,
+      maxlength: [200, "La précision du type autre ne peut pas dépasser 200 caractères"],
+    },
     pricePerKg: {
       type: Number,
       required: [true, "Le prix par kg est requis"],

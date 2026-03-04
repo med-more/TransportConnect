@@ -115,6 +115,26 @@ body {
     @apply w-full px-3 py-2.5 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 text-sm;
   }
 
+  /* Date & time inputs: visible in dark mode, better UX */
+  .dark input[type="date"],
+  .dark input[type="time"] {
+    color-scheme: dark;
+  }
+  input[type="date"],
+  input[type="time"] {
+    min-height: 2.75rem;
+  }
+  .dark input[type="date"]::-webkit-calendar-picker-indicator,
+  .dark input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.8;
+    cursor: pointer;
+  }
+  .dark input[type="date"]::-webkit-datetime-edit,
+  .dark input[type="time"]::-webkit-datetime-edit {
+    color: var(--foreground);
+  }
+
   .card {
     @apply bg-card text-card-foreground rounded-xl border border-border shadow-sm transition-shadow duration-200;
   }

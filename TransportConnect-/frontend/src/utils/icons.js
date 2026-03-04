@@ -72,6 +72,8 @@ import {
   MdSettings,
   MdLightMode,
   MdDarkMode,
+  MdFullscreen,
+  MdFullscreenExit,
 } from "react-icons/md"
 import {
   FaFacebook,
@@ -109,7 +111,9 @@ export const Icons = {
   ChevronRight: MdChevronRight,
   ArrowRight: MdArrowForward,
   ChevronDown: MdExpandMore,
-  
+  Fullscreen: MdFullscreen,
+  FullscreenExit: MdFullscreenExit,
+
   // Location & Time
   MapPin: MdLocationOn,
   Calendar: MdCalendarToday,
@@ -204,6 +208,8 @@ export const {
   ChevronRight,
   ArrowRight,
   ChevronDown,
+  Fullscreen,
+  FullscreenExit,
   MapPin,
   Calendar,
   Weight,

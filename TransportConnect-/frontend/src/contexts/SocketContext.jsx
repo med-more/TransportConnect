@@ -3,7 +3,7 @@ import { io } from "socket.io-client"
 import { SOCKET_URL } from "../config/constants"
 import { useAuth } from "./AuthContext"
 
-const SocketContext = createContext(null)
+export const SocketContext = createContext(null)
 
 export function SocketProvider({ children }) {
   const { user } = useAuth()
