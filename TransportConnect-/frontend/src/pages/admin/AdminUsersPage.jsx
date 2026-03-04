@@ -348,7 +348,7 @@ const AdminUsersPage = () => {
                         <span>Joined {new Date(user.createdAt).toLocaleDateString("en-US")}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-2 border-t border-border">
+                      <div className="flex flex-row flex-wrap gap-2 pt-2 border-t border-border justify-center sm:justify-start">
                         <Button
                           size="small"
                           variant="ghost"
@@ -356,7 +356,7 @@ const AdminUsersPage = () => {
                             setSelectedUser(user)
                             setShowUserDetails(true)
                           }}
-                          className="flex-1 text-primary hover:bg-primary/10"
+                          className="shrink-0 text-primary hover:bg-primary/10"
                         >
                           <Eye className="w-4 h-4 mr-1" />
                           Details
@@ -365,7 +365,7 @@ const AdminUsersPage = () => {
                           <Button
                             size="small"
                             onClick={() => handleVerifyUser(user._id)}
-                            className="flex-1 bg-success hover:bg-success/90"
+                            className="shrink-0 bg-success hover:bg-success/90"
                           >
                             <UserCheck className="w-4 h-4 mr-1" />
                             Verify
@@ -376,7 +376,7 @@ const AdminUsersPage = () => {
                             size="small"
                             variant="outline"
                             onClick={() => handleSuspendUser(user._id)}
-                            className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                            className="shrink-0 border-destructive text-destructive hover:bg-destructive/10"
                           >
                             <UserX className="w-4 h-4 mr-1" />
                             Suspend
@@ -843,14 +843,14 @@ const AdminUsersPage = () => {
                 </Card>
               )}
 
-              <div className="flex flex-col sm:flex-row gap-3 pt-4 sm:pt-6 border-t border-border">
+              <div className="flex flex-row flex-wrap gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-border justify-center sm:justify-start">
                 {!selectedUser.isVerified && selectedUser.isActive && (
                   <Button
                     onClick={() => {
                       handleVerifyUser(selectedUser._id)
                       setShowUserDetails(false)
                     }}
-                    className="flex-1 bg-success hover:bg-success/90"
+                    className="shrink-0 bg-success hover:bg-success/90"
                   >
                     <UserCheck className="w-4 h-4 mr-2" />
                     Verify User
@@ -863,7 +863,7 @@ const AdminUsersPage = () => {
                       handleSuspendUser(selectedUser._id)
                       setShowUserDetails(false)
                     }}
-                    className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                    className="shrink-0 border-destructive text-destructive hover:bg-destructive/10"
                   >
                     <UserX className="w-4 h-4 mr-2" />
                     Suspend User

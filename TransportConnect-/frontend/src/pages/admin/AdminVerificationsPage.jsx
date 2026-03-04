@@ -292,31 +292,31 @@ const AdminVerificationsPage = () => {
                     )}
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="flex flex-row flex-wrap gap-2 justify-center sm:justify-start">
                     <Button
                       size="small"
                       variant="outline"
                       onClick={() => handleViewDetails(user)}
-                      className="flex-1 border-primary text-primary hover:bg-primary hover:text-white"
+                      className="shrink-0 border-primary text-primary hover:bg-primary hover:text-white"
                     >
-                      <Eye className="w-4 h-4 mr-1" />
+                      <Eye className="w-4 h-4 mr-1 sm:mr-1.5" />
                       Details
                     </Button>
                     <Button
                       size="small"
                       onClick={() => handleVerifyUser(user._id)}
-                      className="flex-1 bg-success hover:bg-success/90"
+                      className="shrink-0 bg-success hover:bg-success/90"
                     >
-                      <UserCheck className="w-4 h-4 mr-1" />
+                      <UserCheck className="w-4 h-4 mr-1 sm:mr-1.5" />
                       Approve
                     </Button>
                     <Button
                       size="small"
                       variant="outline"
                       onClick={() => handleRejectUser(user._id)}
-                      className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                      className="shrink-0 border-destructive text-destructive hover:bg-destructive/10"
                     >
-                      <UserX className="w-4 h-4 mr-1" />
+                      <UserX className="w-4 h-4 mr-1 sm:mr-1.5" />
                       Reject
                     </Button>
                   </div>
@@ -525,10 +525,10 @@ const AdminVerificationsPage = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4 sm:pt-6 border-t border-border">
+                <div className="flex flex-row flex-wrap gap-2 sm:gap-4 pt-4 sm:pt-6 border-t border-border justify-center sm:justify-start">
                   <Button
                     onClick={() => handleVerifyUser(selectedUser._id)}
-                    className="flex-1 bg-success hover:bg-success/90"
+                    className="shrink-0 bg-success hover:bg-success/90"
                   >
                     <UserCheck className="w-4 h-4 mr-2" />
                     Approve User
@@ -536,7 +536,7 @@ const AdminVerificationsPage = () => {
                   <Button
                     variant="outline"
                     onClick={() => handleRejectUser(selectedUser._id)}
-                    className="flex-1 border-destructive text-destructive hover:bg-destructive/10"
+                    className="shrink-0 border-destructive text-destructive hover:bg-destructive/10"
                   >
                     <UserX className="w-4 h-4 mr-2" />
                     Reject User
