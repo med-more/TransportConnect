@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react"
-import Map from "react-map-gl/maplibre"
+import Map, { ScaleControl, NavigationControl } from "react-map-gl/maplibre"
 import "maplibre-gl/src/css/maplibre-gl.css"
 import { useTheme } from "../../contexts/ThemeContext"
 import {
-  MAPLIBRE_STYLES,
+  getMapStyle,
+  hasTrafficLayer,
   TRACKING_MAP_VIEW,
   ROUTE_LINE_PAINT,
   ROUTE_LINE_OUTLINE_PAINT,
@@ -13,6 +14,7 @@ import { useCameraFollowMapbox } from "../../hooks/useCameraFollowMapbox"
 import RouteLineMapbox from "./RouteLineMapbox"
 import VehicleMarkerMapbox from "./VehicleMarkerMapbox"
 import DestinationMarkerMapbox from "./DestinationMarkerMapbox"
+import TrafficOverlayMapbox from "./TrafficOverlayMapbox"
 
 const DEFAULT_CENTER = [-5, 32]
 const FLY_DURATION = 800
@@ -42,6 +44,7 @@ const TrackingMapMapbox = forwardRef(function TrackingMapMapbox(
     vehicleBearing = 0,
     cameraFollow = true,
     isFullscreen = false,
+    showTraffic = false,
     className = "",
     style = {},
   },
@@ -53,7 +56,7 @@ const TrackingMapMapbox = forwardRef(function TrackingMapMapbox(
     typeof window !== "undefined" ? window.innerWidth < MOBILE_BREAKPOINT : false
   )
   const { theme } = useTheme()
-  const mapStyle = theme === "dark" ? MAPLIBRE_STYLES.night : MAPLIBRE_STYLES.day
+  const mapStyle = getMapStyle(theme)
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
@@ -65,61 +68,114 @@ const TrackingMapMapbox = forwardRef(function TrackingMapMapbox(
   const routePointsRef = useRef(routePoints)
   const vehiclePositionRef = useRef(vehiclePosition)
   const endCoordsRef = useRef(endCoords)
+  const startCoordsRef = useRef(startCoords)
   const isFullscreenRef = useRef(isFullscreen)
   routePointsRef.current = routePoints
   vehiclePositionRef.current = vehiclePosition
   endCoordsRef.current = endCoords
+  startCoordsRef.current = startCoords
   isFullscreenRef.current = isFullscreen
 
   const fitPadding = isFullscreen ? getFullscreenPadding() : FIT_BOUNDS_PADDING
+  const [followEnabled, setFollowEnabled] = useState(false)
+
+  const getMapInstance = useCallback(() => {
+    const refVal = mapRef.current
+    if (refVal?.getMap) return refVal.getMap()
+    return mapInstance
+  }, [mapInstance])
 
   useImperativeHandle(
     ref,
-    () => ({
-      getMap: () => mapRef.current?.getMap?.() ?? mapInstance,
-      flyToCurrentLocation: () => {
-        setFollowEnabled(true)
-        const map = mapInstance ?? mapRef.current?.getMap?.()
-        const pos = vehiclePositionRef.current
-        if (!map || !pos || !Array.isArray(pos)) return
-        const [lat, lng] = pos
-        map.flyTo({
-          center: [lng, lat],
-          zoom: TRACKING_MAP_VIEW.zoom,
-          pitch: TRACKING_MAP_VIEW.pitch,
-          duration: FLY_DURATION,
-        })
-      },
-      flyToDestination: () => {
+    () => {
+      const runFitRoute = () => {
         setFollowEnabled(false)
-        const map = mapInstance ?? mapRef.current?.getMap?.()
-        const end = endCoordsRef.current
-        if (!map || !end?.length) return
-        map.flyTo({
-          center: [end[1], end[0]],
-          zoom: TRACKING_MAP_VIEW.zoom,
-          pitch: TRACKING_MAP_VIEW.pitch,
-          duration: FLY_DURATION,
-        })
-      },
-      fitRoute: () => {
-        setFollowEnabled(false)
-        const map = mapRef.current?.getMap?.() ?? mapInstance
         const points = routePointsRef.current
-        if (!map || !points?.length) return
-        const lngs = points.map((p) => p[1])
-        const lats = points.map((p) => p[0])
+        const start = startCoordsRef.current
+        const end = endCoordsRef.current
+        const list = Array.isArray(points) && points.length >= 2
+          ? points
+          : start?.length === 2 && end?.length === 2
+            ? [start, end]
+            : null
+        if (!list?.length) return
+        const all = [...list]
+        if (start?.length === 2 && !all.some((p) => p[0] === start[0] && p[1] === start[1])) all.push(start)
+        if (end?.length === 2 && !all.some((p) => p[0] === end[0] && p[1] === end[1])) all.push(end)
+        const lngs = all.map((p) => Number(p[1]))
+        const lats = all.map((p) => Number(p[0]))
+        let minLng = Math.min(...lngs)
+        let maxLng = Math.max(...lngs)
+        let minLat = Math.min(...lats)
+        let maxLat = Math.max(...lats)
+        const minDelta = 0.01
+        if (maxLng - minLng < minDelta) {
+          minLng -= minDelta
+          maxLng += minDelta
+        }
+        if (maxLat - minLat < minDelta) {
+          minLat -= minDelta
+          maxLat += minDelta
+        }
         const padding = isFullscreenRef.current ? getFullscreenPadding() : FIT_BOUNDS_PADDING
-        map.fitBounds(
-          [
-            [Math.min(...lngs), Math.min(...lats)],
-            [Math.max(...lngs), Math.max(...lats)],
-          ],
-          { padding, maxZoom: 16, duration: FLY_DURATION }
-        )
-      },
-    }),
-    [mapInstance]
+        const paddingWithMargin =
+          typeof padding === "number"
+            ? Math.max(padding, 80)
+            : {
+                left: Math.max(padding.left ?? 0, 80),
+                right: Math.max(padding.right ?? 0, 80),
+                top: Math.max(padding.top ?? 0, 80),
+                bottom: Math.max(padding.bottom ?? 0, 80),
+              }
+        const bounds = [
+          [minLng, minLat],
+          [maxLng, maxLat],
+        ]
+        const opts = { padding: paddingWithMargin, maxZoom: 18, duration: FLY_DURATION }
+        const map = getMapInstance()
+        const mapRefVal = mapRef.current
+        const target = mapRefVal?.fitBounds ? mapRefVal : map
+        if (target?.fitBounds) {
+          if (typeof target.resize === "function") target.resize()
+          target.fitBounds(bounds, opts)
+        } else if (map) {
+          if (typeof map.resize === "function") map.resize()
+          map.fitBounds(bounds, opts)
+        }
+      }
+      return {
+        getMap: getMapInstance,
+        flyToCurrentLocation: () => {
+          setFollowEnabled(true)
+          const map = getMapInstance()
+          const pos = vehiclePositionRef.current
+          if (!map || !pos || !Array.isArray(pos)) return
+          const [lat, lng] = pos
+          map.flyTo({
+            center: [lng, lat],
+            zoom: TRACKING_MAP_VIEW.zoom,
+            pitch: TRACKING_MAP_VIEW.pitch,
+            duration: FLY_DURATION,
+          })
+        },
+        flyToDestination: () => {
+          setFollowEnabled(false)
+          const map = getMapInstance()
+          const end = endCoordsRef.current
+          if (!map || !end?.length) return
+          map.flyTo({
+            center: [end[1], end[0]],
+            zoom: TRACKING_MAP_VIEW.zoom,
+            pitch: TRACKING_MAP_VIEW.pitch,
+            duration: FLY_DURATION,
+          })
+        },
+        fitRoute: () => {
+          runFitRoute()
+        },
+      }
+    },
+    [mapInstance, getMapInstance]
   )
 
   const fitDoneRef = useRef(false)
@@ -143,7 +199,6 @@ const TrackingMapMapbox = forwardRef(function TrackingMapMapbox(
     [routePoints, fitPadding]
   )
 
-  const [followEnabled, setFollowEnabled] = useState(false)
   useEffect(() => {
     if (!vehiclePosition || !cameraFollow) return
     const t = setTimeout(() => setFollowEnabled(true), 1200)
@@ -201,6 +256,9 @@ const TrackingMapMapbox = forwardRef(function TrackingMapMapbox(
       scrollZoom
       doubleClickZoom
     >
+      <ScaleControl position="bottom-left" maxWidth={120} unit="metric" />
+      <NavigationControl position="top-right" showCompass showZoom visualizePitch={false} />
+      {hasTrafficLayer() && <TrafficOverlayMapbox visible={showTraffic} />}
       <RouteLineMapbox
         routePoints={routePoints}
         paint={

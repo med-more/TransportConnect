@@ -7,12 +7,13 @@ import { useTheme } from "../contexts/ThemeContext"
 import { geocode, MOROCCO_CENTER } from "../utils/geocode"
 import { getRoute } from "../utils/route"
 import { MAP_TILES } from "../config/mapConfig"
+import { hasTrafficLayer } from "../config/mapLibreConfig"
 import { useSmoothVehiclePosition } from "../hooks/useSmoothVehiclePosition"
 import VehicleMarker from "./map/VehicleMarker"
 import CameraFollow from "./map/CameraFollow"
 import TrackingMapMapbox from "./map/TrackingMapMapbox"
 import { createStartPinIcon, createEndPinIcon, INDRIVE_ORANGE } from "./map/IndriveStyleMarkers"
-import { Target, MapPin, Route, ChevronDown, Fullscreen, FullscreenExit } from "../utils/icons"
+import { Target, MapPin, Route, ChevronDown, Fullscreen, FullscreenExit, Car } from "../utils/icons"
 
 function FitBoundsOnce({ points }) {
   const map = useMap()
@@ -70,7 +71,9 @@ export default function ShipmentTrackingMap({
   const [routeInfo, setRouteInfo] = useState(null)
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [showTraffic, setShowTraffic] = useState(true)
   const progressRef = useRef(0)
+  const canShowTraffic = hasTrafficLayer()
 
   const dep =
     departure?.coordinates?.lat != null
@@ -312,13 +315,30 @@ export default function ShipmentTrackingMap({
           </button>
           <button
             type="button"
-            onClick={() => mapControlRef.current?.fitRoute?.()}
+            onClick={() => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                  mapControlRef.current?.fitRoute?.()
+                })
+              })
+            }}
             className="flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg text-white hover:bg-white/20 active:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation"
             title="Fit route in view"
             aria-label="Fit route in view"
           >
             <Route className="w-5 h-5" />
           </button>
+          {canShowTraffic && (
+            <button
+              type="button"
+              onClick={() => setShowTraffic((v) => !v)}
+              className={`flex items-center justify-center min-w-[44px] min-h-[44px] w-10 h-10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 touch-manipulation ${showTraffic ? "bg-white/25 text-white" : "text-white hover:bg-white/20 active:bg-white/30"}`}
+              title={showTraffic ? "Hide traffic" : "Show traffic"}
+              aria-label={showTraffic ? "Hide traffic" : "Show traffic"}
+            >
+              <Car className="w-5 h-5" />
+            </button>
+          )}
           {!isFullscreen && (
             <button
               type="button"
@@ -348,6 +368,7 @@ export default function ShipmentTrackingMap({
             vehicleBearing={bearing}
             cameraFollow={cameraFollow}
             isFullscreen={isFullscreen}
+            showTraffic={showTraffic}
           />
         </div>
       ) : (
