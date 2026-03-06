@@ -34,7 +34,6 @@ import Card from "../components/ui/Card"
 import Button from "../components/ui/Button"
 import Input from "../components/ui/Input"
 import { usersAPI, documentsAPI } from "../services/api"
-import { API_BASE_URL } from "../config/constants"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { normalizeAvatarUrl } from "../utils/avatar"
@@ -146,6 +145,27 @@ const ProfilePage = () => {
     },
     onError: (e) => toast.error(e.response?.data?.message || "Delete failed"),
   })
+
+  const handleViewDocumentFile = async (doc) => {
+    try {
+      const { data } = await documentsAPI.getFile(doc._id)
+      const url = URL.createObjectURL(data)
+      window.open(url, "_blank", "noopener,noreferrer")
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch (e) {
+      let msg = "Could not open file"
+      if (e.response?.data instanceof Blob) {
+        try {
+          const text = await e.response.data.text()
+          const j = JSON.parse(text)
+          if (j.message) msg = j.message
+        } catch (_) {}
+      } else if (e.response?.data?.message) {
+        msg = e.response.data.message
+      }
+      toast.error(msg)
+    }
+  }
 
   // Backend returns: { success: true, data: { totalTrips, totalRequests } }
   const stats = statsData?.data?.data || statsData?.data || {
@@ -1023,14 +1043,13 @@ const ProfilePage = () => {
                         <p className="text-xs text-destructive mt-1 w-full">Reason: {doc.rejectionReason}</p>
                       )}
                       <div className="flex items-center gap-2">
-                        <a
-                          href={doc.fileUrl?.startsWith("http") ? doc.fileUrl : `${API_BASE_URL.replace(/\/api\/?$/, "")}${doc.fileUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline"
+                        <button
+                          type="button"
+                          onClick={() => handleViewDocumentFile(doc)}
+                          className="text-sm text-primary hover:underline bg-transparent border-0 cursor-pointer p-0 font-inherit"
                         >
                           View
-                        </a>
+                        </button>
                         {doc.status === "pending" && (
                           <Button
                             type="button"

@@ -164,6 +164,8 @@ export const chatAPI = {
 export const documentsAPI = {
   list: (params) => api.get("/documents", { params }).then((r) => r.data?.documents ?? []),
   getById: (id) => api.get(`/documents/${id}`).then((r) => r.data?.document),
+  /** Fetch file as blob (for opening in new tab with auth). Use with responseType: "blob". */
+  getFile: (id) => api.get(`/documents/${id}/file`, { responseType: "blob" }),
   upload: (formData) =>
     api.post("/documents", formData, {
       headers: { "Content-Type": "multipart/form-data" },

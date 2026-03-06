@@ -1,6 +1,7 @@
 import Document from "../models/Document.js"
 import User from "../models/User.js"
 import path from "path"
+import fs from "fs"
 import { createNotification } from "../utils/notifications.js"
 
 /**
@@ -96,6 +97,39 @@ export const listDocuments = async (req, res) => {
   } catch (error) {
     console.error("List documents:", error)
     res.status(500).json({ message: "Erreur lors de la récupération des documents" })
+  }
+}
+
+/**
+ * GET /api/documents/:id/file — Stream document file (owner or admin). Works behind same-origin deploy (e.g. Vercel).
+ */
+export const getDocumentFile = async (req, res) => {
+  try {
+    const doc = await Document.findById(req.params.id).select("fileUrl user")
+    if (!doc) return res.status(404).json({ message: "Document non trouvé" })
+    const ownerId = doc.user?.toString?.() || doc.user?.toString?.()
+    const isOwner = ownerId === req.user._id.toString()
+    const isAdmin = req.user.role === "admin"
+    if (!isOwner && !isAdmin) return res.status(403).json({ message: "Non autorisé" })
+
+    const fileUrl = doc.fileUrl
+    if (!fileUrl) return res.status(404).json({ message: "No file for this document" })
+
+    if (fileUrl.startsWith("http")) {
+      return res.redirect(302, fileUrl)
+    }
+
+    const filename = path.basename(fileUrl)
+    const documentsDir = path.join(__dirname, "../uploads/documents")
+    const filePath = path.join(documentsDir, filename)
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found on server" })
+    }
+    res.setHeader("Content-Disposition", `inline; filename="${filename}"`)
+    return res.sendFile(path.resolve(filePath))
+  } catch (error) {
+    console.error("Get document file:", error)
+    res.status(500).json({ message: "Erreur lors de la récupération du fichier" })
   }
 }
 

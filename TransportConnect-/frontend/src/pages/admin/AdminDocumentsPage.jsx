@@ -5,7 +5,6 @@ import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import { documentsAPI } from "../../services/api"
-import { API_BASE_URL } from "../../config/constants"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 
@@ -54,7 +53,26 @@ const AdminDocumentsPage = () => {
     })
   }
 
-  const fileBaseUrl = API_BASE_URL.replace(/\/api\/?$/, "")
+  const handleViewFile = async (doc) => {
+    try {
+      const { data } = await documentsAPI.getFile(doc._id)
+      const url = URL.createObjectURL(data)
+      window.open(url, "_blank", "noopener,noreferrer")
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch (e) {
+      let msg = "Could not open file"
+      if (e.response?.data instanceof Blob) {
+        try {
+          const text = await e.response.data.text()
+          const j = JSON.parse(text)
+          if (j.message) msg = j.message
+        } catch (_) {}
+      } else if (e.response?.data?.message) {
+        msg = e.response.data.message
+      }
+      toast.error(msg)
+    }
+  }
 
   const filteredDocuments = useMemo(() => {
     let list = documents
@@ -137,17 +155,14 @@ const AdminDocumentsPage = () => {
           </p>
         )}
         <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border">
-          <a
-            href={
-              doc.fileUrl?.startsWith("http") ? doc.fileUrl : `${fileBaseUrl}${doc.fileUrl}`
-            }
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={() => handleViewFile(doc)}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
           >
             <ExternalLink className="w-4 h-4" />
             View file
-          </a>
+          </button>
           {doc.status === "pending" && (
             <>
               <Button
@@ -335,19 +350,14 @@ const AdminDocumentsPage = () => {
                       </td>
                       <td className="py-3 px-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <a
-                            href={
-                              doc.fileUrl?.startsWith("http")
-                                ? doc.fileUrl
-                                : `${fileBaseUrl}${doc.fileUrl}`
-                            }
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline inline-flex items-center gap-1"
+                          <button
+                            type="button"
+                            onClick={() => handleViewFile(doc)}
+                            className="text-primary hover:underline inline-flex items-center gap-1 bg-transparent border-0 cursor-pointer p-0 font-inherit"
                           >
                             <ExternalLink className="w-4 h-4" />
                             View
-                          </a>
+                          </button>
                           {doc.status === "pending" && (
                             <>
                               <Button

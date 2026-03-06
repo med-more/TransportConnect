@@ -3,6 +3,7 @@ import {
   createDocument,
   listDocuments,
   getDocumentById,
+  getDocumentFile,
   updateDocument,
   deleteDocument,
 } from "../controllers/documents.controller.js"
@@ -24,6 +25,9 @@ router.post(
 
 // User: list own; Admin: list all (optional ?status=pending&userId=...)
 router.get("/", listDocuments)
+
+// Stream file (owner or admin) — must be before /:id
+router.get("/:id/file", validateObjectId("id"), getDocumentFile)
 
 // Get one (owner or admin)
 router.get("/:id", validateObjectId("id"), getDocumentById)
