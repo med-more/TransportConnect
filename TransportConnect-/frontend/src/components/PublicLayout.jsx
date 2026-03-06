@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Link, NavLink } from "react-router-dom"
 import { Phone, Mail, MapPin, Facebook, Twitter, Linkedin, Instagram, Youtube, Sun, Moon, Menu, X, ArrowRight, Lock, User, LogOut } from "../utils/icons"
 import Button from "./ui/Button"
-import logo from "../assets/logo.svg"
+import logo from "../assets/logo2.svg"
 import { useTheme } from "../contexts/ThemeContext"
 import { useAuth } from "../contexts/AuthContext"
 
@@ -40,7 +40,7 @@ export const PublicHeader = () => {
             <img
               src={logo}
               alt="TransportConnect"
-              className={`h-10 sm:h-12 md:h-14 w-auto flex-shrink-0 ${isDark ? "brightness-0 invert" : ""}`}
+              className="h-12 sm:h-14 md:h-16 w-auto flex-shrink-0"
             />
             <div className="min-w-0">
               <h1
@@ -288,7 +288,7 @@ export const PublicFooter = () => {
           {/* Brand Column */}
           <div>
             <Link to="/" className="flex items-center gap-2 sm:gap-3 mb-4">
-              <img src={logo} alt="TransportConnect" className="h-12 sm:h-16 md:h-20 w-auto brightness-0 invert flex-shrink-0" />
+              <img src={logo} alt="TransportConnect" className="h-16 sm:h-20 md:h-24 w-auto flex-shrink-0" />
               <div className="min-w-0">
                 <h3 className="text-lg sm:text-xl font-bold">TransportConnect</h3>
               </div>

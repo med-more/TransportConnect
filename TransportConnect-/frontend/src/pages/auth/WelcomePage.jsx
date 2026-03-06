@@ -30,7 +30,7 @@ import {
   ChevronRight,
 } from "../../utils/icons"
 import Button from "../../components/ui/Button"
-import logo from "../../assets/logo.svg"
+import logo from "../../assets/logo2.svg"
 import { PublicHeader } from "../../components/PublicLayout"
 
 // Image Card Component for "Our Platform in Action" section
@@ -957,7 +957,7 @@ const WelcomePage = () => {
             {/* Brand Column */}
             <div>
               <Link to="/" className="flex items-center gap-2 sm:gap-3 mb-4">
-                <img src={logo} alt="TransportConnect" className="h-12 sm:h-16 md:h-20 w-auto brightness-0 invert flex-shrink-0" />
+                <img src={logo} alt="TransportConnect" className="h-16 sm:h-20 md:h-24 w-auto flex-shrink-0" />
                 <div className="min-w-0">
                   <h3 className="text-lg sm:text-xl font-bold">TransportConnect</h3>
                 </div>

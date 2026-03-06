@@ -22,7 +22,7 @@ import {
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
-import logo from "../assets/logo.svg"
+import logo from "../assets/logo2.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
 import { adminAPI } from "../services/api"
 import { useTheme } from "../contexts/ThemeContext"
@@ -179,12 +179,12 @@ const AdminLayout = ({ children }) => {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <div className={clsx("flex items-center gap-3", sidebarCollapsed && "justify-center w-full")}>
-            <img src={logo} alt="TransportConnect" className="h-16 w-auto flex-shrink-0" />
+        <div className="flex items-center justify-between gap-2 p-4 border-b border-border min-w-0">
+          <div className={clsx("flex items-center gap-3 min-w-0 flex-1", sidebarCollapsed && "justify-center flex-1")}>
+            <img src={logo} alt="TransportConnect" className="h-12 w-auto max-w-[140px] flex-shrink-0 lg:h-16 lg:max-w-[4rem]" />
             {!sidebarCollapsed && (
-              <div className="flex-1 min-w-0">
-                <h1 className="text-lg font-bold text-foreground truncate">TransportConnect</h1>
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <h1 className="text-base font-bold text-foreground truncate">TransportConnect</h1>
                 <p className="text-xs text-muted-foreground truncate">Admin Panel</p>
               </div>
             )}
