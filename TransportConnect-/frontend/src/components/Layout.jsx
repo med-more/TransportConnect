@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
 import { useTheme } from "../contexts/ThemeContext"
+import { useSocket } from "../contexts/SocketContext"
 import { useTranslation } from "../i18n/useTranslation"
 import {
   Home,
@@ -62,6 +63,7 @@ const Layout = ({ children }) => {
   const location = useLocation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { socket } = useSocket()
   const notificationRef = useRef(null)
   const searchRef = useRef(null)
   const mobileSearchRef = useRef(null)
@@ -165,6 +167,17 @@ const Layout = ({ children }) => {
 
   const notifications = notificationsData?.notifications || []
   const unreadCount = notificationsData?.unreadCount || 0
+
+  // Real-time: refetch notifications when backend emits new_notification
+  useEffect(() => {
+    if (!socket || !user) return
+    const handler = () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", user._id] })
+      refetchNotifications()
+    }
+    socket.on("new_notification", handler)
+    return () => socket.off("new_notification", handler)
+  }, [socket, user?._id, queryClient, refetchNotifications])
 
   // Conversations (driver–shipper chat) unread count – only for non-admin
   const { data: chatsUnreadData } = useQuery({
@@ -282,7 +295,7 @@ const Layout = ({ children }) => {
     }
   }
 
-  const trips = tripsData?.data?.trips || []
+  const trips = tripsData?.trips ?? []
   const requests = requestsData?.data?.requests || []
 
   // Filter search results
@@ -835,6 +848,9 @@ const Layout = ({ children }) => {
                                         setShowNotifications(false)
                                       } else if (tripId) {
                                         navigate(`/trips/${tripId}`)
+                                        setShowNotifications(false)
+                                      } else if (notif.type === "document_reviewed") {
+                                        navigate("/profile")
                                         setShowNotifications(false)
                                       }
                                     }}

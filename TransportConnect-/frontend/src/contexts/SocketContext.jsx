@@ -9,6 +9,7 @@ export function SocketProvider({ children }) {
   const { user } = useAuth()
   const userId = user?._id ?? user?.id
   const [connected, setConnected] = useState(false)
+  const [socketInstance, setSocketInstance] = useState(null)
   const socketRef = useRef(null)
 
   useEffect(() => {
@@ -17,6 +18,7 @@ export function SocketProvider({ children }) {
         socketRef.current.disconnect()
         socketRef.current = null
         setConnected(false)
+        setSocketInstance(null)
       }
       return
     }
@@ -29,14 +31,19 @@ export function SocketProvider({ children }) {
 
     socket.on("connect", () => {
       setConnected(true)
+      setSocketInstance(socket)
       socket.emit("join_user", userId)
     })
-    socket.on("disconnect", () => setConnected(false))
+    socket.on("disconnect", () => {
+      setConnected(false)
+      setSocketInstance(null)
+    })
 
     return () => {
       socket.disconnect()
       socketRef.current = null
       setConnected(false)
+      setSocketInstance(null)
     }
   }, [userId])
 
@@ -67,7 +74,7 @@ export function SocketProvider({ children }) {
   return (
     <SocketContext.Provider
       value={{
-        socket: socketRef.current,
+        socket: socketInstance || socketRef.current,
         connected,
         joinConversation,
         leaveConversation,

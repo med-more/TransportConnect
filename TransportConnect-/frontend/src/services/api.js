@@ -54,13 +54,22 @@ export const authAPI = {
 
 // API des trajets
 export const tripsAPI = {
-  getTrips: (params) => api.get("/trips", { params }),
-  getMyTrips: (params) => api.get("/trips/my-trips", { params }),
-  getTripById: (id) => api.get(`/trips/${id}`),
+  getTrips: (params) => api.get("/trips", { params }).then((r) => r.data),
+  getMyTrips: (params) => api.get("/trips/my-trips", { params }).then((r) => r.data),
+  getTripById: (id) => api.get(`/trips/${id}`).then((r) => r.data),
   createTrip: (tripData) => api.post("/trips", tripData),
   updateTrip: (id, tripData) => api.put(`/trips/${id}`, tripData),
   deleteTrip: (id) => api.delete(`/trips/${id}`),
   completeTrip: (id) => api.post(`/trips/${id}/complete`),
+}
+
+// API des trajets récurrents
+export const recurringTripsAPI = {
+  list: () => api.get("/recurring-trips").then((r) => r.data?.recurringTrips ?? []),
+  getById: (id) => api.get(`/recurring-trips/${id}`).then((r) => r.data?.recurringTrip),
+  create: (data) => api.post("/recurring-trips", data).then((r) => r.data?.recurringTrip),
+  update: (id, data) => api.patch(`/recurring-trips/${id}`, data).then((r) => r.data?.recurringTrip),
+  delete: (id) => api.delete(`/recurring-trips/${id}`),
 }
 
 // API des demandes
@@ -73,7 +82,20 @@ export const requestsAPI = {
   rejectRequest: (id, message) => api.put(`/requests/${id}/reject`, { message }),
   cancelRequest: (id) => api.put(`/requests/${id}/cancel`),
   confirmPickup: (id) => api.put(`/requests/${id}/pickup-confirm`),
-  confirmDelivery: (id, signature) => api.put(`/requests/${id}/delivery-confirm`, { signature }),
+  confirmDelivery: (id, data = {}) => {
+    const { signature = "", podNotes = "", podPhoto } = data
+    if (podPhoto instanceof File) {
+      const form = new FormData()
+      form.append("signature", signature)
+      form.append("podNotes", podNotes)
+      form.append("podPhoto", podPhoto)
+      return api.put(`/requests/${id}/delivery-confirm`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+    }
+    return api.put(`/requests/${id}/delivery-confirm`, { signature, podNotes })
+  },
+  getPriceEstimate: (tripId, weight) => api.post("/requests/estimate", { tripId, weight }),
   submitRating: (id, rating, comment) => api.post(`/requests/${id}/rating`, { rating, comment }),
 }
 
@@ -93,6 +115,28 @@ export const usersAPI = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getStats: () => api.get("/users/stats"),
+  getSavedAddresses: () => api.get("/users/saved-addresses").then((r) => r.data?.data ?? []),
+  addSavedAddress: (data) => api.post("/users/saved-addresses", data).then((r) => r.data?.data),
+  updateSavedAddress: (id, data) => api.put(`/users/saved-addresses/${id}`, data).then((r) => r.data?.data),
+  deleteSavedAddress: (id) => api.delete(`/users/saved-addresses/${id}`),
+  getNotificationPreferences: () => api.get("/users/me/notification-preferences").then((r) => r.data?.data ?? { email: true, push: true }),
+  updateNotificationPreferences: (prefs) => api.patch("/users/me/notification-preferences", prefs).then((r) => r.data?.data),
+  addPushSubscription: (subscription) => api.post("/users/push-subscription", subscription),
+  removePushSubscription: (endpoint) => api.delete("/users/push-subscription", { data: { endpoint } }),
+}
+
+// Config (e.g. for Web Push)
+export const configAPI = {
+  getVapidPublicKey: () => api.get("/config/vapid-public-key").then((r) => r.data?.vapidPublicKey ?? null),
+}
+
+// Route-based estimate (distance, duration, price) — no auth required
+export const estimateAPI = {
+  getRouteEstimate: (fromLat, fromLng, toLat, toLng, weight) =>
+    api.post("/estimate/route", { fromLat, fromLng, toLat, toLng, weight }).then((r) => r.data),
+  /** waypoints: [{ lat, lng }, ...] (at least 2 points) */
+  getRouteEstimateMulti: (waypoints, weight) =>
+    api.post("/estimate/route-multi", { waypoints, weight }).then((r) => r.data),
 }
 
 // API des notifications
@@ -114,6 +158,18 @@ export const chatAPI = {
   reactToMessage: (conversationId, messageId, emoji) =>
     api.put(`/chats/${conversationId}/messages/${messageId}/react`, { emoji }),
   markAsRead: (conversationId) => api.put(`/chats/${conversationId}/read`),
+}
+
+// Document verification (KYC) — drivers upload; admin approve/reject
+export const documentsAPI = {
+  list: (params) => api.get("/documents", { params }).then((r) => r.data?.documents ?? []),
+  getById: (id) => api.get(`/documents/${id}`).then((r) => r.data?.document),
+  upload: (formData) =>
+    api.post("/documents", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    }).then((r) => r.data?.document),
+  update: (id, data) => api.patch(`/documents/${id}`, data).then((r) => r.data?.document),
+  delete: (id) => api.delete(`/documents/${id}`),
 }
 
 // API d'administration

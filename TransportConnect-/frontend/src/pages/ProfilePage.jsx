@@ -4,7 +4,7 @@ import { useAuth } from "../contexts/AuthContext"
 import { useTranslation } from "../i18n/useTranslation"
 import { useForm } from "react-hook-form"
 import { motion } from "framer-motion"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   User,
   Mail,
@@ -23,11 +23,18 @@ import {
   Camera,
   Upload,
   RefreshCw,
+  Plus,
+  Trash2,
+  FileText,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from "../utils/icons"
 import Card from "../components/ui/Card"
 import Button from "../components/ui/Button"
 import Input from "../components/ui/Input"
-import { usersAPI } from "../services/api"
+import { usersAPI, documentsAPI } from "../services/api"
+import { API_BASE_URL } from "../config/constants"
 import toast from "react-hot-toast"
 import clsx from "clsx"
 import { normalizeAvatarUrl } from "../utils/avatar"
@@ -42,11 +49,102 @@ const ProfilePage = () => {
   const [avatarPreview, setAvatarPreview] = useState(null)
   const [isChangingRole, setIsChangingRole] = useState(false)
   const [roleChangeMessage, setRoleChangeMessage] = useState("")
+  const [showAddAddress, setShowAddAddress] = useState(false)
+  const [newAddressLabel, setNewAddressLabel] = useState("")
+  const [newAddressAddress, setNewAddressAddress] = useState("")
+  const [newAddressCity, setNewAddressCity] = useState("")
+  const [editingAddressId, setEditingAddressId] = useState(null)
+  const [editLabel, setEditLabel] = useState("")
+  const [editAddress, setEditAddress] = useState("")
+  const [editCity, setEditCity] = useState("")
   const fileInputRef = useRef(null)
 
+  const queryClient = useQueryClient()
   const { data: statsData } = useQuery({
     queryKey: ["user-stats"],
     queryFn: usersAPI.getStats,
+  })
+
+  const { data: savedAddresses = [], refetch: refetchSavedAddresses } = useQuery({
+    queryKey: ["saved-addresses"],
+    queryFn: () => usersAPI.getSavedAddresses(),
+    enabled: !!user,
+  })
+
+  const addAddressMutation = useMutation({
+    mutationFn: (data) => usersAPI.addSavedAddress(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-addresses"] })
+      refetchSavedAddresses()
+      toast.success(t("profile.savedAddressAdded") || "Address added")
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to add address"),
+  })
+  const deleteAddressMutation = useMutation({
+    mutationFn: (id) => usersAPI.deleteSavedAddress(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-addresses"] })
+      refetchSavedAddresses()
+      toast.success(t("profile.savedAddressDeleted") || "Address removed")
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to remove address"),
+  })
+  const updateAddressMutation = useMutation({
+    mutationFn: ({ id, ...data }) => usersAPI.updateSavedAddress(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-addresses"] })
+      refetchSavedAddresses()
+      setEditingAddressId(null)
+      setEditLabel("")
+      setEditAddress("")
+      setEditCity("")
+      toast.success(t("profile.savedAddressUpdated") || "Address updated")
+    },
+    onError: (err) => toast.error(err.response?.data?.message || "Failed to update address"),
+  })
+  const startEditAddress = (addr) => {
+    setEditingAddressId(addr._id)
+    setEditLabel(addr.label)
+    setEditAddress(addr.address)
+    setEditCity(addr.city)
+  }
+  const cancelEditAddress = () => {
+    setEditingAddressId(null)
+    setEditLabel("")
+    setEditAddress("")
+    setEditCity("")
+  }
+
+  const { data: documents = [], refetch: refetchDocuments } = useQuery({
+    queryKey: ["documents"],
+    queryFn: () => documentsAPI.list(),
+    enabled: !!user && user?.role === "conducteur",
+  })
+  const [docUploadType, setDocUploadType] = useState("license")
+  const [docUploadFile, setDocUploadFile] = useState(null)
+  const docUploadMutation = useMutation({
+    mutationFn: () => {
+      const form = new FormData()
+      form.append("file", docUploadFile)
+      form.append("type", docUploadType)
+      return documentsAPI.upload(form)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] })
+      refetchDocuments()
+      setDocUploadFile(null)
+      toast.success("Document uploaded for review")
+    },
+    onError: (e) => toast.error(e.response?.data?.message || "Upload failed"),
+  })
+  const docDeleteMutation = useMutation({
+    mutationFn: (id) => documentsAPI.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["documents"] })
+      refetchDocuments()
+      toast.success("Document removed")
+    },
+    onError: (e) => toast.error(e.response?.data?.message || "Delete failed"),
   })
 
   // Backend returns: { success: true, data: { totalTrips, totalRequests } }
@@ -521,6 +619,167 @@ const ProfilePage = () => {
             </form>
           </Card>
 
+          {/* Saved addresses */}
+          <Card className="p-4 sm:p-5 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                {t("profile.savedAddresses") || "Saved addresses"}
+              </h3>
+              {!showAddAddress && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="small"
+                  onClick={() => setShowAddAddress(true)}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  {t("profile.addAddress") || "Add address"}
+                </Button>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground mb-4">
+              {t("profile.savedAddressesHint") || "Use these when creating requests for faster checkout."}
+            </p>
+            {showAddAddress && (
+              <form
+                className="mb-6 p-4 rounded-xl border border-border bg-muted/20 space-y-3"
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  if (!newAddressLabel.trim() || !newAddressAddress.trim() || !newAddressCity.trim()) {
+                    toast.error("Label, address and city are required")
+                    return
+                  }
+                  addAddressMutation.mutate(
+                    { label: newAddressLabel.trim(), address: newAddressAddress.trim(), city: newAddressCity.trim(), country: "Maroc" },
+                    {
+                      onSuccess: () => {
+                        setNewAddressLabel("")
+                        setNewAddressAddress("")
+                        setNewAddressCity("")
+                        setShowAddAddress(false)
+                      },
+                    }
+                  )
+                }}
+              >
+                <Input
+                  label={t("profile.addressLabel") || "Label"}
+                  placeholder="Home, Office..."
+                  value={newAddressLabel}
+                  onChange={(e) => setNewAddressLabel(e.target.value)}
+                />
+                <Input
+                  label={t("profile.addressStreet") || "Address"}
+                  placeholder="Street, building"
+                  value={newAddressAddress}
+                  onChange={(e) => setNewAddressAddress(e.target.value)}
+                />
+                <Input
+                  label={t("profile.city") || "City"}
+                  placeholder="City"
+                  value={newAddressCity}
+                  onChange={(e) => setNewAddressCity(e.target.value)}
+                />
+                <div className="flex gap-2">
+                  <Button type="submit" loading={addAddressMutation.isPending} size="small">
+                    {t("profile.addAddress") || "Add address"}
+                  </Button>
+                  <Button type="button" variant="outline" size="small" onClick={() => setShowAddAddress(false)}>
+                    {t("common.cancel")}
+                  </Button>
+                </div>
+              </form>
+            )}
+            {savedAddresses.length === 0 && !showAddAddress && (
+              <p className="text-sm text-muted-foreground py-4">{t("profile.noSavedAddresses") || "No saved addresses yet."}</p>
+            )}
+            <ul className="space-y-3">
+              {savedAddresses.map((addr) => (
+                <li
+                  key={addr._id}
+                  className="p-3 rounded-xl border border-border bg-card hover:bg-accent/30 transition-colors"
+                >
+                  {editingAddressId === addr._id ? (
+                    <form
+                      className="space-y-3"
+                      onSubmit={(e) => {
+                        e.preventDefault()
+                        if (!editLabel.trim() || !editAddress.trim() || !editCity.trim()) {
+                          toast.error("Label, address and city are required")
+                          return
+                        }
+                        updateAddressMutation.mutate({
+                          id: addr._id,
+                          label: editLabel.trim(),
+                          address: editAddress.trim(),
+                          city: editCity.trim(),
+                          country: "Maroc",
+                        })
+                      }}
+                    >
+                      <Input
+                        label={t("profile.addressLabel") || "Label"}
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                      />
+                      <Input
+                        label={t("profile.addressStreet") || "Address"}
+                        value={editAddress}
+                        onChange={(e) => setEditAddress(e.target.value)}
+                      />
+                      <Input
+                        label={t("profile.city") || "City"}
+                        value={editCity}
+                        onChange={(e) => setEditCity(e.target.value)}
+                      />
+                      <div className="flex gap-2">
+                        <Button type="submit" size="small" loading={updateAddressMutation.isPending}>
+                          {t("common.save")}
+                        </Button>
+                        <Button type="button" variant="outline" size="small" onClick={cancelEditAddress}>
+                          {t("common.cancel")}
+                        </Button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-foreground">{addr.label}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {addr.address}, {addr.city}
+                          {addr.postalCode ? ` ${addr.postalCode}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="small"
+                          aria-label={t("common.edit")}
+                          onClick={() => startEditAddress(addr)}
+                          disabled={!!editingAddressId}
+                        >
+                          <Edit className="w-4 h-4 text-muted-foreground hover:text-foreground" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="small"
+                          className="text-destructive hover:bg-destructive/10"
+                          onClick={() => deleteAddressMutation.mutate(addr._id)}
+                          disabled={deleteAddressMutation.isPending}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </Card>
+
           {/* Vehicle Information (for drivers) */}
           {user?.role === "conducteur" && (
             <Card className="p-4 sm:p-5 md:p-6">
@@ -681,6 +940,114 @@ const ProfilePage = () => {
                   )}
                 </div>
               )}
+            </Card>
+          )}
+
+          {/* Document verification (drivers only) */}
+          {user?.role === "conducteur" && (
+            <Card className="p-4 sm:p-5 md:p-6">
+              <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                Document verification
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Upload your license, insurance, or registration. Admin will review and approve or reject with a reason.
+              </p>
+              <div className="space-y-4">
+                <form
+                  className="flex flex-wrap items-end gap-3 p-3 rounded-xl border border-border bg-muted/20"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    if (!docUploadFile) {
+                      toast.error("Select a file")
+                      return
+                    }
+                    docUploadMutation.mutate()
+                  }}
+                >
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">Type</label>
+                    <select
+                      className="input-field min-w-[140px]"
+                      value={docUploadType}
+                      onChange={(e) => setDocUploadType(e.target.value)}
+                    >
+                      <option value="license">License</option>
+                      <option value="insurance">Insurance</option>
+                      <option value="registration">Registration</option>
+                      <option value="id_card">ID card</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-muted-foreground mb-1">File (image or PDF)</label>
+                    <input
+                      type="file"
+                      accept="image/*,.pdf"
+                      className="block w-full text-sm text-muted-foreground file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-primary file:text-white file:text-sm"
+                      onChange={(e) => setDocUploadFile(e.target.files?.[0] || null)}
+                    />
+                  </div>
+                  <Button type="submit" size="small" loading={docUploadMutation.isPending} disabled={!docUploadFile}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload
+                  </Button>
+                </form>
+                <ul className="space-y-2">
+                  {documents.length === 0 && (
+                    <p className="text-sm text-muted-foreground py-2">No documents uploaded yet.</p>
+                  )}
+                  {documents.map((doc) => (
+                    <li
+                      key={doc._id}
+                      className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-border bg-card"
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        <span className="font-medium text-foreground capitalize">{doc.type.replace("_", " ")}</span>
+                        <span
+                          className={clsx(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium",
+                            doc.status === "approved" && "bg-success/10 text-success",
+                            doc.status === "rejected" && "bg-destructive/10 text-destructive",
+                            doc.status === "pending" && "bg-warning/10 text-warning"
+                          )}
+                        >
+                          {doc.status === "approved" && <CheckCircle className="w-3 h-3" />}
+                          {doc.status === "rejected" && <XCircle className="w-3 h-3" />}
+                          {doc.status === "pending" && <Clock className="w-3 h-3" />}
+                          {doc.status}
+                        </span>
+                      </div>
+                      {doc.status === "rejected" && doc.rejectionReason && (
+                        <p className="text-xs text-destructive mt-1 w-full">Reason: {doc.rejectionReason}</p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={doc.fileUrl?.startsWith("http") ? doc.fileUrl : `${API_BASE_URL.replace(/\/api\/?$/, "")}${doc.fileUrl}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline"
+                        >
+                          View
+                        </a>
+                        {doc.status === "pending" && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="small"
+                            className="text-destructive hover:bg-destructive/10"
+                            onClick={() => docDeleteMutation.mutate(doc._id)}
+                            disabled={docDeleteMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </Card>
           )}
 

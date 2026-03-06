@@ -1,11 +1,44 @@
-import Request from "../models/Request.js";
-import User from "../models/User.js";
-import Trip from "../models/Trip.js";
-import Chat from "../models/Chat.js";
-import { createNotification, getNotificationMessages } from "../utils/notifications.js";
+import Request from "../models/Request.js"
+import User from "../models/User.js"
+import Trip from "../models/Trip.js"
+import Chat from "../models/Chat.js"
+import { createNotification, getNotificationMessages } from "../utils/notifications.js"
+import { sendNotificationEmailToUser } from "../services/email.service.js"
 
 
 
+
+export const getPriceEstimate = async (req, res) => {
+  try {
+    const { tripId, weight } = req.body
+    if (!tripId || weight == null || weight <= 0) {
+      return res.status(400).json({
+        message: "tripId and weight (positive number) are required",
+      })
+    }
+    const trip = await Trip.findById(tripId).select("pricePerKg availableCapacity")
+    if (!trip) {
+      return res.status(404).json({ message: "Trajet non trouvé" })
+    }
+    const w = Number(weight)
+    if (w > (trip.availableCapacity?.weight ?? 0)) {
+      return res.status(400).json({
+        message: "Le poids dépasse la capacité disponible du trajet",
+        availableWeight: trip.availableCapacity?.weight,
+      })
+    }
+    const estimatedPrice = w * (trip.pricePerKg ?? 0)
+    res.json({
+      estimatedPrice: Math.round(estimatedPrice * 100) / 100,
+      currency: "MAD",
+      weight: w,
+      pricePerKg: trip.pricePerKg,
+    })
+  } catch (error) {
+    console.error("getPriceEstimate error:", error)
+    res.status(500).json({ message: "Erreur lors du calcul de l'estimation" })
+  }
+}
 
 export const getUserRequests = async (req, res) => {
   
@@ -197,8 +230,8 @@ export const createRequest = async (req, res) => {
     await chat.save()
 
     try {
-      await sendNotificationEmail(
-        trip.driver.email,
+      await sendNotificationEmailToUser(
+        trip.driver._id,
         "Nouvelle demande de transport",
         `Vous avez reçu une nouvelle demande de transport de ${req.user.firstName} ${req.user.lastName}.`,
       )
@@ -242,6 +275,10 @@ export const createRequest = async (req, res) => {
           relatedRequestId: request._id,
           relatedTripId: tripId,
         })
+        const ioNotif = req.app.get("io")
+        if (ioNotif && notification) {
+          ioNotif.to(`user_${notification.recipient}`).emit("new_notification", notification)
+        }
         console.log("✅ Notification created successfully:", notification._id)
       }
     } catch (notifError) {
@@ -371,8 +408,8 @@ export const acceptRequest = async (req, res) => {
       })
   
       try {
-        await sendNotificationEmail(
-          request.sender.email,
+        await sendNotificationEmailToUser(
+          request.sender._id,
           "Demande acceptée",
           `Votre demande de transport a été acceptée par ${req.user.firstName} ${req.user.lastName}.`,
         )
@@ -442,6 +479,10 @@ export const acceptRequest = async (req, res) => {
           relatedRequestId: request._id,
           relatedTripId: tripIdForNotif,
         })
+        const io = req.app.get("io")
+        if (io && notification) {
+          io.to(`user_${notification.recipient}`).emit("new_notification", notification)
+        }
         console.log("✅ Notification created successfully:", notification._id)
       }
     } catch (notifError) {
@@ -486,8 +527,8 @@ export const acceptRequest = async (req, res) => {
   
       
       try {
-        await sendNotificationEmail(
-          request.sender.email,
+        await sendNotificationEmailToUser(
+          request.sender._id,
           "Demande refusée",
           `Votre demande de transport a été refusée par ${req.user.firstName} ${req.user.lastName}.`,
         )
@@ -522,7 +563,7 @@ export const acceptRequest = async (req, res) => {
             type: "request_rejected",
           })
           
-          await createNotification({
+          const notif = await createNotification({
             recipientId: senderId,
             senderId: req.user._id,
             type: "request_rejected",
@@ -531,7 +572,10 @@ export const acceptRequest = async (req, res) => {
             relatedRequestId: request._id,
             relatedTripId: request.trip._id,
           })
-          
+          const io = req.app.get("io")
+          if (io && notif) {
+            io.to(`user_${notif.recipient}`).emit("new_notification", notif)
+          }
           console.log("✅ Rejection notification created successfully")
         }
       } catch (notifError) {
@@ -730,7 +774,7 @@ export const acceptRequest = async (req, res) => {
   
   export const confirmDelivery = async (req, res) => {
     try {
-      const { signature } = req.body
+      const { signature, podNotes } = req.body || {}
       const request = await Request.findById(req.params.id).populate("trip").populate("sender")
   
       if (!request) {
@@ -748,12 +792,17 @@ export const acceptRequest = async (req, res) => {
         return res.status(400).json({ message: "Le colis doit être en transit pour confirmer la livraison" })
       }
   
+      const podPhotoUrl = req.file
+        ? `/uploads/pod/${req.file.filename}`
+        : null
       request.status = "delivered"
       request.tracking.delivered = {
         confirmed: true,
         confirmedAt: new Date(),
         confirmedBy: req.user._id,
         signature: signature || null,
+        podPhotoUrl: podPhotoUrl || request.tracking?.delivered?.podPhotoUrl || null,
+        podNotes: podNotes != null && String(podNotes).trim() !== "" ? String(podNotes).trim().slice(0, 500) : null,
       }
       await request.save()
 
@@ -777,7 +826,7 @@ export const acceptRequest = async (req, res) => {
               type: "delivered",
             })
             
-            await createNotification({
+            const notification = await createNotification({
               recipientId: senderId,
               senderId: req.user._id,
               type: "delivered",
@@ -786,7 +835,21 @@ export const acceptRequest = async (req, res) => {
               relatedRequestId: request._id,
               relatedTripId: request.trip._id,
             })
-            
+            const io = req.app.get("io")
+            if (io && notification) {
+              io.to(`user_${notification.recipient}`).emit("new_notification", notification)
+            }
+            if (request.sender?._id) {
+              try {
+                await sendNotificationEmailToUser(
+                  request.sender._id,
+                  "Livraison confirmée",
+                  `${req.user.firstName} ${req.user.lastName} a confirmé la livraison de votre colis.`,
+                )
+              } catch (e) {
+                console.error("Erreur envoi email livraison:", e)
+              }
+            }
             console.log("✅ Delivery notification created successfully")
           }
         }

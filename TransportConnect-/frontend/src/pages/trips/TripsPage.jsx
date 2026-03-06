@@ -26,6 +26,7 @@ import {
   ChevronRight,
   ArrowLeft,
   ArrowRight,
+  RefreshCw,
 } from "../../utils/icons"
 import { useAuth } from "../../contexts/AuthContext"
 import { useLocale } from "../../contexts/LocaleContext"
@@ -89,8 +90,8 @@ const TripsPage = () => {
     enabled: !!user && user?.role !== "conducteur",
   })
 
-  const trips = tripsData?.data?.trips || []
-  const userRequests = userRequestsData?.data?.requests || []
+  const trips = tripsData?.trips ?? []
+  const userRequests = userRequestsData?.data?.requests ?? []
 
   // Helper function to check if user has an active request for a trip
   const hasActiveRequestForTrip = (tripId) => {
@@ -230,12 +231,20 @@ const TripsPage = () => {
           </p>
         </div>
         {user?.role === "conducteur" && (
-          <Link to="/trips/create" className="flex-shrink-0">
-            <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg">
-              <Plus className="w-4 h-4 mr-2" />
-              Create Trip
-            </Button>
-          </Link>
+          <div className="flex flex-wrap gap-2 flex-shrink-0">
+            <Link to="/trips/create">
+              <Button className="w-full sm:w-auto bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg">
+                <Plus className="w-4 h-4 mr-2" />
+                Create Trip
+              </Button>
+            </Link>
+            <Link to="/trips/recurring">
+              <Button variant="outline" className="w-full sm:w-auto">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Recurring
+              </Button>
+            </Link>
+          </div>
         )}
       </div>
 
@@ -381,20 +390,44 @@ const TripsPage = () => {
                     <option value="capacityDesc">Capacité: décroissant</option>
                   </select>
                 </div>
+                <Link to="/trips/recurring">
+                  <span
+                    className={clsx(
+                      "inline-flex items-center gap-2 py-1.5 px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors",
+                      "bg-info/10 text-info border-info/20 hover:bg-info/15 hover:border-info/30"
+                    )}
+                  >
+                    <RefreshCw className="w-4 h-4 shrink-0" />
+                    <span className="whitespace-nowrap">Recurring trips</span>
+                  </span>
+                </Link>
               </>
             )}
             {user?.role === "conducteur" && (
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                <select
-                  className="input-field py-1.5 text-xs sm:text-sm min-w-[140px]"
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                >
-                  <option value="departureDateDesc">Date: Plus récents d'abord</option>
-                  <option value="departureDateAsc">Date: Plus anciens d'abord</option>
-                </select>
-              </div>
+              <>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                  <select
+                    className="input-field py-1.5 text-xs sm:text-sm min-w-[140px]"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                  >
+                    <option value="departureDateDesc">Date: Plus récents d'abord</option>
+                    <option value="departureDateAsc">Date: Plus anciens d'abord</option>
+                  </select>
+                </div>
+                <Link to="/trips/recurring">
+                  <span
+                    className={clsx(
+                      "inline-flex items-center gap-2 py-1.5 px-3 rounded-lg border text-xs sm:text-sm font-medium transition-colors",
+                      "bg-info/10 text-info border-info/20 hover:bg-info/15 hover:border-info/30"
+                    )}
+                  >
+                    <RefreshCw className="w-4 h-4 shrink-0" />
+                    <span className="whitespace-nowrap">Recurring trips</span>
+                  </span>
+                </Link>
+              </>
             )}
             <Button variant="ghost" size="small" onClick={() => setShowFilters(!showFilters)} className="flex-shrink-0">
               {showFilters ? t("common.hideFilters") : t("common.showFilters")}
@@ -497,6 +530,8 @@ const TripsPage = () => {
               {paginatedTrips.map((trip, index) => {
               const isBestDeal =
                 isShipper && trip.pricePerKg <= parseFloat(shipperStats.averagePrice) && shipperStats.averagePrice > 0
+              const isRecurring = !!trip.fromRecurring
+              const hasTopTag = isBestDeal || isRecurring
 
               return (
                 <motion.div
@@ -509,16 +544,33 @@ const TripsPage = () => {
                     hover
                     className={clsx(
                       "p-3 sm:p-4 md:p-5 lg:p-6 h-full flex flex-col relative overflow-visible",
-                      isBestDeal && "border-2 border-warning/30"
+                      isBestDeal && "border-2 border-warning/30",
+                      isRecurring && !isBestDeal && "border-2 border-info/30"
                     )}
                   >
-                    {isBestDeal && (
-                      <div
-                        className="absolute top-0 right-0 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-bl-lg rounded-tr-lg bg-warning text-gray-900 shadow-md"
-                        aria-label="Best deal"
-                      >
-                        <Sparkles className="w-4 h-4 shrink-0" />
-                        <span className="text-xs font-bold uppercase tracking-wide">Best Deal</span>
+                    {hasTopTag && (
+                      <div className="absolute top-0 right-0 z-10 flex flex-col items-end gap-1">
+                        {isRecurring && (
+                          <div
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-bl-lg rounded-tr-lg bg-info text-white shadow-md"
+                            aria-label="Recurring trip"
+                          >
+                            <RefreshCw className="w-4 h-4 shrink-0" />
+                            <span className="text-xs font-bold uppercase tracking-wide">Recurring</span>
+                          </div>
+                        )}
+                        {isBestDeal && (
+                          <div
+                            className={clsx(
+                              "flex items-center gap-1.5 px-3 py-1.5 rounded-bl-lg rounded-tr-lg bg-warning text-gray-900 shadow-md",
+                              isRecurring && "rounded-tl-none"
+                            )}
+                            aria-label="Best deal"
+                          >
+                            <Sparkles className="w-4 h-4 shrink-0" />
+                            <span className="text-xs font-bold uppercase tracking-wide">Best Deal</span>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -543,7 +595,7 @@ const TripsPage = () => {
                           <span>{getStatusLabel(trip.status)}</span>
                         </div>
                       </div>
-                      <div className={clsx("text-right shrink-0 min-w-0", isBestDeal && "pt-6")}>
+                      <div className={clsx("text-right shrink-0 min-w-0", hasTopTag && (isRecurring && isBestDeal ? "pt-12" : "pt-6"))}>
                         <div className="text-2xl font-bold text-primary truncate" title={formatCurrency(trip.pricePerKg) + "/kg"}>
                           {formatCurrency(trip.pricePerKg)}/kg
                         </div>

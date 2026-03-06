@@ -1,4 +1,5 @@
 import Notification from "../models/Notification.js"
+import { sendWebPush } from "../services/push.service.js"
 
 /**
  * Create a notification for a user
@@ -10,6 +11,7 @@ import Notification from "../models/Notification.js"
  * @param {String} options.message - Message content
  * @param {String} options.relatedRequestId - Related request ID (optional)
  * @param {String} options.relatedTripId - Related trip ID (optional)
+ * @param {String} options.link - Custom URL for push / in-app link (optional)
  */
 export const createNotification = async ({
   recipientId,
@@ -19,6 +21,7 @@ export const createNotification = async ({
   message,
   relatedRequestId = null,
   relatedTripId = null,
+  link: customLink = null,
 }) => {
   try {
     const notification = await Notification.create({
@@ -30,6 +33,11 @@ export const createNotification = async ({
       relatedRequest: relatedRequestId,
       relatedTrip: relatedTripId,
     })
+
+    const link =
+      customLink ||
+      (relatedRequestId ? `/requests/${relatedRequestId}` : relatedTripId ? `/trips/${relatedTripId}` : "/dashboard")
+    sendWebPush(recipientId, { title, body: message, url: link }).catch(() => {})
 
     return notification
   } catch (error) {

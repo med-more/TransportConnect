@@ -110,6 +110,8 @@ const requestSchema = new mongoose.Schema(
           confirmedAt: Date,
           confirmedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
           signature: String,
+          podPhotoUrl: { type: String, default: null },
+          podNotes: { type: String, maxlength: [500, "Les notes ne peuvent pas dépasser 500 caractères"] },
         },
       },
       ratings: {

@@ -135,6 +135,20 @@
     }
   }
 
+ function normalizeIntermediateStops(stops) {
+  if (!Array.isArray(stops)) return []
+  return stops
+    .filter((s) => s && (s.address || s.city))
+    .map((s, i) => ({
+      address: s.address || "",
+      city: s.city || "",
+      coordinates: s.coordinates || (s.lat != null && s.lng != null ? { lat: s.lat, lng: s.lng } : undefined),
+      order: typeof s.order === "number" ? s.order : i,
+    }))
+    .sort((a, b) => a.order - b.order)
+    .map((s, i) => ({ ...s, order: i }))
+}
+
  export const createTrip = async (req, res) => {
   try {
     const tripData = {
@@ -142,6 +156,9 @@
       driver: req.user._id,
     }
     tripData.status = "active"
+    if (Array.isArray(req.body.intermediateStops)) {
+      tripData.intermediateStops = normalizeIntermediateStops(req.body.intermediateStops)
+    }
 
     const trip = new Trip(tripData)
     await trip.save()
@@ -164,6 +181,9 @@
         return res.status(400).json({ message: "Impossible de modifier un trajet avec des demandes acceptées" })
 
       Object.assign(trip, req.body)
+      if (Array.isArray(req.body.intermediateStops)) {
+        trip.intermediateStops = normalizeIntermediateStops(req.body.intermediateStops)
+      }
       await trip.save()
       await trip.populate("driver", "firstName lastName avatar stats")
 

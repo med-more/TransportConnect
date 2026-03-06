@@ -9,6 +9,7 @@ const MAX_SUGGESTIONS = 8
 /**
  * Place autocomplete for Morocco: suggestions as user types + "Ma position" (GPS).
  * Fills two form fields: city and address. Use with react-hook-form setValue + register.
+ * Optional coordFields: { lat: 'fieldNameLat', lng: 'fieldNameLng' } to also set coordinates when a place is selected (for route/distance estimate).
  */
 export default function PlaceAutocompleteInput({
   label,
@@ -21,6 +22,7 @@ export default function PlaceAutocompleteInput({
   placeholder = "Rechercher un lieu au Maroc...",
   cityRules,
   addressRules,
+  coordFields,
   className,
 }) {
   const [inputValue, setInputValue] = useState("")
@@ -74,6 +76,8 @@ export default function PlaceAutocompleteInput({
   const handleSelect = (place) => {
     setValue(cityField, place.city)
     setValue(addressField, place.address)
+    if (coordFields?.lat && place.lat != null) setValue(coordFields.lat, place.lat)
+    if (coordFields?.lng && place.lng != null) setValue(coordFields.lng, place.lng)
     setInputValue(place.display_name || place.address)
     setSuggestions([])
     setOpen(false)
@@ -85,20 +89,22 @@ export default function PlaceAutocompleteInput({
     }
     setMyLocationLoading(true)
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          const result = await reverseGeocode(pos.coords.latitude, pos.coords.longitude)
-          if (result) {
-            setValue(cityField, result.city)
-            setValue(addressField, result.address)
-            setInputValue(result.display_name || result.address)
-            setSuggestions([])
-            setOpen(false)
+        async (pos) => {
+          try {
+            const result = await reverseGeocode(pos.coords.latitude, pos.coords.longitude)
+            if (result) {
+              setValue(cityField, result.city)
+              setValue(addressField, result.address)
+              if (coordFields?.lat) setValue(coordFields.lat, pos.coords.latitude)
+              if (coordFields?.lng) setValue(coordFields.lng, pos.coords.longitude)
+              setInputValue(result.display_name || result.address)
+              setSuggestions([])
+              setOpen(false)
+            }
+          } finally {
+            setMyLocationLoading(false)
           }
-        } finally {
-          setMyLocationLoading(false)
-        }
-      },
+        },
       () => setMyLocationLoading(false),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
     )

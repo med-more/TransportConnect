@@ -77,6 +77,23 @@ const userSchema = new mongoose.Schema({
         postalCode: String,
         country: { type: String, default: "Maroc" },
       },
+      savedAddresses: {
+        type: [
+          {
+            label: { type: String, required: true, trim: true, maxlength: [80, "Label max 80 chars"] },
+            address: { type: String, required: true, trim: true },
+            city: { type: String, required: true, trim: true },
+            postalCode: { type: String, default: "" },
+            country: { type: String, default: "Maroc" },
+            coordinates: {
+              lat: { type: Number },
+              lng: { type: Number },
+            },
+            type: { type: String, enum: ["home", "work", "other"], default: "other" },
+          },
+        ],
+        default: [],
+      },
       vehicleInfo: {
         type: {
           type: String,
@@ -112,6 +129,24 @@ const userSchema = new mongoose.Schema({
       resetPasswordExpires: {
         type: Date,
         default: null,
+      },
+      notificationPreferences: {
+        email: { type: Boolean, default: true },
+        push: { type: Boolean, default: true },
+      },
+      pushSubscriptions: {
+        type: [
+          {
+            endpoint: { type: String, required: true },
+            keys: {
+              p256dh: { type: String, required: true },
+              auth: { type: String, required: true },
+            },
+            createdAt: { type: Date, default: Date.now },
+          },
+        ],
+        default: [],
+        select: false,
       },
     },
     {

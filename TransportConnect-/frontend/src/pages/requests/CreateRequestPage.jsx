@@ -1,9 +1,9 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, Package, MapPin, User, Euro, AlertCircle } from "../../utils/icons"
-import { tripsAPI, requestsAPI } from "../../services/api"
+import { tripsAPI, requestsAPI, usersAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import PlaceAutocompleteInput from "../../components/ui/PlaceAutocompleteInput"
@@ -89,9 +89,62 @@ const CreateRequestPage = () => {
   const watchedLength = watch("length")
   const watchedWidth = watch("width")
   const watchedHeight = watch("height")
-  const trip = tripData?.data?.trip
+  const trip = tripData?.trip
 
-  const estimatedPrice = watchedWeight && trip ? (Number.parseFloat(watchedWeight) * trip.pricePerKg).toFixed(2) : 0
+  const { data: estimateData } = useQuery({
+    queryKey: ["price-estimate", tripId, watchedWeight],
+    queryFn: () => requestsAPI.getPriceEstimate(tripId, Number(watchedWeight)),
+    enabled: !!tripId && !!trip && Number(watchedWeight) > 0,
+  })
+  const serverEstimate = estimateData?.data?.estimatedPrice ?? estimateData?.estimatedPrice
+  const estimatedPrice =
+    serverEstimate != null
+      ? Number(serverEstimate).toFixed(2)
+      : watchedWeight && trip
+        ? (Number.parseFloat(watchedWeight) * trip.pricePerKg).toFixed(2)
+        : "0"
+
+  const { data: savedAddresses = [] } = useQuery({
+    queryKey: ["saved-addresses"],
+    queryFn: () => usersAPI.getSavedAddresses(),
+    enabled: true,
+  })
+
+  const fillPickupFromAddress = (addr) => {
+    if (!addr) return
+    setValue("pickupAddress", addr.address)
+    setValue("pickupCity", addr.city)
+  }
+  const fillDeliveryFromAddress = (addr) => {
+    if (!addr) return
+    setValue("deliveryAddress", addr.address)
+    setValue("deliveryCity", addr.city)
+  }
+
+  const [saveAddressType, setSaveAddressType] = useState(null)
+  const [saveAddressLabel, setSaveAddressLabel] = useState("")
+  const saveAddressMutation = useMutation({
+    mutationFn: (data) => usersAPI.addSavedAddress(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["saved-addresses"] })
+      setSaveAddressType(null)
+      setSaveAddressLabel("")
+      toast.success("Address saved to your list")
+    },
+    onError: (e) => toast.error(e.response?.data?.message || "Failed to save address"),
+  })
+  const handleSaveAddress = (type) => {
+    const address = type === "pickup" ? watch("pickupAddress") : watch("deliveryAddress")
+    const city = type === "pickup" ? watch("pickupCity") : watch("deliveryCity")
+    if (!address?.trim() || !city?.trim()) {
+      toast.error("Enter address and city first")
+      return
+    }
+    saveAddressMutation.mutate(
+      { label: saveAddressLabel.trim() || (type === "pickup" ? "Pickup" : "Delivery"), address: address.trim(), city: city.trim(), country: "Maroc" },
+      { onSuccess: () => setSaveAddressType(null) }
+    )
+  }
 
   const maxWeight = trip?.availableCapacity?.weight
   const maxDims = trip?.availableCapacity?.dimensions
@@ -366,6 +419,28 @@ const CreateRequestPage = () => {
             <h2 className="text-xl font-semibold text-foreground">Pickup Information</h2>
           </div>
 
+          {savedAddresses?.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
+              <select
+                className="input-field"
+                onChange={(e) => {
+                  const id = e.target.value
+                  if (!id) return
+                  const addr = savedAddresses.find((a) => a._id === id)
+                  fillPickupFromAddress(addr)
+                }}
+              >
+                <option value="">Select an address...</option>
+                {savedAddresses.map((addr) => (
+                  <option key={addr._id} value={addr._id}>
+                    {addr.label} — {addr.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <PlaceAutocompleteInput
               label="Lieu de ramassage (Maroc)"
@@ -394,6 +469,38 @@ const CreateRequestPage = () => {
               {...register("pickupContactPhone")}
             />
           </div>
+          <div className="mt-4 pt-4 border-t border-border">
+            {saveAddressType === "pickup" ? (
+              <div className="flex flex-wrap items-end gap-2">
+                <input
+                  type="text"
+                  placeholder="Label (e.g. Warehouse)"
+                  value={saveAddressLabel}
+                  onChange={(e) => setSaveAddressLabel(e.target.value)}
+                  className="input-field flex-1 min-w-[140px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveAddress("pickup")}
+                  disabled={saveAddressMutation.isPending}
+                  className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button type="button" onClick={() => setSaveAddressType(null)} className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50">
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setSaveAddressType("pickup")}
+                className="text-sm text-primary hover:underline"
+              >
+                Save this pickup to my addresses
+              </button>
+            )}
+          </div>
         </Card>
 
         <Card className="p-4 sm:p-5 md:p-6">
@@ -401,6 +508,28 @@ const CreateRequestPage = () => {
             <MapPin className="w-6 h-6 text-primary mr-3" />
             <h2 className="text-xl font-semibold text-foreground">Delivery Information</h2>
           </div>
+
+          {savedAddresses?.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
+              <select
+                className="input-field"
+                onChange={(e) => {
+                  const id = e.target.value
+                  if (!id) return
+                  const addr = savedAddresses.find((a) => a._id === id)
+                  fillDeliveryFromAddress(addr)
+                }}
+              >
+                <option value="">Select an address...</option>
+                {savedAddresses.map((addr) => (
+                  <option key={addr._id} value={addr._id}>
+                    {addr.label} — {addr.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <PlaceAutocompleteInput
@@ -429,6 +558,38 @@ const CreateRequestPage = () => {
               error={errors.deliveryContactPhone?.message}
               {...register("deliveryContactPhone")}
             />
+          </div>
+          <div className="mt-4 pt-4 border-t border-border">
+            {saveAddressType === "delivery" ? (
+              <div className="flex flex-wrap items-end gap-2">
+                <input
+                  type="text"
+                  placeholder="Label (e.g. Client Rabat)"
+                  value={saveAddressLabel}
+                  onChange={(e) => setSaveAddressLabel(e.target.value)}
+                  className="input-field flex-1 min-w-[140px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleSaveAddress("delivery")}
+                  disabled={saveAddressMutation.isPending}
+                  className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button type="button" onClick={() => setSaveAddressType(null)} className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50">
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setSaveAddressType("delivery")}
+                className="text-sm text-primary hover:underline"
+              >
+                Save this delivery to my addresses
+              </button>
+            )}
           </div>
         </Card>
 

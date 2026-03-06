@@ -60,7 +60,7 @@ const AdminTripsPage = () => {
   })
 
   const trips = tripsData?.data || []
-  const tripDetails = tripDetailData?.data?.trip
+  const tripDetails = tripDetailData?.trip
 
   const filterTrips = () => {
     let filtered = trips

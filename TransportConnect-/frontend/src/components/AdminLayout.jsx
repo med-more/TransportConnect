@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "../contexts/AuthContext"
+import { useSocket } from "../contexts/SocketContext"
 import {
   BarChart3,
   Truck,
@@ -19,12 +20,13 @@ import {
   Sun,
   Moon,
   Car,
+  FileText,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
 import logo from "../assets/logo2.svg"
 import { normalizeAvatarUrl } from "../utils/avatar"
-import { adminAPI } from "../services/api"
+import { adminAPI, notificationsAPI } from "../services/api"
 import { useTheme } from "../contexts/ThemeContext"
 
 const AdminLayout = ({ children }) => {
@@ -34,13 +36,14 @@ const AdminLayout = ({ children }) => {
     return saved ? JSON.parse(saved) : false
   })
   const [sidebarOpen, setSidebarOpen] = useState(false) // Mobile sidebar
-  const [notifications, setNotifications] = useState([])
   const [showNotifications, setShowNotifications] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const { user, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { socket } = useSocket()
+  const queryClient = useQueryClient()
   const location = useLocation()
   const navigate = useNavigate()
   const notificationRef = useRef(null)
@@ -58,6 +61,7 @@ const AdminLayout = ({ children }) => {
     { name: "Trajets", href: "/admin/trips", icon: Truck },
     { name: "Demandes", href: "/admin/requests", icon: Package },
     { name: "Véhicules", href: "/admin/vehicles", icon: Car },
+    { name: "Documents (KYC)", href: "/admin/documents", icon: FileText },
     { name: "Vérifications", href: "/admin/verifications", icon: Shield },
   ]
 
@@ -83,6 +87,34 @@ const AdminLayout = ({ children }) => {
   const trips = tripsData?.data || []
   const requests = requestsData?.data || []
   const allUsers = usersData?.data || []
+
+  const {
+    data: notificationsData,
+    refetch: refetchNotifications,
+  } = useQuery({
+    queryKey: ["notifications", user?._id],
+    queryFn: async () => {
+      try {
+        const response = await notificationsAPI.getNotifications({ limit: 50 })
+        const data = response?.data?.data || response?.data
+        return { notifications: data?.notifications || [], unreadCount: data?.unreadCount ?? 0 }
+      } catch {
+        return { notifications: [], unreadCount: 0 }
+      }
+    },
+    enabled: !!user,
+  })
+  const notifications = notificationsData?.notifications || []
+
+  useEffect(() => {
+    if (!socket || !user) return
+    const handler = () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications", user._id] })
+      refetchNotifications()
+    }
+    socket.on("new_notification", handler)
+    return () => socket.off("new_notification", handler)
+  }, [socket, user?._id, queryClient, refetchNotifications])
 
   // Filter search results
   const searchResults = {
@@ -520,18 +552,40 @@ const AdminLayout = ({ children }) => {
                         </div>
                       ) : (
                         <div className="divide-y divide-border">
-                          {notifications.map((notif, idx) => (
+                          {notifications.map((notif) => (
                             <div
-                              key={idx}
+                              key={notif._id || notif.createdAt}
+                              role="button"
+                              tabIndex={0}
+                              onClick={async () => {
+                                if (!notif.read) {
+                                  try {
+                                    await notificationsAPI.markAsRead(notif._id)
+                                    queryClient.invalidateQueries({ queryKey: ["notifications", user?._id] })
+                                    refetchNotifications()
+                                  } catch (e) {
+                                    console.error("Mark as read failed:", e)
+                                  }
+                                }
+                                setShowNotifications(false)
+                                if (notif.type === "document_submitted") {
+                                  navigate("/admin/documents")
+                                } else if (notif.relatedRequest?._id || notif.relatedRequest) {
+                                  navigate(`/admin/requests`)
+                                } else if (notif.relatedTrip?._id || notif.relatedTrip) {
+                                  navigate(`/admin/trips`)
+                                }
+                              }}
+                              onKeyDown={(e) => e.key === "Enter" && e.currentTarget.click()}
                               className={clsx(
                                 "p-4 hover:bg-accent transition-colors cursor-pointer",
-                                !notif.read && "bg-accent/50"
+                                !notif.read && "bg-primary/5"
                               )}
                             >
                               <p className="text-sm font-medium text-foreground">{notif.title}</p>
                               <p className="text-xs text-muted-foreground mt-1">{notif.message}</p>
                               <p className="text-xs text-muted-foreground mt-2">
-                                {new Date(notif.date).toLocaleString()}
+                                {new Date(notif.createdAt || notif.date).toLocaleString()}
                               </p>
                             </div>
                           ))}

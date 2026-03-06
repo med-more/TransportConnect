@@ -229,11 +229,169 @@ export const uploadAvatar = async (req, res) => {
     })
   } catch (error) {
     console.error("Erreur lors de l'upload de l'avatar:", error)
-    console.error("Error stack:", error.stack)
-    res.status(500).json({
-      success: false,
-      message: error.message || "Erreur lors de l'upload de l'avatar",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined
+  }
+}
+
+export const getSavedAddresses = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("savedAddresses").lean()
+    res.json({ success: true, data: user?.savedAddresses || [] })
+  } catch (error) {
+    console.error("getSavedAddresses error:", error)
+    res.status(500).json({ success: false, message: "Error fetching saved addresses" })
+  }
+}
+
+export const addSavedAddress = async (req, res) => {
+  try {
+    const { label, address, city, postalCode, country, coordinates, type } = req.body
+    if (!label || !address || !city) {
+      return res.status(400).json({
+        success: false,
+        message: "Label, address and city are required",
+      })
+    }
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    user.savedAddresses.push({
+      label: label.trim(),
+      address: address.trim(),
+      city: city.trim(),
+      postalCode: postalCode ? String(postalCode).trim() : "",
+      country: country ? String(country).trim() : "Maroc",
+      coordinates: coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number"
+        ? { lat: coordinates.lat, lng: coordinates.lng }
+        : undefined,
+      type: type && ["home", "work", "other"].includes(type) ? type : "other",
     })
+    await user.save()
+    const added = user.savedAddresses[user.savedAddresses.length - 1]
+    res.status(201).json({ success: true, data: added })
+  } catch (error) {
+    console.error("addSavedAddress error:", error)
+    res.status(500).json({ success: false, message: "Error adding saved address" })
+  }
+}
+
+export const updateSavedAddress = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { label, address, city, postalCode, country, coordinates, type } = req.body
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    const subdoc = user.savedAddresses.id(id)
+    if (!subdoc) {
+      return res.status(404).json({ success: false, message: "Saved address not found" })
+    }
+    if (label != null) subdoc.label = String(label).trim()
+    if (address != null) subdoc.address = String(address).trim()
+    if (city != null) subdoc.city = String(city).trim()
+    if (postalCode != null) subdoc.postalCode = String(postalCode).trim()
+    if (country != null) subdoc.country = String(country).trim()
+    if (coordinates && typeof coordinates.lat === "number" && typeof coordinates.lng === "number") {
+      subdoc.coordinates = { lat: coordinates.lat, lng: coordinates.lng }
+    }
+    if (type && ["home", "work", "other"].includes(type)) subdoc.type = type
+    await user.save()
+    res.json({ success: true, data: subdoc })
+  } catch (error) {
+    console.error("updateSavedAddress error:", error)
+    res.status(500).json({ success: false, message: "Error updating saved address" })
+  }
+}
+
+export const deleteSavedAddress = async (req, res) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    const subdoc = user.savedAddresses.id(id)
+    if (!subdoc) {
+      return res.status(404).json({ success: false, message: "Saved address not found" })
+    }
+    subdoc.deleteOne()
+    await user.save()
+    res.json({ success: true, message: "Saved address deleted" })
+  } catch (error) {
+    console.error("deleteSavedAddress error:", error)
+    res.status(500).json({ success: false, message: "Error deleting saved address" })
+  }
+}
+
+export const getNotificationPreferences = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select("notificationPreferences")
+      .lean()
+    const prefs = user?.notificationPreferences ?? { email: true, push: true }
+    res.json({ success: true, data: prefs })
+  } catch (error) {
+    console.error("getNotificationPreferences error:", error)
+    res.status(500).json({ success: false, message: "Error fetching notification preferences" })
+  }
+}
+
+export const updateNotificationPreferences = async (req, res) => {
+  try {
+    const { email, push } = req.body
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    if (typeof email === "boolean") user.notificationPreferences.email = email
+    if (typeof push === "boolean") user.notificationPreferences.push = push
+    await user.save()
+    res.json({
+      success: true,
+      data: user.notificationPreferences,
+    })
+  } catch (error) {
+    console.error("updateNotificationPreferences error:", error)
+    res.status(500).json({ success: false, message: "Error updating notification preferences" })
+  }
+}
+
+export const addPushSubscription = async (req, res) => {
+  try {
+    const { endpoint, keys } = req.body
+    if (!endpoint || !keys?.p256dh || !keys?.auth) {
+      return res.status(400).json({
+        success: false,
+        message: "endpoint and keys.p256dh, keys.auth are required",
+      })
+    }
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    const existing = user.pushSubscriptions?.find((s) => s.endpoint === endpoint)
+    if (existing) {
+      existing.keys = { p256dh: keys.p256dh, auth: keys.auth }
+      existing.createdAt = new Date()
+    } else {
+      user.pushSubscriptions = user.pushSubscriptions || []
+      user.pushSubscriptions.push({
+        endpoint,
+        keys: { p256dh: keys.p256dh, auth: keys.auth },
+      })
+    }
+    await user.save()
+    res.json({ success: true, message: "Push subscription saved" })
+  } catch (error) {
+    console.error("addPushSubscription error:", error)
+    res.status(500).json({ success: false, message: "Error saving push subscription" })
+  }
+}
+
+export const removePushSubscription = async (req, res) => {
+  try {
+    const { endpoint } = req.body
+    if (!endpoint) {
+      return res.status(400).json({ success: false, message: "endpoint is required" })
+    }
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ success: false, message: "User not found" })
+    user.pushSubscriptions = (user.pushSubscriptions || []).filter((s) => s.endpoint !== endpoint)
+    await user.save()
+    res.json({ success: true, message: "Push subscription removed" })
+  } catch (error) {
+    console.error("removePushSubscription error:", error)
+    res.status(500).json({ success: false, message: "Error removing push subscription" })
   }
 } 

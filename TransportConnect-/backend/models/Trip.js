@@ -45,6 +45,7 @@ const tripSchema = new mongoose.Schema(
           lat: Number,
           lng: Number,
         },
+        order: { type: Number, default: 0 },
       },
     ],
     departureDate: {
@@ -106,6 +107,11 @@ const tripSchema = new mongoose.Schema(
     totalEarnings: {
       type: Number,
       default: 0,
+    },
+    fromRecurring: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RecurringTrip",
+      default: null,
     },
   },
   {

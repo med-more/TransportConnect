@@ -28,6 +28,8 @@ const notificationSchema = new mongoose.Schema(
         "account_verified", // Admin verified user account
         "account_suspended", // Admin suspended user account
         "account_reactivated", // Admin reactivated user account
+        "document_submitted", // Driver submitted a document for review (notify admins)
+        "document_reviewed", // Admin approved or rejected a document (notify driver)
       ],
     },
     title: {

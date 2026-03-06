@@ -1,6 +1,20 @@
 import express from "express"
-import { getUserStats, updateProfile, updateLastSeen, uploadAvatar } from "../controllers/users.controller.js"
+import {
+  getUserStats,
+  updateProfile,
+  updateLastSeen,
+  uploadAvatar,
+  getSavedAddresses,
+  addSavedAddress,
+  updateSavedAddress,
+  deleteSavedAddress,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+  addPushSubscription,
+  removePushSubscription,
+} from "../controllers/users.controller.js"
 import { authenticateToken } from "../middleware/auth.middleware.js"
+import { validateObjectId } from "../middleware/validation.js"
 import uploadSingle from "../middleware/upload.middleware.js"
 
 const router = express.Router()
@@ -62,5 +76,17 @@ router.post("/avatar", (req, res, next) => {
     next()
   })
 }, uploadAvatar)
+
+// Saved addresses
+router.get("/saved-addresses", getSavedAddresses)
+router.post("/saved-addresses", addSavedAddress)
+router.put("/saved-addresses/:id", ...validateObjectId("id"), updateSavedAddress)
+router.delete("/saved-addresses/:id", ...validateObjectId("id"), deleteSavedAddress)
+
+// Notification preferences & Web Push
+router.get("/me/notification-preferences", getNotificationPreferences)
+router.patch("/me/notification-preferences", updateNotificationPreferences)
+router.post("/push-subscription", addPushSubscription)
+router.delete("/push-subscription", removePushSubscription)
 
 export default router 

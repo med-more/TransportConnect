@@ -68,6 +68,12 @@ export const validateTrip = [
   body("availableCapacity.weight").isFloat({ min: 1 }).withMessage("La capacité de poids doit être supérieure à 0"),
   body("pricePerKg").isFloat({ min: 0 }).withMessage("Le prix par kg ne peut pas être négatif"),
   body("acceptedCargoTypes").isArray({ min: 1 }).withMessage("Au moins un type de cargaison doit être sélectionné"),
+  body("intermediateStops").optional().isArray().withMessage("intermediateStops doit être un tableau"),
+  body("intermediateStops.*.address").optional().trim(),
+  body("intermediateStops.*.city").optional().trim(),
+  body("intermediateStops.*.order").optional().isInt({ min: 0 }),
+  body("intermediateStops.*.coordinates.lat").optional().isFloat(),
+  body("intermediateStops.*.coordinates.lng").optional().isFloat(),
   handleValidationErrors,
 ]
 
@@ -96,6 +102,24 @@ export const validateObjectId = (paramName) => [
   handleValidationErrors,
 ]
 
+export const validateRecurringTrip = [
+  body("frequency").isIn(["weekly", "monthly"]).withMessage("Fréquence invalide (weekly ou monthly)"),
+  body("dayOfWeek").optional().isInt({ min: 0, max: 6 }).withMessage("dayOfWeek 0–6 (dimanche–samedi)"),
+  body("dayOfMonth").optional().isInt({ min: 1, max: 31 }).withMessage("dayOfMonth 1–31"),
+  body("startDate").isISO8601().toDate().withMessage("Date de début requise"),
+  body("endDate").optional({ checkFalsy: true, nullable: true }).isISO8601().toDate().withMessage("Format endDate invalide"),
+  body("template").isObject().withMessage("Template requis"),
+  body("template.departure.address").trim().notEmpty().withMessage("Adresse de départ requise"),
+  body("template.departure.city").trim().notEmpty().withMessage("Ville de départ requise"),
+  body("template.destination.address").trim().notEmpty().withMessage("Adresse de destination requise"),
+  body("template.destination.city").trim().notEmpty().withMessage("Ville de destination requise"),
+  body("template.availableCapacity.weight").isFloat({ min: 1 }).withMessage("Capacité poids requise (min 1)"),
+  body("template.pricePerKg").isFloat({ min: 0 }).withMessage("Prix par kg requis"),
+  body("template.acceptedCargoTypes").isArray().withMessage("acceptedCargoTypes doit être un tableau"),
+  body("template.departureTime").optional().trim().matches(/^\d{1,2}:\d{2}$/).withMessage("departureTime format HH:mm"),
+  body("template.durationHours").optional().isFloat({ min: 0.5, max: 72 }).withMessage("durationHours entre 0.5 et 72"),
+  handleValidationErrors,
+]
 
 const VALID_VEHICLE_TYPES = ["camion", "camionnette", "voiture", "moto"]
 

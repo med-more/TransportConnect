@@ -69,7 +69,7 @@ const DashboardPage = () => {
   // Active shipment: for driver = first active trip; for shipper = first accepted/in_transit request
   const activeTrip =
     user?.role === "conducteur"
-      ? recentTrips?.data?.trips?.find((t) => t.status === "active")
+      ? recentTrips?.trips?.find((t) => t.status === "active")
       : null
   const activeRequest =
     user?.role !== "conducteur"
@@ -120,7 +120,7 @@ const DashboardPage = () => {
     },
     {
       title: t("dashboard.activeShipments"),
-      value: recentTrips?.data?.trips?.filter((trip) => trip.status === "active")?.length || 0,
+      value: recentTrips?.trips?.filter((trip) => trip.status === "active")?.length || 0,
       icon: Package,
       color: "text-info",
       bgColor: "bg-info/10",
@@ -408,8 +408,8 @@ const DashboardPage = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {recentTrips?.data?.trips?.length > 0 ? (
-                    recentTrips.data.trips.map((trip) => (
+                  {recentTrips?.trips?.length > 0 ? (
+                    recentTrips.trips.map((trip) => (
                       <div
                         key={trip._id}
                         className="p-4 bg-muted/30 dark:bg-muted/50 rounded-xl border border-border hover:border-primary/30 hover:shadow-sm transition-all duration-200"

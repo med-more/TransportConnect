@@ -22,6 +22,11 @@ import requestRoutes from "./routes/requests.route.js"
 import adminRoutes from "./routes/admin.route.js"
 import notificationsRoutes from "./routes/notifications.route.js"
 import chatsRoutes from "./routes/chats.route.js"
+import configRoutes from "./routes/config.route.js"
+import estimateRoutes from "./routes/estimate.route.js"
+import recurringTripsRoutes from "./routes/recurringTrips.route.js"
+import documentsRoutes from "./routes/documents.route.js"
+import { runRecurringTripsJob } from "./services/recurringTrip.service.js"
 
 const app = express()
 const PORT = process.env.PORT || 7000
@@ -68,6 +73,16 @@ if (!fs.existsSync(avatarsPath)) {
   fs.mkdirSync(avatarsPath, { recursive: true })
   console.log("✅ Created avatars directory:", avatarsPath)
 }
+const podPath = path.join(uploadsPath, "pod")
+if (!fs.existsSync(podPath)) {
+  fs.mkdirSync(podPath, { recursive: true })
+  console.log("✅ Created POD uploads directory:", podPath)
+}
+const documentsPath = path.join(uploadsPath, "documents")
+if (!fs.existsSync(documentsPath)) {
+  fs.mkdirSync(documentsPath, { recursive: true })
+  console.log("✅ Created documents uploads directory:", documentsPath)
+}
 
 app.use("/uploads", express.static(uploadsPath))
 console.log("📁 Serving static files from:", uploadsPath)
@@ -79,6 +94,10 @@ app.use("/api/users", usersRoutes)
 app.use("/api/admin", adminRoutes)
 app.use("/api/notifications", notificationsRoutes)
 app.use("/api/chats", chatsRoutes)
+app.use("/api/config", configRoutes)
+app.use("/api/estimate", estimateRoutes)
+app.use("/api/recurring-trips", recurringTripsRoutes)
+app.use("/api/documents", documentsRoutes)
 
 app.get("/api/health", (_, res) => res.status(200).json({ ok: true }))
 
@@ -116,6 +135,9 @@ const start = async () => {
     server.listen(PORT, () => {
       console.log(`Serveur en marche sur le port ${PORT}`)
       console.log(`⏱️  Server timeout set to ${server.timeout}ms for file uploads`)
+      const runJob = () => runRecurringTripsJob().catch((err) => console.error("Recurring trips job:", err))
+      setTimeout(runJob, 5000)
+      setInterval(runJob, 24 * 60 * 60 * 1000)
     })
   } catch (err) {
     console.error("Failed to start server:", err)

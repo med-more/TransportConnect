@@ -123,5 +123,58 @@ export default function uploadSingle(fieldName) {
   return uploadMiddleware.single(fieldName)
 }
 
+// POD (proof of delivery) photo upload — local folder uploads/pod
+const podUploadsDir = path.join(__dirname, "../uploads/pod")
+if (!fs.existsSync(podUploadsDir)) {
+  fs.mkdirSync(podUploadsDir, { recursive: true })
+}
+const podStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, podUploadsDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    const requestId = req.params?.id || "unknown"
+    cb(null, `pod-${requestId}-${uniqueSuffix}${path.extname(file.originalname) || ".jpg"}`)
+  },
+})
+const podUpload = multer({
+  storage: podStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    file.mimetype.startsWith("image/") ? cb(null, true) : cb(new Error("Only image files are allowed"))
+  },
+})
+
+export function uploadPodPhoto() {
+  return podUpload.single("podPhoto")
+}
+
+// KYC / Document verification uploads — uploads/documents (images + PDF)
+const documentsUploadsDir = path.join(__dirname, "../uploads/documents")
+if (!fs.existsSync(documentsUploadsDir)) {
+  fs.mkdirSync(documentsUploadsDir, { recursive: true })
+}
+const documentsStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, documentsUploadsDir),
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9)
+    const userId = req.user?._id?.toString() || "unknown"
+    const ext = path.extname(file.originalname) || ".bin"
+    cb(null, `doc-${userId}-${uniqueSuffix}${ext}`)
+  },
+})
+const documentsUpload = multer({
+  storage: documentsStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]
+    if (allowed.includes(file.mimetype)) return cb(null, true)
+    cb(new Error("Only images (JPEG, PNG, WebP, GIF) and PDF are allowed"))
+  },
+})
+
+export function uploadDocument() {
+  return documentsUpload.single("file")
+}
+
 // For direct use in routes
 export { uploadMiddleware, cloudinary }

@@ -1,3 +1,6 @@
 /node_modules
 
 .env
+
+# Internal roadmap (do not push)
+docs/VALUE_ADD_FEATURES_ROADMAP.md

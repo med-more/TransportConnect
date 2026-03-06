@@ -29,6 +29,8 @@ import DashboardPage from "./pages/dashboard/DashboardPage"
 import TripsPage from "./pages/trips/TripsPage"
 import TripDetailPage from "./pages/trips/TripDetailPage"
 import CreateTripPage from "./pages/trips/CreateTripPage"
+import RecurringTripsPage from "./pages/trips/RecurringTripsPage"
+import RecurringTripDetailPage from "./pages/trips/RecurringTripDetailPage"
 import RequestsPage from "./pages/requests/RequestsPage"
 import RequestDetailPage from "./pages/requests/RequestDetailPage"
 import CreateRequestPage from "./pages/requests/CreateRequestPage"
@@ -44,6 +46,7 @@ import AdminTripsPage from "./pages/admin/AdminTripsPage"
 import AdminRequestsPage from "./pages/admin/AdminRequestsPage"
 import AdminVerificationsPage from "./pages/admin/AdminVerificationsPage"
 import AdminVehiclesPage from "./pages/admin/AdminVehiclesPage"
+import AdminDocumentsPage from "./pages/admin/AdminDocumentsPage"
 
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth()
@@ -102,6 +105,26 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <CreateTripPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trips/recurring"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <RecurringTripsPage />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trips/recurring/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <RecurringTripDetailPage />
             </Layout>
           </ProtectedRoute>
         }
@@ -264,6 +287,16 @@ function AppRoutes() {
           <ProtectedRoute roles={["admin"]}>
             <AdminLayout>
               <AdminVehiclesPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/documents"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminDocumentsPage />
             </AdminLayout>
           </ProtectedRoute>
         }

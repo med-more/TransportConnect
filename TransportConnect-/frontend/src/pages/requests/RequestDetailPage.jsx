@@ -32,10 +32,18 @@ import Skeleton from "../../components/ui/Skeleton"
 import ShipmentTrackingMap from "../../components/ShipmentTrackingMap"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import InputDialog from "../../components/ui/InputDialog"
+import DeliveryConfirmModal from "../../components/ui/DeliveryConfirmModal"
 import RatingDialog from "../../components/ui/RatingDialog"
 import toast from "react-hot-toast"
 import { normalizeAvatarUrl } from "../../utils/avatar"
+import { API_BASE_URL } from "../../config/constants"
 import clsx from "clsx"
+
+const getPodImageUrl = (path) => {
+  if (!path) return null
+  const base = API_BASE_URL.replace(/\/api\/?$/, "")
+  return path.startsWith("http") ? path : `${base}${path.startsWith("/") ? "" : "/"}${path}`
+}
 
 const RequestDetailPage = () => {
   const { id } = useParams()
@@ -136,7 +144,8 @@ const RequestDetailPage = () => {
   })
 
   const confirmDeliveryMutation = useMutation({
-    mutationFn: ({ id, signature }) => requestsAPI.confirmDelivery(id, signature),
+    mutationFn: ({ id, signature, podNotes, podPhoto }) =>
+      requestsAPI.confirmDelivery(id, { signature, podNotes, podPhoto }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["request", id] })
       await queryClient.invalidateQueries({ queryKey: ["requests"], exact: false })
@@ -202,16 +211,16 @@ const RequestDetailPage = () => {
   }
 
   const handleConfirmDelivery = () => {
-    setDeliveryDialog(true)
-  }
-
-  const handleConfirmDeliveryAction = () => {
-    setDeliveryDialog(false)
     setDeliverySignatureDialog(true)
   }
 
-  const handleConfirmDeliveryWithSignature = (signature) => {
-    confirmDeliveryMutation.mutate({ id, signature: signature || "" })
+  const handleConfirmDeliveryWithPOD = (payload) => {
+    confirmDeliveryMutation.mutate({
+      id,
+      signature: payload?.signature ?? "",
+      podNotes: payload?.podNotes ?? "",
+      podPhoto: payload?.podPhoto,
+    })
     setDeliverySignatureDialog(false)
   }
 
@@ -778,6 +787,37 @@ const RequestDetailPage = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Proof of delivery — photo, signature, notes */}
+                    {request.tracking?.delivered?.confirmed &&
+                      (request.tracking.delivered.podPhotoUrl ||
+                        request.tracking.delivered.signature ||
+                        request.tracking.delivered.podNotes) && (
+                      <div className="mt-4 pt-4 border-t border-border space-y-3">
+                        <h4 className="text-sm font-semibold text-foreground">Proof of delivery</h4>
+                        {request.tracking.delivered.podPhotoUrl && (
+                          <div className="rounded-xl overflow-hidden border border-border bg-muted/30">
+                            <img
+                              src={`${API_BASE_URL.replace(/\/api\/?$/, "")}${request.tracking.delivered.podPhotoUrl}`}
+                              alt="Delivery proof"
+                              className="w-full max-h-64 object-contain bg-muted/20"
+                            />
+                          </div>
+                        )}
+                        {request.tracking.delivered.signature && (
+                          <p className="text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">Signature: </span>
+                            {request.tracking.delivered.signature}
+                          </p>
+                        )}
+                        {request.tracking.delivered.podNotes && (
+                          <p className="text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">Notes: </span>
+                            {request.tracking.delivered.podNotes}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </Card>
               </motion.div>
@@ -1200,29 +1240,13 @@ const RequestDetailPage = () => {
         loading={confirmPickupMutation.isLoading}
       />
 
-      <ConfirmationDialog
-        isOpen={deliveryDialog}
-        onClose={() => setDeliveryDialog(false)}
-        onConfirm={handleConfirmDeliveryAction}
-        title="Confirm package delivery?"
-        message="This will mark the package as delivered. Make sure the recipient has received the package."
-        confirmText="Continue"
-        cancelText="Cancel"
-        variant="success"
-      />
-
-      <InputDialog
+      <DeliveryConfirmModal
         isOpen={deliverySignatureDialog}
         onClose={() => setDeliverySignatureDialog(false)}
-        onConfirm={handleConfirmDeliveryWithSignature}
-        title="Recipient Signature"
-        message="Enter the recipient's signature (optional)"
-        placeholder="Recipient signature (optional)"
-        confirmText="Confirm Delivery"
-        cancelText="Cancel"
-        variant="success"
+        onConfirm={handleConfirmDeliveryWithPOD}
         loading={confirmDeliveryMutation.isLoading}
-        type="text"
+        confirmText={t("request.confirmDelivery")}
+        cancelText={t("common.cancel")}
       />
 
       <InputDialog

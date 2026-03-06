@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, useNavigate, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
@@ -21,7 +21,7 @@ import {
   XCircle,
   Eye,
 } from "../../utils/icons"
-import { tripsAPI, requestsAPI } from "../../services/api"
+import { tripsAPI, requestsAPI, estimateAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
 import { useLocale } from "../../contexts/LocaleContext"
 import { useTranslation } from "../../i18n/useTranslation"
@@ -31,6 +31,7 @@ import Skeleton from "../../components/ui/Skeleton"
 import ConfirmationDialog from "../../components/ui/ConfirmationDialog"
 import toast from "react-hot-toast"
 import Card from "../../components/ui/Card"
+import RouteStepsMap from "../../components/map/RouteStepsMap"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import clsx from "clsx"
 
@@ -105,6 +106,45 @@ const TripDetailPage = () => {
     }
   }, [])
 
+  const trip = tripData?.trip
+  const routeWaypoints = useMemo(() => {
+    if (!trip) return []
+    const dep = trip.departure?.coordinates
+    const dest = trip.destination?.coordinates
+    const stops = (trip.intermediateStops || []).slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+    const list = []
+    if (dep?.lat != null && dep?.lng != null) {
+      list.push({ lat: dep.lat, lng: dep.lng, label: trip.departure?.city || "Departure" })
+    }
+    stops.forEach((s, i) => {
+      if (s.coordinates?.lat != null && s.coordinates?.lng != null) {
+        list.push({
+          lat: s.coordinates.lat,
+          lng: s.coordinates.lng,
+          label: s.city || s.address || `Stop ${i + 1}`,
+        })
+      }
+    })
+    if (dest?.lat != null && dest?.lng != null) {
+      list.push({ lat: dest.lat, lng: dest.lng, label: trip.destination?.city || "Destination" })
+    }
+    return list
+  }, [trip])
+
+  const { data: routeEstimate } = useQuery({
+    queryKey: ["trip-route", id, routeWaypoints.map((w) => `${w.lat},${w.lng}`).join(";")],
+    queryFn: () =>
+      routeWaypoints.length === 2
+        ? estimateAPI.getRouteEstimate(
+            routeWaypoints[0].lat,
+            routeWaypoints[0].lng,
+            routeWaypoints[1].lat,
+            routeWaypoints[1].lng
+          )
+        : estimateAPI.getRouteEstimateMulti(routeWaypoints),
+    enabled: !!id && routeWaypoints.length >= 2,
+  })
+
   const handleDeleteTrip = () => {
     setDeleteDialog(true)
   }
@@ -149,7 +189,7 @@ const TripDetailPage = () => {
     )
   }
 
-  if (!tripData?.data?.trip) {
+  if (!tripData?.trip) {
     return (
       <div className="p-6 text-center">
         <h1 className="text-2xl font-bold text-foreground mb-4">Trip not found</h1>
@@ -158,8 +198,7 @@ const TripDetailPage = () => {
     )
   }
 
-  const trip = tripData.data.trip
-  const isOwner = user?.id === trip.driver._id
+  const isOwner = user?.id === trip?.driver?._id
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -243,7 +282,17 @@ const TripDetailPage = () => {
             </Button>
             <div className="min-w-0 flex-1">
               <h1 className="text-lg font-bold text-foreground truncate sm:text-xl md:text-2xl lg:text-3xl">
-                {trip.departure?.city} → {trip.destination?.city}
+                {[
+                  trip.departure?.city,
+                  ...(trip.intermediateStops || [])
+                    .slice()
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map((s) => s.city)
+                    .filter(Boolean),
+                  trip.destination?.city,
+                ]
+                  .filter(Boolean)
+                  .join(" → ")}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1 sm:text-sm">
                 {new Date(trip.departureDate).toLocaleDateString("en-US", { dateStyle: "medium" })}
@@ -274,6 +323,17 @@ const TripDetailPage = () => {
                   <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Route</h2>
                 </div>
 
+                {routeWaypoints.length >= 2 && (
+                  <div className="mb-4 sm:mb-5">
+                    <p className="text-sm font-medium text-foreground mb-2">Route on map</p>
+                    <RouteStepsMap
+                      waypoints={routeWaypoints}
+                      routeGeometry={routeEstimate?.geometry}
+                      height="300px"
+                      className="rounded-xl"
+                    />
+                  </div>
+                )}
                 <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
                   <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
                     <div className="flex items-center gap-2 mb-2 sm:mb-3">
@@ -292,6 +352,35 @@ const TripDetailPage = () => {
                       })}
                     </div>
                   </div>
+
+                  {/* Intermediate stops */}
+                  {(trip.intermediateStops || [])
+                    .slice()
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map((stop, idx) => (
+                      <div key={idx}>
+                        <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <Navigation className="w-4 h-4 text-muted-foreground rotate-90" />
+                          </div>
+                        </div>
+                        <div className="p-3 sm:p-4 bg-accent/30 rounded-xl border border-border/50">
+                          <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                              <MapPin className="w-4 h-4 text-muted-foreground" />
+                            </div>
+                            <h3 className="font-semibold text-foreground text-sm sm:text-base">Stop {idx + 1}</h3>
+                          </div>
+                          <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{stop.address || "—"}</p>
+                          <p className="text-muted-foreground text-xs sm:text-sm">{stop.city || ""}</p>
+                        </div>
+                        <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>
+                          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <Navigation className="w-4 h-4 text-muted-foreground rotate-90" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
 
                   {/* Route connector on mobile */}
                   <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>

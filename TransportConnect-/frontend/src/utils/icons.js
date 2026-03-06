@@ -46,6 +46,7 @@ import {
   MdBolt,
   MdPublic,
   MdExpandMore,
+  MdExpandLess,
   MdFilterList,
   MdSwapVert,
   MdAttachFile,
@@ -74,6 +75,7 @@ import {
   MdDarkMode,
   MdFullscreen,
   MdFullscreenExit,
+  MdOpenInNew,
 } from "react-icons/md"
 import {
   FaFacebook,
@@ -110,6 +112,7 @@ export const Icons = {
   ChevronLeft: MdChevronLeft,
   ChevronRight: MdChevronRight,
   ArrowRight: MdArrowForward,
+  ChevronUp: MdExpandLess,
   ChevronDown: MdExpandMore,
   Fullscreen: MdFullscreen,
   FullscreenExit: MdFullscreenExit,
@@ -183,6 +186,7 @@ export const Icons = {
   Settings: MdSettings,
   Sun: MdLightMode,
   Moon: MdDarkMode,
+  ExternalLink: MdOpenInNew,
 }
 
 // Re-export all icons for direct use (named exports for compatibility)
@@ -207,6 +211,7 @@ export const {
   ChevronLeft,
   ChevronRight,
   ArrowRight,
+  ChevronUp,
   ChevronDown,
   Fullscreen,
   FullscreenExit,
@@ -268,6 +273,7 @@ export const {
   Settings,
   Sun,
   Moon,
+  ExternalLink,
 } = Icons
 
 export default Icons
