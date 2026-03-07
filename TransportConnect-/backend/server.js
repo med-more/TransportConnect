@@ -132,7 +132,7 @@ server.headersTimeout = 31000
 const start = async () => {
   try {
     await connectDB()
-    server.listen(PORT, () => {
+    server.listen(PORT, "0.0.0.0", () => {
       console.log(`Serveur en marche sur le port ${PORT}`)
       console.log(`⏱️  Server timeout set to ${server.timeout}ms for file uploads`)
       const runJob = () => runRecurringTripsJob().catch((err) => console.error("Recurring trips job:", err))

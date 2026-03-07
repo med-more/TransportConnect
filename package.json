@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "cd TransportConnect- && npm install",
-    "start": "cd TransportConnect- && node backend/server.js"
+    "start": "node TransportConnect-/backend/server.js"
   },
   "dependencies": {
     "chart.js": "^4.5.0",

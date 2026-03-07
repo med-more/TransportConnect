@@ -1,5 +1,5 @@
-# Railway: force start command so the correct package.json root is used
-# Root Directory in Railway must be: TransportConnect/TransportConnect-
+# Railway: set "Root Directory" to this folder (TransportConnect/TransportConnect-)
+# so the start command runs from the backend root. No "cd" needed.
 
 [build]
 builder = "nixpacks"
