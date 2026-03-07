@@ -6,12 +6,13 @@ import { createNotification } from "../utils/notifications.js"
 
 /**
  * Build file URL for stored document (local or full URL).
+ * Prefer HTTPS when behind a proxy (X-Forwarded-Proto) so stored URLs work on HTTPS pages.
  */
 function getDocumentFileUrl(req, filename) {
   if (!filename) return null
   if (filename.startsWith("http")) return filename
-  const protocol = req.protocol || "http"
-  const host = req.get("host") || `localhost:${process.env.PORT || 7000}`
+  const protocol = (req.get("x-forwarded-proto") || req.protocol || "http").split(",")[0].trim()
+  const host = req.get("x-forwarded-host") || req.get("host") || `localhost:${process.env.PORT || 7000}`
   return `${protocol}://${host}/uploads/documents/${path.basename(filename)}`
 }
 
@@ -115,12 +116,27 @@ export const getDocumentFile = async (req, res) => {
     const fileUrl = doc.fileUrl
     if (!fileUrl) return res.status(404).json({ message: "No file for this document" })
 
-    if (fileUrl.startsWith("http")) {
-      return res.redirect(302, fileUrl)
+    const documentsDir = path.join(__dirname, "../uploads/documents")
+    let filename = path.basename(fileUrl)
+
+    if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
+      try {
+        const parsed = new URL(fileUrl)
+        const ourHost = (req.get("x-forwarded-host") || req.get("host") || "").split(":")[0]
+        const urlHost = parsed.hostname
+        if (ourHost && urlHost && ourHost === urlHost) {
+          const pathname = parsed.pathname || ""
+          if (pathname.includes("/uploads/documents/")) {
+            filename = path.basename(pathname)
+          }
+        } else {
+          return res.redirect(302, fileUrl)
+        }
+      } catch {
+        return res.redirect(302, fileUrl)
+      }
     }
 
-    const filename = path.basename(fileUrl)
-    const documentsDir = path.join(__dirname, "../uploads/documents")
     const filePath = path.join(documentsDir, filename)
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: "File not found on server" })
