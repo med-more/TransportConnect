@@ -4,6 +4,7 @@ import path from "path"
 import fs from "fs"
 import { fileURLToPath } from "url"
 import { createNotification } from "../utils/notifications.js"
+import { cloudinary } from "../middleware/upload.middleware.js"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -34,7 +35,20 @@ export const createDocument = async (req, res) => {
       return res.status(400).json({ message: "Invalid document type. Use: license, insurance, registration, id_card, other" })
     }
 
-    const fileUrl = getDocumentFileUrl(req, req.file.filename) || `/uploads/documents/${req.file.filename}`
+    let fileUrl = getDocumentFileUrl(req, req.file.filename) || `/uploads/documents/${req.file.filename}`
+
+    if (process.env.CLOUDINARY_CLOUD_NAME && cloudinary && req.file.path && fs.existsSync(req.file.path)) {
+      try {
+        const result = await cloudinary.uploader.upload(req.file.path, {
+          folder: "transportconnect/documents",
+          resource_type: "auto",
+        })
+        fileUrl = result.secure_url
+        fs.unlink(req.file.path, () => {})
+      } catch (uploadErr) {
+        console.error("Document Cloudinary upload fallback:", uploadErr)
+      }
+    }
 
     const doc = new Document({
       user: req.user._id,
@@ -143,7 +157,12 @@ export const getDocumentFile = async (req, res) => {
 
     const filePath = path.join(documentsDir, filename)
     if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ message: "File not found on server" })
+      if (fileUrl.startsWith("https://") || fileUrl.startsWith("http://")) {
+        return res.redirect(302, fileUrl)
+      }
+      return res.status(404).json({
+        message: "File no longer available (e.g. after a redeploy). Please re-upload the document.",
+      })
     }
     const absolutePath = path.resolve(filePath)
     res.setHeader("Content-Disposition", `inline; filename="${filename}"`)
