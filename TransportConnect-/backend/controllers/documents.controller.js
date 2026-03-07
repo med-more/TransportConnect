@@ -2,7 +2,10 @@ import Document from "../models/Document.js"
 import User from "../models/User.js"
 import path from "path"
 import fs from "fs"
+import { fileURLToPath } from "url"
 import { createNotification } from "../utils/notifications.js"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Build file URL for stored document (local or full URL).
@@ -116,7 +119,8 @@ export const getDocumentFile = async (req, res) => {
     const fileUrl = doc.fileUrl
     if (!fileUrl) return res.status(404).json({ message: "No file for this document" })
 
-    const documentsDir = path.join(__dirname, "../uploads/documents")
+    const currentDir = path.dirname(fileURLToPath(import.meta.url))
+    const documentsDir = path.join(currentDir, "../uploads/documents")
     let filename = path.basename(fileUrl)
 
     if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) {
@@ -141,11 +145,17 @@ export const getDocumentFile = async (req, res) => {
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ message: "File not found on server" })
     }
+    const absolutePath = path.resolve(filePath)
     res.setHeader("Content-Disposition", `inline; filename="${filename}"`)
-    return res.sendFile(path.resolve(filePath))
+    res.sendFile(absolutePath, (err) => {
+      if (err && !res.headersSent) {
+        console.error("Get document file sendFile:", err)
+        res.status(500).json({ message: "Erreur lors de la récupération du fichier" })
+      }
+    })
   } catch (error) {
     console.error("Get document file:", error)
-    res.status(500).json({ message: "Erreur lors de la récupération du fichier" })
+    if (!res.headersSent) res.status(500).json({ message: "Erreur lors de la récupération du fichier" })
   }
 }
 
