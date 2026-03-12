@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react"
+import { useSearchParams, Link } from "react-router-dom"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { FileText, CheckCircle, XCircle, Clock, ExternalLink, User, Search } from "../../utils/icons"
 import Card from "../../components/ui/Card"
@@ -14,6 +15,8 @@ const PAGE_SIZE = 10
 
 const AdminDocumentsPage = () => {
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const userIdFromUrl = searchParams.get("userId") || null
   const [statusFilter, setStatusFilter] = useState("pending")
   const [searchQuery, setSearchQuery] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
@@ -24,9 +27,12 @@ const AdminDocumentsPage = () => {
   const [rejectionReason, setRejectionReason] = useState("")
 
   const { data: documents = [], isLoading } = useQuery({
-    queryKey: ["admin-documents", statusFilter],
+    queryKey: ["admin-documents", statusFilter, userIdFromUrl],
     queryFn: () =>
-      documentsAPI.list(statusFilter === "all" ? {} : { status: statusFilter }),
+      documentsAPI.list({
+        ...(statusFilter !== "all" && { status: statusFilter }),
+        ...(userIdFromUrl && { userId: userIdFromUrl }),
+      }),
   })
 
   const updateMutation = useMutation({
@@ -202,6 +208,15 @@ const AdminDocumentsPage = () => {
         <p className="text-sm sm:text-base text-muted-foreground mt-1 max-w-2xl">
           Review driver documents (license, insurance, registration). Approve or reject with a reason.
         </p>
+        {userIdFromUrl && (
+          <p className="text-sm text-muted-foreground mt-2 flex items-center gap-2">
+            <User className="w-4 h-4" />
+            Showing documents for this user only.
+            <Link to="/admin/documents" className="text-primary hover:underline font-medium">
+              Show all documents
+            </Link>
+          </p>
+        )}
       </div>
 
       <Card className="p-3 sm:p-4 md:p-5 overflow-hidden">

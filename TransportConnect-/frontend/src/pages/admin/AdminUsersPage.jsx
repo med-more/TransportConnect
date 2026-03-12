@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import clsx from "clsx"
 import {
@@ -23,6 +24,7 @@ import {
   ChevronRight,
   ArrowLeft,
   ArrowRight,
+  FileText,
 } from "../../utils/icons"
 import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
@@ -349,6 +351,13 @@ const AdminUsersPage = () => {
                       </div>
 
                       <div className="flex flex-row flex-wrap gap-2 pt-2 border-t border-border justify-center sm:justify-start">
+                        <Link
+                          to={`/admin/documents?userId=${user._id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Papers
+                        </Link>
                         <Button
                           size="small"
                           variant="ghost"
@@ -464,6 +473,7 @@ const AdminUsersPage = () => {
                     <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Role</th>
                     <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Status</th>
                     <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Registration Date</th>
+                    <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Documents</th>
                     <th className="text-left py-4 px-4 font-semibold text-foreground text-sm">Actions</th>
                   </tr>
                 </thead>
@@ -512,6 +522,16 @@ const AdminUsersPage = () => {
                           <Calendar className="w-4 h-4" />
                           <span>{new Date(user.createdAt).toLocaleDateString("en-US")}</span>
                         </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Link
+                          to={`/admin/documents?userId=${user._id}`}
+                          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline font-medium"
+                          title="View this user's documents"
+                        >
+                          <FileText className="w-4 h-4" />
+                          Papers
+                        </Link>
                       </td>
                       <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
@@ -844,6 +864,14 @@ const AdminUsersPage = () => {
               )}
 
               <div className="flex flex-row flex-wrap gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-border justify-center sm:justify-start">
+                <Link
+                  to={`/admin/documents?userId=${selectedUser._id}`}
+                  onClick={() => setShowUserDetails(false)}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-primary hover:bg-primary/10 transition-colors shrink-0 border border-primary/30"
+                >
+                  <FileText className="w-4 h-4" />
+                  View documents
+                </Link>
                 {!selectedUser.isVerified && selectedUser.isActive && (
                   <Button
                     onClick={() => {
