@@ -20,7 +20,7 @@ import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
-import { adminAPI } from "../../services/api"
+import { adminAPI, documentsAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import { useNavigate } from "react-router-dom"
 import { Bar, Line, Doughnut } from "react-chartjs-2"
@@ -70,6 +70,11 @@ const AdminDashboardPage = () => {
   const { data: recentUsers, isLoading: usersLoading } = useQuery({
     queryKey: ["admin-all-users"],
     queryFn: () => adminAPI.getAllUsers(),
+  })
+
+  const { data: pendingDocuments = [] } = useQuery({
+    queryKey: ["admin-documents-pending-count"],
+    queryFn: () => documentsAPI.list({ status: "pending" }),
   })
 
   const stats = statsData?.data || {}
@@ -244,7 +249,7 @@ const AdminDashboardPage = () => {
           </div>
         </motion.div>
 
-        {/* Attention needed */}
+        {/* Attention needed - user verifications & requests */}
         {needsAttention && (
           <motion.div variants={itemVariants}>
             <Link to={(stats.pendingVerifications || 0) > 0 ? "/admin/verifications" : "/admin/requests"}>
@@ -264,6 +269,28 @@ const AdminDashboardPage = () => {
                     </p>
                   </div>
                   <ArrowRight className="w-5 h-5 text-warning shrink-0" />
+                </div>
+              </Card>
+            </Link>
+          </motion.div>
+        )}
+
+        {/* Attention needed - document verifications (papers) — distinct color */}
+        {pendingDocuments.length > 0 && (
+          <motion.div variants={itemVariants}>
+            <Link to="/admin/documents">
+              <Card className="p-4 border-l-4 border-l-info bg-info/5 hover:bg-info/10 transition-colors cursor-pointer">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-info/20">
+                    <AlertCircle className="w-5 h-5 text-info" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Attention needed</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                      {pendingDocuments.length} document verification(s) pending
+                    </p>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-info shrink-0" />
                 </div>
               </Card>
             </Link>

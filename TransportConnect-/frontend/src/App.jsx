@@ -1,5 +1,14 @@
-import { Routes, Route, Navigate } from "react-router-dom"
+import { useEffect } from "react"
+import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 import { Toaster } from "react-hot-toast"
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
 import { useAuth } from "./contexts/AuthContext"
 import ProtectedRoute from "./components/ProtectedRoute"
 import PublicRoute from "./components/PublicRoute"
@@ -52,7 +61,9 @@ function AppRoutes() {
   const { user, isAuthenticated } = useAuth()
 
   return (
-    <Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
       {/* Public routes */}
       <Route path="/" element={<PublicRoute><WelcomePage /></PublicRoute>} />
       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
@@ -301,7 +312,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-    </Routes>
+      </Routes>
+    </>
   )
 }
 
