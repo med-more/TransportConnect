@@ -45,6 +45,13 @@ function formatDuration(seconds) {
   return `${m} min`
 }
 
+function formatEtaMinutes(minutes) {
+  if (minutes == null || minutes <= 0) return "Arrived"
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? `${h}h ${m}min` : `${m}min`
+}
+
 function formatDistance(meters) {
   if (meters == null || meters <= 0) return "—"
   if (meters >= 1000) return `${(meters / 1000).toFixed(1)} km`
@@ -64,6 +71,7 @@ export default function ShipmentTrackingMap({
   showLegend = false,
   showRouteStrip = true,
   cameraFollow = true,
+  onRouteLoaded,
 }) {
   const [startCoords, setStartCoords] = useState(null)
   const [endCoords, setEndCoords] = useState(null)
@@ -120,11 +128,13 @@ export default function ShipmentTrackingMap({
       const result = await getRoute(start, end)
       if (cancelled) return
       if (result?.coordinates?.length >= 2) {
-        setRoutePoints(result.coordinates)
-        setRouteInfo({
+        const info = {
           distanceMeters: result.distanceMeters,
           durationSeconds: result.durationSeconds,
-        })
+        }
+        setRoutePoints(result.coordinates)
+        setRouteInfo(info)
+        onRouteLoaded?.(info)
       } else {
         setRoutePoints([startCoords, endCoords])
         setRouteInfo(null)
@@ -436,9 +446,11 @@ export default function ShipmentTrackingMap({
                     <span className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" aria-hidden />
                     En direct
                   </span>
-                  {etaMinutes != null && (
+                  {(routeInfo != null || etaMinutes != null) && (
                     <span className="text-white text-base font-semibold tabular-nums">
-                      {etaMinutes <= 0 ? "Arrivé" : `ETA ${etaMinutes} min`}
+                      {routeInfo != null
+                        ? formatDuration(routeInfo.durationSeconds)
+                        : formatEtaMinutes(etaMinutes)}
                     </span>
                   )}
                   <ChevronDown className="w-6 h-6 text-white/80 shrink-0" aria-hidden />
@@ -485,9 +497,11 @@ export default function ShipmentTrackingMap({
                       <span className="w-2.5 h-2.5 sm:w-2 sm:h-2 rounded-full bg-white animate-pulse" aria-hidden />
                       En direct
                     </span>
-                    {etaMinutes != null && (
+                    {(routeInfo != null || etaMinutes != null) && (
                       <span className="text-white text-base sm:text-sm font-semibold tabular-nums">
-                        {etaMinutes <= 0 ? "Arrived" : `ETA ${etaMinutes} min`}
+                        {routeInfo != null
+                          ? formatDuration(routeInfo.durationSeconds)
+                          : formatEtaMinutes(etaMinutes)}
                       </span>
                     )}
                   </div>

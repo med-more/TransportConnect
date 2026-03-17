@@ -1,3 +1,4 @@
+import { useState, useCallback, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
@@ -92,21 +93,40 @@ const DashboardPage = () => {
       ? Math.min(100, Math.round((usedWeight / truckCapacityKg) * 100))
       : 0
 
-  // ETA from trip arrival date (when we have an active trip)
-  const getDistanceToArrival = () => {
+  // Route duration from map (matches "696.8 km ~ 9h 12min") — so dashboard and map card show same value
+  const [routeDurationSeconds, setRouteDurationSeconds] = useState(null)
+  const handleRouteLoaded = useCallback((info) => {
+    if (info?.durationSeconds != null) setRouteDurationSeconds(info.durationSeconds)
+  }, [])
+
+  useEffect(() => {
+    setRouteDurationSeconds(null)
+  }, [activeTrip?._id, activeRequest?._id])
+
+  const formatRouteDuration = (seconds) => {
+    if (seconds == null || seconds <= 0) return null
+    const h = Math.floor(seconds / 3600)
+    const m = Math.floor((seconds % 3600) / 60)
+    return h > 0 ? `${h}h ${m}min` : `${m}min`
+  }
+
+  // Fallback: time until arrivalDate when route not yet loaded
+  const getTimeToArrivalFallback = () => {
     const trip = activeTrip || activeRequest?.trip
     if (!trip?.arrivalDate) return null
     const now = new Date()
     const arrival = new Date(trip.arrivalDate)
-    if (arrival <= now) return { text: "Arrived", min: 0 }
+    if (arrival <= now) return "Arrived"
     const min = Math.round((arrival - now) / (60 * 1000))
     const hours = Math.floor(min / 60)
     const mins = min % 60
-    const timeStr =
-      hours > 0 ? `${hours}h ${mins}min` : `${mins} min`
-    return { text: `Est. ${timeStr}`, min }
+    return hours > 0 ? `${hours}h ${mins}min` : `${mins}min`
   }
-  const distanceToArrival = getDistanceToArrival()
+
+  const timeToArrivalText =
+    routeDurationSeconds != null
+      ? formatRouteDuration(routeDurationSeconds)
+      : getTimeToArrivalFallback()
 
   const statsCards = [
     {
@@ -334,6 +354,7 @@ const DashboardPage = () => {
                         height="100%"
                         className="w-full h-full"
                         showRouteStrip
+                        onRouteLoaded={handleRouteLoaded}
                       />
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-2 text-center">
@@ -347,9 +368,9 @@ const DashboardPage = () => {
                     <div className="space-y-3 sm:space-y-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs sm:text-sm text-muted-foreground">{t("dashboard.distanceToArrival")}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground">{t("dashboard.timeToArrival")}</p>
                           <p className="text-base sm:text-lg font-semibold text-foreground">
-                            {distanceToArrival ? distanceToArrival.text : "—"}
+                            {timeToArrivalText ?? "—"}
                           </p>
                         </div>
                       </div>
@@ -377,7 +398,7 @@ const DashboardPage = () => {
                       <div className="text-center">
                         <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-2" />
                         <p className="text-sm text-muted-foreground">{t("dashboard.noActiveShipment")}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.distanceToArrival")} —</p>
+                        <p className="text-xs text-muted-foreground mt-1">{t("dashboard.timeToArrival")} —</p>
                       </div>
                     </div>
                     <div className="flex flex-col sm:flex-row gap-2">
