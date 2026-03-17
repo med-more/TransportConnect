@@ -265,7 +265,7 @@ body {
   }
 
   .section-title {
-    @apply text-2xl sm:text-3xl md:text-4xl font-bold text-foreground tracking-tight;
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-foreground tracking-tight;
     letter-spacing: -0.02em;
   }
 

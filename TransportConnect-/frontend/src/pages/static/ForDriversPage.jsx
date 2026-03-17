@@ -110,7 +110,7 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           HERO — full bleed image with diagonal red accent
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[92vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[92vh] flex items-end overflow-hidden">
         {/* bg */}
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/70 to-black/30" />
@@ -121,16 +121,16 @@ export default function ForDriversPage() {
         />
 
         {/* text */}
-        <div className="relative z-10 w-full px-6 sm:px-12 md:px-20 pb-28 pt-36 max-w-6xl mx-auto">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-20 pb-16 sm:pb-20 md:pb-28 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — For Professional Drivers
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase text-white leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase text-white leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Drive More.<br />
@@ -187,9 +187,9 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           BENEFITS — 3 alternating split sections
          ══════════════════════════════════════════════ */}
-      <section className="px-4 sm:px-6 md:px-8 bg-background pb-20 sm:pb-28 space-y-24 sm:space-y-32">
+      <section className="px-4 sm:px-6 md:px-8 bg-background pb-12 sm:pb-16 md:pb-20 lg:pb-28 space-y-16 sm:space-y-24 lg:space-y-32">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Why join us</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
               Why drive with <span className="text-primary">TransportConnect</span>?
@@ -200,7 +200,7 @@ export default function ForDriversPage() {
             const Icon = b.icon
             const isEven = i % 2 === 0
             return (
-              <div key={b.title} className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              <div key={b.title} className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
                 {/* image */}
                 <motion.div
                   {...(isEven ? fadeLeft(0) : fadeRight(0))}
@@ -252,9 +252,9 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           HOW IT WORKS — dark bg numbered timeline
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Simple. Fast. Profitable.</motion.p>
             <motion.h2
               {...fadeUp(0.08)}
@@ -294,16 +294,16 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           FEATURES + IMAGE — split
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             {/* image */}
-            <motion.div {...fadeLeft(0)} className="relative">
-              <div className="rounded-3xl overflow-hidden aspect-[4/5]">
+            <motion.div {...fadeLeft(0)} className="relative overflow-hidden">
+              <div className="rounded-2xl sm:rounded-3xl overflow-hidden aspect-[4/5]">
                 <img src="/home/1/3.webp" alt="Driver features" className="w-full h-full object-cover" />
               </div>
-              {/* floating card */}
-              <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-5 shadow-xl max-w-[200px]">
+              {/* floating card — hidden on small to avoid overflow */}
+              <div className="hidden sm:block absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-xl max-w-[200px]">
                 <p className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Driver Tools</p>
                 <div className="space-y-3">
                   {["Route optimizer", "Real-time loads", "Instant payment", "Trip analytics"].map((t, i) => (
@@ -348,9 +348,9 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           TESTIMONIALS — 3 cards with earnings badge
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Real Drivers, Real Results</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
               Driver success <span className="text-primary">stories</span>
@@ -393,21 +393,21 @@ export default function ForDriversPage() {
       {/* ══════════════════════════════════════════════
           CTA — full bleed image
          ══════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-36 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/4/2.webp)" }} />
         <div className="absolute inset-0 bg-black/75" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
             Ready to earn more?
           </motion.p>
           <motion.h2
             {...fadeUp(0.08)}
-            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Start driving today
           </motion.h2>
-          <motion.p {...fadeUp(0.15)} className="text-white/70 max-w-lg mx-auto mb-10 text-lg">
+          <motion.p {...fadeUp(0.15)} className="text-white/70 max-w-lg mx-auto mb-8 sm:mb-10 text-base sm:text-lg px-2">
             Join thousands of drivers already earning more with TransportConnect across Morocco.
           </motion.p>
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-4 justify-center">

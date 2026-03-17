@@ -83,23 +83,23 @@ export default function FeaturesPage() {
       {/* ══════════════════════════════════════════════
           HERO — fullbleed right image
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[88vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[88vh] flex items-end overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25" />
         <div
           className="absolute right-0 top-0 h-full w-[40%] opacity-15"
           style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
         />
-        <div className="relative z-10 w-full px-6 sm:px-12 md:px-20 pb-20 pt-36 max-w-6xl mx-auto">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-20 pb-12 sm:pb-16 md:pb-20 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — Platform Features
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase text-white leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase text-white leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Powerful<br />
@@ -159,8 +159,8 @@ export default function FeaturesPage() {
       {/* ══════════════════════════════════════════════
           CORE FEATURES — alternating split sections
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
-        <div className="container mx-auto max-w-6xl space-y-28">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
+        <div className="container mx-auto max-w-6xl space-y-16 sm:space-y-20 lg:space-y-28">
           <div className="text-center">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Core Features</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
@@ -174,7 +174,7 @@ export default function FeaturesPage() {
             return (
               <div
                 key={feat.title}
-                className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center`}
+                className={`grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center`}
               >
                 {/* image */}
                 <motion.div
@@ -185,8 +185,8 @@ export default function FeaturesPage() {
                     <img src={feat.img} alt={feat.title} className="w-full h-full object-cover" />
                     <div className={`absolute inset-0 bg-gradient-to-${isEven ? "tr" : "tl"} from-primary/25 to-transparent`} />
                   </div>
-                  {/* floating icon badge */}
-                  <div className={`absolute -bottom-5 ${isEven ? "-right-5 sm:-right-8" : "-left-5 sm:-left-8"} bg-primary text-white p-5 rounded-2xl shadow-2xl`}>
+                  {/* floating icon badge — hide on very small to avoid overflow */}
+                  <div className={`hidden sm:block absolute -bottom-5 ${isEven ? "-right-5 md:-right-8" : "-left-5 md:-left-8"} bg-primary text-white p-4 sm:p-5 rounded-2xl shadow-2xl`}>
                     <Icon className="w-8 h-8 mb-1" />
                     <p className="font-black text-sm">{feat.title}</p>
                   </div>
@@ -218,9 +218,9 @@ export default function FeaturesPage() {
       {/* ══════════════════════════════════════════════
           24/7 SUPPORT + SMART MATCHING — 2 col dark
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">More Power</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="text-3xl sm:text-4xl md:text-5xl font-black uppercase" style={{ letterSpacing: "-0.02em" }}>
               Even more <span className="text-primary">features</span>
@@ -254,10 +254,10 @@ export default function FeaturesPage() {
       {/* ══════════════════════════════════════════════
           VS. COMPARISON — table style
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <motion.div {...fadeLeft(0)}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
+            <motion.div {...fadeLeft(0)} className="min-w-0">
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Compare</p>
               <h2 className="section-title mb-6">
                 Why choose <span className="text-primary">TransportConnect</span>?
@@ -272,13 +272,13 @@ export default function FeaturesPage() {
                       <span className="font-bold text-foreground text-sm">{item.feature}</span>
                     </div>
                     <div className="grid grid-cols-2">
-                      <div className="px-6 py-4 border-r border-border">
+                      <div className="px-3 sm:px-6 py-3 sm:py-4 border-r border-border min-w-0">
                         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Traditional</p>
-                        <p className="text-sm text-foreground">{item.traditional}</p>
+                        <p className="text-xs sm:text-sm text-foreground break-words">{item.traditional}</p>
                       </div>
-                      <div className="px-6 py-4 bg-primary/5">
+                      <div className="px-3 sm:px-6 py-3 sm:py-4 bg-primary/5 min-w-0">
                         <p className="text-xs text-primary uppercase tracking-wide font-semibold mb-1">TransportConnect</p>
-                        <p className="text-sm font-bold text-primary">{item.us}</p>
+                        <p className="text-xs sm:text-sm font-bold text-primary break-words">{item.us}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -355,12 +355,12 @@ export default function FeaturesPage() {
       {/* ══════════════════════════════════════════════
           CTA STRIP
          ══════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-36 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/4.webp)" }} />
         <div className="absolute inset-0 bg-black/75" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">Experience all features today</motion.p>
-          <motion.h2 {...fadeUp(0.08)} className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8" style={{ letterSpacing: "-0.03em" }}>
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">Experience all features today</motion.p>
+          <motion.h2 {...fadeUp(0.08)} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8" style={{ letterSpacing: "-0.03em" }}>
             Start shipping smarter
           </motion.h2>
           <motion.div {...fadeUp(0.15)} className="flex flex-col sm:flex-row gap-4 justify-center">

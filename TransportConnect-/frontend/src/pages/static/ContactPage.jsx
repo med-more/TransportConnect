@@ -72,18 +72,18 @@ export default function ContactPage() {
       {/* ══════════════════════════════════════════════
           HERO — bold split with image right
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[75vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
         {/* text left */}
-        <div className="relative z-10 w-full lg:w-[55%] px-6 sm:px-12 md:px-20 py-28">
+        <div className="relative z-10 w-full lg:w-[55%] px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — We're here for you
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Contact<br />
@@ -156,9 +156,9 @@ export default function ContactPage() {
       {/* ══════════════════════════════════════════════
           MAIN: FORM + SIDE INFO
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-start">
 
             {/* ── LEFT: FORM ── */}
             <motion.div {...fadeLeft(0)}>
@@ -297,21 +297,21 @@ export default function ContactPage() {
       {/* ══════════════════════════════════════════════
           IMAGE STRIP + CTA
          ══════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-36 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/4/2.webp)" }} />
         <div className="absolute inset-0 bg-black/75" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
             Ready to get started?
           </motion.p>
           <motion.h2
             {...fadeUp(0.08)}
-            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Streamline your logistics
           </motion.h2>
-          <motion.p {...fadeUp(0.15)} className="text-white/70 max-w-xl mx-auto mb-10 text-lg">
+          <motion.p {...fadeUp(0.15)} className="text-white/70 max-w-xl mx-auto mb-8 sm:mb-10 text-base sm:text-lg px-2">
             Join thousands of shippers and drivers already using TransportConnect across Morocco.
           </motion.p>
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-4 justify-center">

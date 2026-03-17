@@ -80,13 +80,13 @@ export default function PrivacyPolicyPage() {
       {/* ══════════════════════════════════════════════
           HERO — dark bg + image right
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[55vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
-        <div className="relative z-10 w-full lg:w-1/2 px-6 sm:px-12 md:px-20 py-24">
+      <section className="relative min-h-[45vh] sm:min-h-[55vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
+        <div className="relative z-10 w-full lg:w-1/2 px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24">
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — Legal & Privacy
           </motion.p>
@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-4 sm:mb-6"
             style={{ letterSpacing: "-0.03em" }}
           >
             Privacy<br />
@@ -142,9 +142,9 @@ export default function PrivacyPolicyPage() {
       {/* ══════════════════════════════════════════════
           INTRO + CONTENT
          ══════════════════════════════════════════════ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 sm:gap-12 lg:gap-16">
             {/* sticky sidebar */}
             <motion.div {...fadeLeft(0)} className="lg:col-span-1">
               <div className="lg:sticky lg:top-24 space-y-2">
@@ -235,11 +235,11 @@ export default function PrivacyPolicyPage() {
       {/* ══════════════════════════════════════════════
           CTA
          ══════════════════════════════════════════════ */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-16 sm:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
         <div className="absolute inset-0 bg-black/75" />
-        <div className="relative z-10 text-center px-4">
-          <motion.h2 {...fadeUp(0)} className="text-3xl sm:text-4xl font-black uppercase text-white mb-6" style={{ letterSpacing: "-0.02em" }}>
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.h2 {...fadeUp(0)} className="text-2xl sm:text-3xl md:text-4xl font-black uppercase text-white mb-5 sm:mb-6" style={{ letterSpacing: "-0.02em" }}>
             Ready to Start Shipping?
           </motion.h2>
           <motion.div {...fadeUp(0.1)}>

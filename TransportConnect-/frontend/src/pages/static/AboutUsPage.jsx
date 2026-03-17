@@ -55,18 +55,18 @@ export default function AboutUsPage() {
       {/* ══════════════════════════════════════════════
           HERO — split: text left / image right
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[85vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
         {/* left text half */}
-        <div className="relative z-10 w-full lg:w-1/2 px-6 sm:px-12 md:px-20 py-28">
+        <div className="relative z-10 w-full lg:w-1/2 px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
           <motion.p
             {...fadeUp(0)}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — Our Platform
           </motion.p>
           <motion.h1
             {...fadeUp(0.1)}
-            className="text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             We Move<br />
@@ -132,16 +132,16 @@ export default function AboutUsPage() {
       {/* ══════════════════════════════════════════════
           OUR STORY — image left / text right
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             {/* image */}
-            <motion.div {...fadeLeft(0)} className="relative">
-              <div className="rounded-3xl overflow-hidden aspect-[4/5]">
+            <motion.div {...fadeLeft(0)} className="relative overflow-hidden">
+              <div className="rounded-2xl sm:rounded-3xl overflow-hidden aspect-[4/5]">
                 <img src="/home/1/3.webp" alt="Our story" className="w-full h-full object-cover" />
               </div>
-              {/* timeline pill overlay */}
-              <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-5 shadow-xl max-w-[220px]">
+              {/* timeline pill overlay — hidden on small screens to avoid overflow */}
+              <div className="hidden sm:block absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-4 sm:p-5 shadow-xl max-w-[200px] sm:max-w-[220px]">
                 <p className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Our Journey</p>
                 <div className="space-y-3">
                   {milestones.map((m) => (
@@ -186,7 +186,7 @@ export default function AboutUsPage() {
       {/* ══════════════════════════════════════════════
           VALUES — dark bg bento grid
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">All the Perks</motion.p>
@@ -222,7 +222,7 @@ export default function AboutUsPage() {
       {/* ══════════════════════════════════════════════
           TESTIMONIALS — cards with accent border tops
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Happy Users</motion.p>
@@ -250,16 +250,16 @@ export default function AboutUsPage() {
       {/* ══════════════════════════════════════════════
           CTA — full bleed image
          ══════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-36 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
         <div className="absolute inset-0 bg-black/70" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
             Ready to join us?
           </motion.p>
           <motion.h2
             {...fadeUp(0.08)}
-            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             See all trips & offers

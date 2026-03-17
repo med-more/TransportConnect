@@ -118,7 +118,7 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           HERO — full bleed image + diagonal orange stripe
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[92vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[92vh] flex items-end overflow-hidden">
         {/* bg image */}
         <div
           className="absolute inset-0 bg-cover bg-center"
@@ -135,17 +135,17 @@ export default function ForShippersPage() {
           }}
         />
 
-        <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 pb-20 pt-36">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-16 pb-12 sm:pb-16 md:pb-20 pt-24 sm:pt-28 md:pt-36">
           <div className="max-w-6xl mx-auto">
             <motion.p
               {...fadeUp(0)}
-              className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-primary mb-5"
+              className="text-xs sm:text-sm font-semibold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5"
             >
               — Ship with confidence
             </motion.p>
             <motion.h1
               {...fadeUp(0.1)}
-              className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-none mb-8"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8"
               style={{ letterSpacing: "-0.03em" }}
             >
               For<br />
@@ -200,9 +200,9 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           WHY CHOOSE — image left, benefits right
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             {/* image block */}
             <motion.div {...fadeLeft(0)} className="relative">
               <div className="relative rounded-3xl overflow-hidden aspect-[4/5]">
@@ -219,7 +219,7 @@ export default function ForShippersPage() {
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.35, duration: 0.5 }}
-                className="absolute -bottom-6 -right-4 sm:-right-8 bg-primary text-white p-5 rounded-2xl shadow-2xl max-w-[200px]"
+                className="absolute -bottom-6 -right-4 md:-right-8 bg-primary text-white p-4 sm:p-5 rounded-2xl shadow-2xl max-w-[180px] sm:max-w-[200px]"
               >
                 <Truck className="w-7 h-7 mb-2" />
                 <p className="font-bold text-lg leading-tight">Driven by Trust</p>
@@ -267,9 +267,9 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           PROCESS TIMELINE — full width dark bg
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground text-background dark:bg-card dark:text-foreground overflow-hidden">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-foreground text-background dark:bg-card dark:text-foreground overflow-hidden">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">
               Our Seamless Process
             </motion.p>
@@ -309,9 +309,9 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           FEATURES — checklist left + image right
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             <motion.div {...fadeLeft(0)}>
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Skills & Features</p>
               <h2 className="section-title mb-4">
@@ -352,7 +352,7 @@ export default function ForShippersPage() {
                 <img src="/home/3/1.webp" alt="Logistics operations" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent" />
               </div>
-              <div className="absolute -bottom-4 -left-4 sm:-left-8 w-2/3 rounded-2xl overflow-hidden shadow-2xl border-4 border-background">
+              <div className="absolute -bottom-4 -left-4 md:-left-8 w-[85%] sm:w-2/3 rounded-2xl overflow-hidden shadow-2xl border-2 sm:border-4 border-background">
                 <img src="/home/1/2.webp" alt="Driver with shipment" className="w-full object-cover aspect-video" />
               </div>
             </motion.div>
@@ -363,9 +363,9 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           TESTIMONIALS — dark section with image
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">
               Hear From Our Happy Clients
             </motion.p>
@@ -400,9 +400,9 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           FAQ — side by side with image
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-start">
             <motion.div {...fadeLeft(0)}>
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">FAQ</p>
               <h2 className="section-title mb-4">Frequently Asked <span className="text-primary">Questions</span></h2>
@@ -428,21 +428,21 @@ export default function ForShippersPage() {
       {/* ══════════════════════════════════════════════
           CTA STRIP — full bleed image + overlay
          ══════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-32 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/4.webp)" }} />
         <div className="absolute inset-0 bg-black/70" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
             Ready to get started?
           </motion.p>
           <motion.h2
             {...fadeUp(0.08)}
-            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Start shipping today
           </motion.h2>
-          <motion.p {...fadeUp(0.15)} className="text-white/75 max-w-xl mx-auto mb-10 text-lg">
+          <motion.p {...fadeUp(0.15)} className="text-white/75 max-w-xl mx-auto mb-8 sm:mb-10 text-base sm:text-lg px-2">
             Join thousands of shippers already using TransportConnect across Morocco.
           </motion.p>
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-4 justify-center">

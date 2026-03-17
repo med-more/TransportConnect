@@ -83,21 +83,21 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           HERO — search + image
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[70vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[70vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
         {/* left */}
-        <div className="relative z-10 w-full lg:w-1/2 px-6 sm:px-12 md:px-20 py-28">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6">
+        <div className="relative z-10 w-full lg:w-1/2 px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6">
             — We're here 24/7
           </motion.p>
           <motion.h1
             {...fadeUp(0.1)}
-            className="text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             How can<br />
             we <span className="text-primary">help</span>?
           </motion.h1>
-          <motion.p {...fadeUp(0.18)} className="text-white/70 dark:text-muted-foreground text-lg leading-relaxed max-w-md mb-10">
+          <motion.p {...fadeUp(0.18)} className="text-white/70 dark:text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mb-8 sm:mb-10">
             Search our help center or choose a support channel that works best for you.
           </motion.p>
           {/* search */}
@@ -136,9 +136,9 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           SUPPORT CHANNELS — 4-col cards with border accent
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Get Support</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
               Choose how to <span className="text-primary">reach us</span>
@@ -177,9 +177,9 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           FAQ — left image + right accordion
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-start">
             {/* left */}
             <motion.div {...fadeLeft(0)}>
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">FAQ</p>
@@ -209,9 +209,9 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           RESOURCES — 3 col with image bg
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Resources</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
               Helpful resources
@@ -243,14 +243,14 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           CTA STRIP
          ══════════════════════════════════════════════ */}
-      <section className="relative py-24 sm:py-32 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
         <div className="absolute inset-0 bg-black/75" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">Still need help?</motion.p>
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">Still need help?</motion.p>
           <motion.h2
             {...fadeUp(0.08)}
-            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Our team is ready

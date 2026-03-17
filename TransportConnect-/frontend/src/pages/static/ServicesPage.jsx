@@ -55,7 +55,7 @@ export default function ServicesPage() {
       {/* ══════════════════════════════════════════════
           HERO — split: dark left / image right
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[88vh] flex items-end overflow-hidden">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[88vh] flex items-end overflow-hidden">
         {/* bg */}
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25" />
@@ -64,16 +64,16 @@ export default function ServicesPage() {
           className="absolute right-0 top-0 h-full w-[40%] opacity-15"
           style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
         />
-        <div className="relative z-10 w-full px-6 sm:px-12 md:px-20 pb-20 pt-36 max-w-6xl mx-auto">
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-20 pb-12 sm:pb-16 md:pb-20 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
-            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
           >
             — Our Trusted Logistics Services
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase text-white leading-none mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase text-white leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Transport<br />
@@ -133,9 +133,9 @@ export default function ServicesPage() {
       {/* ══════════════════════════════════════════════
           MAIN SERVICES — image cards staggered
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">What we offer</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">
               Everything you need to <span className="text-primary">ship smarter</span>
@@ -143,7 +143,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Service 1 – Image left, text right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center mb-16 sm:mb-24">
             <motion.div {...fadeLeft(0)} className="relative">
               <div className="rounded-3xl overflow-hidden aspect-[4/3]">
                 <img src="/home/2/1.webp" alt="Freight Transport" className="w-full h-full object-cover" />
@@ -179,7 +179,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Service 2 – Text left, image right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center mb-16 sm:mb-24">
             <motion.div {...fadeLeft(0)} className="order-2 lg:order-1">
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Service 02</p>
               <h3 className="text-3xl sm:text-4xl font-black uppercase mb-5" style={{ letterSpacing: "-0.02em" }}>
@@ -215,7 +215,7 @@ export default function ServicesPage() {
           </div>
 
           {/* Service 3 – Image left, text right */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             <motion.div {...fadeLeft(0)} className="relative">
               <div className="rounded-3xl overflow-hidden aspect-[4/3]">
                 <img src="/home/4/1.webp" alt="Secure Platform" className="w-full h-full object-cover" />
@@ -255,9 +255,9 @@ export default function ServicesPage() {
       {/* ══════════════════════════════════════════════
           HOW IT WORKS — dark bg timeline
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
         <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 sm:mb-16">
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Our Seamless Process</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="text-3xl sm:text-4xl md:text-5xl font-black uppercase" style={{ letterSpacing: "-0.02em" }}>
               How it <span className="text-primary">works</span>
@@ -283,9 +283,9 @@ export default function ServicesPage() {
       {/* ══════════════════════════════════════════════
           PLATFORM STRENGTHS — circular progress + image
          ══════════════════════════════════════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+      <section className="py-12 sm:py-16 md:py-20 lg:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-20 items-center">
             {/* progress rings */}
             <motion.div {...fadeLeft(0)}>
               <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Platform Strengths</p>
@@ -337,12 +337,12 @@ export default function ServicesPage() {
       {/* ══════════════════════════════════════════════
           CTA — full bleed image
          ══════════════════════════════════════════════ */}
-      <section className="relative py-28 sm:py-36 overflow-hidden">
+      <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/2.webp)" }} />
         <div className="absolute inset-0 bg-black/72" />
-        <div className="relative z-10 text-center px-4">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">Ready to move?</motion.p>
-          <motion.h2 {...fadeUp(0.08)} className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8" style={{ letterSpacing: "-0.03em" }}>
+        <div className="relative z-10 text-center px-4 sm:px-6">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">Ready to move?</motion.p>
+          <motion.h2 {...fadeUp(0.08)} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black uppercase text-white mb-6 sm:mb-8" style={{ letterSpacing: "-0.03em" }}>
             Get started today
           </motion.h2>
           <motion.div {...fadeUp(0.15)} className="flex flex-col sm:flex-row gap-4 justify-center">
