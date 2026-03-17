@@ -20,6 +20,7 @@ import {
   Clock,
   XCircle,
   Eye,
+  Shield,
 } from "../../utils/icons"
 import { tripsAPI, requestsAPI, estimateAPI } from "../../services/api"
 import { useAuth } from "../../contexts/AuthContext"
@@ -448,6 +449,28 @@ const TripDetailPage = () => {
                       {formatCurrency(trip.pricePerKg || 0)}/kg
                     </p>
                   </div>
+                  {trip.insured && (
+                    <div className="p-3 sm:p-4 bg-info/10 rounded-xl border border-info/30 min-w-0 sm:col-span-2 md:col-span-3">
+                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                        <Shield className="w-4 h-4 text-info shrink-0" />
+                        <h3 className="text-xs sm:text-sm font-medium text-info truncate">Insurance</h3>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Insured shipment up to{" "}
+                        <span className="font-semibold text-foreground">
+                          {(trip.coverageAmount || trip.declaredValue || 0).toLocaleString()} MAD
+                        </span>
+                        {trip.insurancePremium != null && trip.insurancePremium > 0 && (
+                          <>
+                            {" "}with premium{" "}
+                            <span className="font-semibold text-foreground">
+                              {trip.insurancePremium.toLocaleString()} MAD
+                            </span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </Card>
             </motion.div>

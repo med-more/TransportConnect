@@ -143,6 +143,15 @@ const CreateTripPage = () => {
     },
   })
 
+  const watchedInsured = watch("insured")
+  const watchedDeclaredValue = Number(watch("declaredValue") || 0)
+  const INSURANCE_RATE = 0.01 // 1% of declared value
+  const INSURANCE_MIN_PREMIUM = 20 // MAD
+  const computedPremium =
+    watchedInsured && watchedDeclaredValue > 0
+      ? Math.max(INSURANCE_MIN_PREMIUM, Math.round(watchedDeclaredValue * INSURANCE_RATE))
+      : 0
+
   const onSubmit = async (data) => {
     if (selectedCargoTypes.length === 0) {
       toast.error("Please select at least one cargo type")
@@ -247,6 +256,12 @@ const CreateTripPage = () => {
       ...(selectedCargoTypes.includes("autre") && otherCargoType?.trim() && { otherCargoType: otherCargoType.trim() }),
       pricePerKg: Number.parseFloat(data.pricePerKg),
       description: data.description,
+      insured: !!data.insured,
+      ...(data.insured && watchedDeclaredValue > 0 && {
+        declaredValue: watchedDeclaredValue,
+        coverageAmount: watchedDeclaredValue,
+        insurancePremium: computedPremium,
+      }),
     }
 
     createTripMutation.mutate(tripData)
@@ -486,8 +501,24 @@ const CreateTripPage = () => {
                   {routeEstimate.durationMinutes >= 60 && ` (${(routeEstimate.durationMinutes / 60).toFixed(1)} h)`}
                 </span>
                 <span className="text-sm text-muted-foreground">
-                  Suggested price: <strong className="text-primary">{routeEstimate.estimatedPrice} {routeEstimate.currency}</strong>
+                  Suggested price:{" "}
+                  <strong className="text-primary">
+                    {routeEstimate.estimatedPrice} {routeEstimate.currency}
+                  </strong>
                 </span>
+                {watchedInsured && watchedDeclaredValue > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    Insurance:{" "}
+                    <strong className="text-foreground">
+                      {computedPremium} {routeEstimate.currency} premium
+                    </strong>{" "}
+                    (coverage up to{" "}
+                    <strong className="text-foreground">
+                      {watchedDeclaredValue.toLocaleString()} {routeEstimate.currency}
+                    </strong>
+                    )
+                  </span>
+                )}
               </div>
             </>
           )}
@@ -564,6 +595,56 @@ const CreateTripPage = () => {
                     onChange={(e) => setRecurrenceEndDate(e.target.value)}
                   />
                 </div>
+              </div>
+            )}
+          </div>
+        </Card>
+        <Card className="p-4 sm:p-5 md:p-6">
+          <div className="flex items-center mb-4 sm:mb-5">
+            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary mr-3" />
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Insurance (optional)</h2>
+          </div>
+          <div className="space-y-3 sm:space-y-4">
+            <label className="flex items-start gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                {...register("insured")}
+              />
+              <span className="text-sm sm:text-base text-foreground">
+                Insure this shipment
+                <span className="block text-xs sm:text-sm text-muted-foreground">
+                  Optional cargo insurance with coverage based on the declared value.
+                </span>
+              </span>
+            </label>
+            {watchedInsured && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <Input
+                  type="number"
+                  label="Declared value (MAD)"
+                  placeholder="e.g. 5000"
+                  min={0}
+                  {...register("declaredValue")}
+                />
+                {watchedDeclaredValue > 0 && (
+                  <div className="text-xs sm:text-sm text-muted-foreground flex items-center">
+                    <div className="space-y-1">
+                      <p>
+                        Estimated premium:{" "}
+                        <span className="font-semibold text-foreground">
+                          {computedPremium} MAD
+                        </span>
+                      </p>
+                      <p>
+                        Coverage up to:{" "}
+                        <span className="font-semibold text-foreground">
+                          {watchedDeclaredValue.toLocaleString()} MAD
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

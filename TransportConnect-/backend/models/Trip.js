@@ -113,6 +113,23 @@ const tripSchema = new mongoose.Schema(
       ref: "RecurringTrip",
       default: null,
     },
+    // Insurance / cargo coverage (optional)
+    insured: {
+      type: Boolean,
+      default: false,
+    },
+    declaredValue: {
+      type: Number,
+      min: [0, "La valeur déclarée ne peut pas être négative"],
+    },
+    coverageAmount: {
+      type: Number,
+      min: [0, "La couverture ne peut pas être négative"],
+    },
+    insurancePremium: {
+      type: Number,
+      min: [0, "La prime d'assurance ne peut pas être négative"],
+    },
   },
   {
     timestamps: true,
