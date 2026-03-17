@@ -1,288 +1,361 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { ArrowRight, Truck, Package } from "../../utils/icons"
+import { ArrowRight, Truck, Shield, MapPin, Package, CheckCircle, TrendingUp } from "../../utils/icons"
 import Button from "../../components/ui/Button"
-import VisualSection from "../../components/ui/VisualSection"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
-const ServicesPage = () => {
-  const serviceCards = [
-    {
-      title: "Freight Transport",
-      description: "Connect with verified transporters for your shipping needs across Morocco. Real-time tracking and secure payments.",
-      image: "/home/2/1.webp",
-      accent: "tl-br", // top-left + bottom-right L-shape
-    },
-    {
-      title: "Driver Network",
-      description: "Join our network of professional drivers. Flexible schedules, fair pricing, and direct payments.",
-      image: "/home/3/1.webp",
-      accent: null,
-    },
-    {
-      title: "Secure Platform",
-      description: "Your shipments are protected with insurance, verified users, and secure transactions.",
-      image: "/home/4/1.webp",
-      accent: "tr-bl", // top-right + bottom-left L-shape
-    },
-  ]
+/* ─── helpers ──────────────────────────────────────────────── */
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
+})
+const fadeLeft = (delay = 0) => ({
+  initial: { opacity: 0, x: -32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+})
+const fadeRight = (delay = 0) => ({
+  initial: { opacity: 0, x: 32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+})
 
-  const skills = [
-    { label: "On-time delivery", value: 98 },
-    { label: "Verified partners", value: 100 },
-    { label: "Customer satisfaction", value: 95 },
-    { label: "Coverage", value: 100 },
-  ]
+/* ─── data ─────────────────────────────────────────────────── */
+const skills = [
+  { label: "On-time delivery", value: 98 },
+  { label: "Verified partners", value: 100 },
+  { label: "Customer satisfaction", value: 95 },
+  { label: "Coverage", value: 100 },
+]
 
+const howSteps = [
+  { step: "01", title: "Post your request", desc: "Create a shipping request with details about your cargo, route, and deadline." },
+  { step: "02", title: "Get matched", desc: "Receive competitive offers from verified drivers in your area within minutes." },
+  { step: "03", title: "Track & deliver", desc: "Monitor your shipment in real-time with live GPS updates until delivery." },
+]
+
+const additionalServices = [
+  "Full-truck & partial load options",
+  "Refrigerated transport",
+  "Express same-day delivery",
+  "Fragile & high-value cargo",
+  "International border crossings",
+  "Long-haul Morocco-wide routes",
+]
+
+export default function ServicesPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
 
-      {/* Breadcrumb */}
-      <nav className="border-b border-border bg-background px-4 sm:px-6 md:px-8 py-3">
-        <div className="container mx-auto max-w-6xl">
-          <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-            </li>
-            <li aria-hidden className="text-muted-foreground/60">/</li>
-            <li className="font-medium text-foreground" aria-current="page">Services</li>
-          </ol>
-        </div>
-      </nav>
-
-      {/* Hero — same style as About Us: full-width image, overlay, centered title + CTA */}
-      <section className="relative min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-center items-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden">
+      {/* ══════════════════════════════════════════════
+          HERO — split: dark left / image right
+         ══════════════════════════════════════════════ */}
+      <section className="relative min-h-[88vh] flex items-end overflow-hidden">
+        {/* bg */}
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25" />
+        {/* diagonal accent */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-          style={{ backgroundImage: "url(/home/2/1.webp)" }}
+          className="absolute right-0 top-0 h-full w-[40%] opacity-15"
+          style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
         />
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
-        <div className="relative z-10 text-center max-w-4xl mx-auto text-white">
+        <div className="relative z-10 w-full px-6 sm:px-12 md:px-20 pb-20 pt-36 max-w-6xl mx-auto">
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-white/80 mb-4"
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
           >
-            Our Services
+            — Our Trusted Logistics Services
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black uppercase text-white leading-none mb-8"
+            style={{ letterSpacing: "-0.03em" }}
           >
-            Transport solutions for Morocco
+            Transport<br />
+            <span className="text-primary">Solutions</span><br />
+            for Morocco
           </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-8 sm:mt-10"
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}
+            className="text-white/75 text-base sm:text-lg max-w-lg mb-10 leading-relaxed"
           >
+            From freight transport to secure platform tools — everything your business needs to ship smarter across Morocco.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.26 }}
+            className="flex flex-col sm:flex-row gap-4"
+          >
+            <Link to="/register">
+              <Button className="bg-primary hover:bg-primary/90 text-white min-h-[52px] px-8 uppercase font-black tracking-widest text-sm rounded-none">
+                Get started free <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </Button>
+            </Link>
             <Link to="/trips">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-white/20 uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
-                Get started
-                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              <Button variant="outline" className="min-h-[52px] px-8 border-2 border-white/50 text-white hover:bg-white/10 rounded-none uppercase font-bold tracking-widest text-sm">
+                Browse trips
               </Button>
             </Link>
           </motion.div>
         </div>
       </section>
 
-      {/* How It Works — 3 steps */}
-      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+      {/* ── STATS STRIP ── */}
+      <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10 sm:mb-14"
-          >
-            <h2 className="section-title mb-3">How it works</h2>
-            <p className="section-subtitle mx-auto">Simple steps to get your shipments moving</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
             {[
-              { step: "01", title: "Post your request", desc: "Create a shipping request with details about your cargo" },
-              { step: "02", title: "Get matched", desc: "Receive offers from verified drivers in your area" },
-              { step: "03", title: "Track & deliver", desc: "Monitor your shipment in real-time until delivery" },
-            ].map((item, index) => (
+              { v: "98%", l: "On-Time Delivery", s: "industry-leading rate" },
+              { v: "8K+", l: "Verified Drivers", s: "background-checked drivers" },
+              { v: "40+", l: "Cities Covered", s: "across Morocco" },
+              { v: "24/7", l: "Live Support", s: "whenever you need us" },
+            ].map((st, i) => (
               <motion.div
-                key={item.step}
+                key={st.l}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="text-center"
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
-                <div className="w-14 h-14 sm:w-16 sm:h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <span className="text-lg sm:text-xl font-bold text-primary">{item.step}</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-sm sm:text-base text-muted-foreground">{item.desc}</p>
+                <span className="text-3xl sm:text-4xl font-black text-primary leading-none">{st.v}</span>
+                <span className="text-sm font-bold text-foreground mt-1">{st.l}</span>
+                <span className="text-xs text-muted-foreground">{st.s}</span>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Service cards — 3 columns, L-shaped red accents, image at bottom */}
-      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 md:px-8 bg-background">
+      {/* ══════════════════════════════════════════════
+          MAIN SERVICES — image cards staggered
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-10 sm:mb-14"
-          >
-            <h2 className="section-title mb-3">What we offer</h2>
-            <p className="section-subtitle mx-auto">Everything you need to streamline your logistics</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {serviceCards.map((card, index) => (
-              <motion.div
-                key={card.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.08 }}
-                className="relative rounded-2xl overflow-hidden bg-card border border-border shadow-sm hover:shadow-md transition-shadow duration-300"
-              >
-                {/* L-shaped accent — top-left + bottom-right */}
-                {card.accent === "tl-br" && (
-                  <>
-                    <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-primary rounded-tl-2xl z-10" />
-                    <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-primary rounded-br-2xl z-10" />
-                  </>
-                )}
-                {/* L-shaped accent — top-right + bottom-left */}
-                {card.accent === "tr-bl" && (
-                  <>
-                    <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-primary rounded-tr-2xl z-10" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-primary rounded-bl-2xl z-10" />
-                  </>
-                )}
-                <div className="p-6 sm:p-8">
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-3">{card.title}</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                    {card.description}
-                  </p>
-                </div>
-                <div className="h-48 sm:h-56 relative">
-                  <VisualSection
-                    type="image"
-                    src={card.image}
-                    alt={card.title}
-                    className="w-full h-full object-cover"
-                    fallbackIcon={Package}
-                  />
-                </div>
-              </motion.div>
-            ))}
+          <div className="text-center mb-16">
+            <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">What we offer</motion.p>
+            <motion.h2 {...fadeUp(0.08)} className="section-title">
+              Everything you need to <span className="text-primary">ship smarter</span>
+            </motion.h2>
           </div>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mt-10 sm:mt-12 flex justify-center"
-          >
-            <Link to="/features">
-              <Button size="large" variant="outline" className="min-h-[48px] px-6">
-                Explore all features
-                <ArrowRight className="w-4 h-4 ml-2" />
+
+          {/* Service 1 – Image left, text right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+            <motion.div {...fadeLeft(0)} className="relative">
+              <div className="rounded-3xl overflow-hidden aspect-[4/3]">
+                <img src="/home/2/1.webp" alt="Freight Transport" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent" />
+              </div>
+              <div className="absolute -bottom-5 -right-5 sm:-right-8 bg-primary text-white p-5 rounded-2xl shadow-2xl">
+                <Truck className="w-8 h-8 mb-2" />
+                <p className="font-black text-lg">Freight Transport</p>
+              </div>
+            </motion.div>
+            <motion.div {...fadeRight(0)}>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Service 01</p>
+              <h3 className="text-3xl sm:text-4xl font-black uppercase mb-5" style={{ letterSpacing: "-0.02em" }}>
+                Freight Transport
+              </h3>
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Connect with verified transporters for all your shipping needs across Morocco. Post a request and receive competitive bids in minutes — complete with real-time tracking and secure payments.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {["Full-truck & partial loads", "Live GPS tracking", "Insurance on every shipment", "Secure escrow payments"].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-sm font-medium text-foreground">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/trips">
+                <Button className="bg-primary hover:bg-primary/90 text-white min-h-[48px] px-8 uppercase font-bold tracking-wider text-sm rounded-none">
+                  Find drivers <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+
+          {/* Service 2 – Text left, image right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-24">
+            <motion.div {...fadeLeft(0)} className="order-2 lg:order-1">
+              <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Service 02</p>
+              <h3 className="text-3xl sm:text-4xl font-black uppercase mb-5" style={{ letterSpacing: "-0.02em" }}>
+                Driver Network
+              </h3>
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Join our growing network of professional drivers. Get steady work, set your own schedule, and receive fair, direct payments — with no middlemen taking cuts from your earnings.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {["Flexible scheduling", "Direct & instant payments", "Route optimization", "Driver profile & ratings"].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-sm font-medium text-foreground">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/register">
+                <Button className="bg-primary hover:bg-primary/90 text-white min-h-[48px] px-8 uppercase font-bold tracking-wider text-sm rounded-none">
+                  Join as driver <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+                </Button>
+              </Link>
+            </motion.div>
+            <motion.div {...fadeRight(0)} className="order-1 lg:order-2 relative">
+              <div className="rounded-3xl overflow-hidden aspect-[4/3]">
+                <img src="/home/3/1.webp" alt="Driver Network" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-bl from-primary/30 to-transparent" />
+              </div>
+              <div className="absolute -bottom-5 -left-5 sm:-left-8 bg-foreground dark:bg-card text-white dark:text-foreground p-5 rounded-2xl shadow-2xl border border-border">
+                <Truck className="w-8 h-8 text-primary mb-2" />
+                <p className="font-black text-lg">Driver Network</p>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Service 3 – Image left, text right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <motion.div {...fadeLeft(0)} className="relative">
+              <div className="rounded-3xl overflow-hidden aspect-[4/3]">
+                <img src="/home/4/1.webp" alt="Secure Platform" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent" />
+              </div>
+              <div className="absolute -bottom-5 -right-5 sm:-right-8 bg-primary text-white p-5 rounded-2xl shadow-2xl">
+                <Shield className="w-8 h-8 mb-2" />
+                <p className="font-black text-lg">Secure Platform</p>
+              </div>
+            </motion.div>
+            <motion.div {...fadeRight(0)}>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Service 03</p>
+              <h3 className="text-3xl sm:text-4xl font-black uppercase mb-5" style={{ letterSpacing: "-0.02em" }}>
+                Secure Platform
+              </h3>
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Your shipments, payments, and data are protected at every step. Verified users, insured shipments, and escrow payments give you complete peace of mind on every transaction.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {["Identity-verified drivers", "Shipment insurance", "Secure payment escrow", "24/7 dispute resolution"].map((f, i) => (
+                  <li key={i} className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span className="text-sm font-medium text-foreground">{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link to="/features">
+                <Button className="bg-primary hover:bg-primary/90 text-white min-h-[48px] px-8 uppercase font-bold tracking-wider text-sm rounded-none">
+                  See all features <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          HOW IT WORKS — dark bg timeline
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Our Seamless Process</motion.p>
+            <motion.h2 {...fadeUp(0.08)} className="text-3xl sm:text-4xl md:text-5xl font-black uppercase" style={{ letterSpacing: "-0.02em" }}>
+              How it <span className="text-primary">works</span>
+            </motion.h2>
+          </div>
+          <div className="relative">
+            <div className="hidden lg:block absolute left-0 right-0 h-px bg-primary/30" style={{ top: "2.5rem" }} />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {howSteps.map((s, i) => (
+                <motion.div key={s.step} {...fadeUp(i * 0.1)} className="relative flex flex-col items-center text-center">
+                  <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6 flex-shrink-0 z-10 shadow-xl">
+                    <span className="text-xl font-black text-white">{s.step}</span>
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{s.title}</h3>
+                  <p className="text-sm opacity-65 leading-relaxed max-w-xs">{s.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          PLATFORM STRENGTHS — circular progress + image
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* progress rings */}
+            <motion.div {...fadeLeft(0)}>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Platform Strengths</p>
+              <h2 className="section-title mb-10">
+                Skills that keep your <span className="text-primary">business moving</span>
+              </h2>
+              <div className="grid grid-cols-2 gap-8">
+                {skills.map((skill, index) => (
+                  <motion.div key={skill.label} {...fadeUp(index * 0.1)} className="flex flex-col items-center">
+                    <div className="relative w-28 h-28">
+                      <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6" className="text-muted/30" />
+                        <circle
+                          cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="6"
+                          strokeLinecap="round" className="text-primary transition-all duration-1000"
+                          strokeDasharray={`${skill.value * 2.64} 264`}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-2xl font-black text-foreground">
+                        {skill.value}%
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-foreground text-center">{skill.label}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+
+            {/* image + checklist */}
+            <motion.div {...fadeRight(0)} className="space-y-8">
+              <div className="rounded-3xl overflow-hidden aspect-video">
+                <img src="/home/1/4.webp" alt="Our services" className="w-full h-full object-cover" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {additionalServices.map((s, i) => (
+                  <motion.div key={i} {...fadeUp(i * 0.05)} className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <CheckCircle className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-foreground">{s}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          CTA — full bleed image
+         ══════════════════════════════════════════════ */}
+      <section className="relative py-28 sm:py-36 overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/2.webp)" }} />
+        <div className="absolute inset-0 bg-black/72" />
+        <div className="relative z-10 text-center px-4">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">Ready to move?</motion.p>
+          <motion.h2 {...fadeUp(0.08)} className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8" style={{ letterSpacing: "-0.03em" }}>
+            Get started today
+          </motion.h2>
+          <motion.div {...fadeUp(0.15)} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/register">
+              <Button className="bg-primary hover:bg-primary/90 text-white min-h-[52px] px-10 uppercase font-black tracking-widest text-sm rounded-none">
+                Get started free <ArrowRight className="w-4 h-4 ml-2 inline-block" />
               </Button>
             </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Our Company Skills — circular progress indicators */}
-      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
-        <div className="container mx-auto max-w-5xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
-          >
-            <h2 className="section-title mb-3">Our platform strengths</h2>
-            <p className="section-subtitle mx-auto">
-              Trusted by shippers and drivers across Morocco for reliability, security, and support.
-            </p>
-          </motion.div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10">
-            {skills.map((skill, index) => (
-              <motion.div
-                key={skill.label}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08 }}
-                className="flex flex-col items-center"
-              >
-                <div className="relative w-24 h-24 sm:w-28 sm:h-28">
-                  <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="42"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      className="text-muted/30"
-                    />
-                    <circle
-                      cx="50"
-                      cy="50"
-                      r="42"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="6"
-                      strokeLinecap="round"
-                      className="text-primary transition-all duration-1000"
-                      strokeDasharray={`${skill.value * 2.64} 264`}
-                    />
-                  </svg>
-                  <span className="absolute inset-0 flex items-center justify-center text-xl sm:text-2xl font-bold text-foreground">
-                    {skill.value}%
-                  </span>
-                </div>
-                <p className="mt-4 text-sm sm:text-base font-medium text-foreground text-center">
-                  {skill.label}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
-        <div className="container mx-auto max-w-3xl text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <h2 className="section-title mb-3 sm:mb-4">Ready to get started?</h2>
-            <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Join thousands of shippers and drivers already using TransportConnect
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/register">
-                <Button size="large" className="w-full sm:w-auto btn-glow shadow-glow hover:shadow-glow-lg">
-                  Get started free
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </Link>
-              <Link to="/contact">
-                <Button variant="outline" size="large" className="w-full sm:w-auto">
-                  Contact sales
-                </Button>
-              </Link>
-            </div>
+            <Link to="/contact">
+              <Button variant="outline" className="min-h-[52px] px-10 border-2 border-white/50 text-white hover:bg-white/10 rounded-none uppercase font-bold tracking-widest text-sm">
+                Contact sales
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -291,5 +364,3 @@ const ServicesPage = () => {
     </div>
   )
 }
-
-export default ServicesPage

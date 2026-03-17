@@ -1,197 +1,281 @@
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
-import { ArrowRight } from "../../utils/icons"
+import { ArrowRight, Shield, Clock, MapPin, Users, Award, Target } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 
-const AboutUsPage = () => {
-  const perks = [
-    { title: "Verified Drivers", desc: "Every transporter is background-checked and verified for your peace of mind." },
-    { title: "Real-time Tracking", desc: "Follow your shipment from pickup to delivery with live GPS updates." },
-    { title: "Secure Payments", desc: "Safe, transparent payments with protection for shippers and drivers." },
-    { title: "24/7 Support", desc: "Our team is here whenever you need help or have questions." },
-    { title: "Fair Pricing", desc: "Compare offers and choose the best rate for your shipment." },
-  ]
+/* ─── animation helpers ─────────────────────────────────────── */
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] },
+})
+const fadeLeft = (delay = 0) => ({
+  initial: { opacity: 0, x: -32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+})
+const fadeRight = (delay = 0) => ({
+  initial: { opacity: 0, x: 32 },
+  whileInView: { opacity: 1, x: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] },
+})
 
-  const testimonials = [
-    { quote: "TransportConnect cut our logistics headaches in half. We ship across Morocco every week—reliable, transparent, and simple.", border: "border-border" },
-    { quote: "As a driver, I get more loads and get paid on time. The platform is easy to use and the support team is always helpful.", border: "border-primary/50" },
-    { quote: "Finally a platform that connects shippers and drivers without the hassle. Real-time tracking and verified partners make all the difference.", border: "border-primary" },
-  ]
+/* ─── data ─────────────────────────────────────────────────── */
+const values = [
+  { icon: Shield, title: "Trust & Safety", desc: "Every transporter is background-checked, verified, and insured for your peace of mind on every route." },
+  { icon: Clock, title: "Real-time Tracking", desc: "Follow your shipment from pickup to delivery with live GPS. No more guesswork or status calls." },
+  { icon: MapPin, title: "Morocco-Wide Reach", desc: "From Casablanca to Agadir, our network covers 40+ cities so your goods reach every corner of Morocco." },
+  { icon: Users, title: "Community First", desc: "We built this platform for shippers and drivers equally – fair pricing, transparent payments." },
+  { icon: Award, title: "Quality Guarantee", desc: "Our rating system and insurance ensure only the best drivers make it to your dashboard." },
+  { icon: Target, title: "Mission-Driven", desc: "We're here to make logistics in Morocco smarter, faster, and accessible to every business." },
+]
 
+const milestones = [
+  { year: "2021", event: "TransportConnect founded in Casablanca with a team of 5." },
+  { year: "2022", event: "Platform launched with 200 drivers and first 500 shipments." },
+  { year: "2023", event: "Expanded to 20 cities. Reached 5,000 active users." },
+  { year: "2024", event: "40+ cities covered, 12K+ shippers, 98% on-time delivery rate." },
+]
+
+const testimonials = [
+  { quote: "TransportConnect cut our logistics headaches in half. We ship across Morocco every week—reliable, transparent.", name: "Hamid Oukkal", role: "Operations Manager" },
+  { quote: "As a driver, I get more loads and get paid on time. The platform is easy to use and support is always helpful.", name: "Youssef Raji", role: "Independent Driver" },
+  { quote: "Real-time tracking and verified partners make all the difference. Finally a platform that connects both sides.", name: "Sara Benkirane", role: "E-commerce Store Owner" },
+]
+
+export default function AboutUsPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
 
-      {/* Breadcrumb */}
-      <nav className="border-b border-border bg-background px-4 sm:px-6 md:px-8 py-3">
-        <div className="container mx-auto max-w-6xl">
-          <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-            <li>
-              <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
-            </li>
-            <li aria-hidden className="text-muted-foreground/60">/</li>
-            <li className="font-medium text-foreground" aria-current="page">About Us</li>
-          </ol>
-        </div>
-      </nav>
-
-      {/* Hero — image bg with overlay; text stays light on overlay for contrast */}
-      <section className="relative min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-center items-center px-4 sm:px-6 py-20 sm:py-28 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
-          style={{ backgroundImage: "url(/home/4/1.webp)" }}
-        />
-        <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
-        <div className="relative z-10 text-center max-w-4xl mx-auto text-white">
+      {/* ══════════════════════════════════════════════
+          HERO — split: text left / image right
+         ══════════════════════════════════════════════ */}
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
+        {/* left text half */}
+        <div className="relative z-10 w-full lg:w-1/2 px-6 sm:px-12 md:px-20 py-28">
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-xs sm:text-sm font-semibold tracking-[0.25em] uppercase text-white/80 mb-4"
+            {...fadeUp(0)}
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-6"
           >
-            Our Platform
+            — Our Platform
           </motion.p>
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight uppercase"
+            {...fadeUp(0.1)}
+            className="text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-8"
+            style={{ letterSpacing: "-0.03em" }}
           >
-            About Us
+            We Move<br />
+            <span className="text-primary">Morocco</span><br />
+            Forward
           </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-8 sm:mt-10"
-          >
-            <Link to="/trips">
-              <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-white/20 uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
-                Find Trips
-                <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+          <motion.p {...fadeUp(0.2)} className="text-white/70 dark:text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mb-10">
+            Built to make freight in Morocco simple, secure, and fair — connecting shippers and drivers in one seamless platform.
+          </motion.p>
+          <motion.div {...fadeUp(0.28)}>
+            <Link to="/register">
+              <Button className="bg-primary hover:bg-primary/90 text-white min-h-[52px] px-8 uppercase font-black tracking-widest text-sm rounded-none">
+                Join us today <ArrowRight className="w-4 h-4 ml-2 inline-block" />
               </Button>
             </Link>
           </motion.div>
         </div>
+
+        {/* right image half */}
+        <motion.div
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+          className="hidden lg:block absolute right-0 top-0 w-[52%] h-full"
+        >
+          <img
+            src="/home/4/1.webp"
+            alt="Morocco logistics"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-foreground dark:from-card via-transparent to-transparent" />
+        </motion.div>
       </section>
 
-      {/* All the Perks — two columns: left = label + title + text, right = bordered perks grid */}
-      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
+      {/* ══════════════════════════════════════════════
+          STATS STRIP — floating cards
+         ══════════════════════════════════════════════ */}
+      <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-            <motion.div
-              initial={{ opacity: 0, x: -24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-4">About Us</p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">All the Perks.</h2>
-              <p className="text-muted-foreground text-base sm:text-lg leading-relaxed max-w-lg">
-                We built TransportConnect to make freight in Morocco simple, secure, and fair. From verified drivers and real-time tracking to 24/7 support and transparent pricing—everything you need is in one place.
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 24 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="border-2 border-primary/40 rounded-2xl p-6 sm:p-8 bg-card"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-                {perks.map((item, i) => (
-                  <div key={item.title} className="space-y-2">
-                    <h3 className="text-lg font-bold text-foreground">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Story — small red label centered, justified text block */}
-      <section className="py-14 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-muted/50 dark:bg-muted/30">
-        <div className="container mx-auto max-w-4xl">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-8"
-          >
-            Our Story
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-muted-foreground text-base sm:text-lg leading-relaxed text-justify space-y-4"
-          >
-            <p>
-              TransportConnect was founded with a simple mission: to make freight transport in Morocco more accessible, efficient, and reliable. We recognized the challenges that both shippers and drivers face in the traditional logistics industry and set out to create a solution that benefits everyone.
-            </p>
-            <p>
-              Since our launch, we have grown from a small startup to a trusted platform serving thousands of users across Morocco. Our commitment to innovation, security, and customer satisfaction has made us a leader in the logistics technology space.
-            </p>
-            <p>
-              Today, we continue to evolve our platform, adding new features and expanding our network to better serve our community of shippers and drivers.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Why Choose Us — HAPPY USERS (red), title, 3 testimonial cards with quote + different borders */}
-      <section className="py-16 sm:py-20 md:py-24 px-4 sm:px-6 md:px-8 bg-background">
-        <div className="container mx-auto max-w-6xl">
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center text-xs font-semibold tracking-[0.2em] uppercase text-primary mb-3"
-          >
-            Happy Users
-          </motion.p>
-          <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-12 sm:mb-16"
-          >
-            Why Choose Us
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {testimonials.map((card, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
+            {[
+              { v: "12K+", l: "Active Shippers", s: "and growing daily" },
+              { v: "8K+", l: "Verified Drivers", s: "background-checked" },
+              { v: "40+", l: "Cities Covered", s: "across Morocco" },
+              { v: "98%", l: "On-Time Rate", s: "industry-leading" },
+            ].map((st, i) => (
               <motion.div
-                key={i}
+                key={st.l}
                 initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className={`rounded-2xl border-2 ${card.border} bg-card p-6 sm:p-8 min-h-[220px] flex flex-col`}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
-                <span className="text-4xl sm:text-5xl font-serif text-muted-foreground leading-none">"</span>
-                <p className="text-foreground text-sm sm:text-base leading-relaxed mt-2 flex-1">{card.quote}</p>
+                <span className="text-3xl sm:text-4xl font-black text-primary leading-none">{st.v}</span>
+                <span className="text-sm font-bold text-foreground mt-1">{st.l}</span>
+                <span className="text-xs text-muted-foreground">{st.s}</span>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA strip — blurred / dark bg, single button */}
-      <section className="relative py-16 sm:py-20 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: "url(/home/2/1.webp)" }}
-        />
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-        <div className="relative z-10 text-center">
-          <Link to="/trips">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground border border-border uppercase font-semibold tracking-wider px-6 py-3 rounded min-h-[48px]">
-              See All Trips and Offers
-            </Button>
-          </Link>
+      {/* ══════════════════════════════════════════════
+          OUR STORY — image left / text right
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-background">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* image */}
+            <motion.div {...fadeLeft(0)} className="relative">
+              <div className="rounded-3xl overflow-hidden aspect-[4/5]">
+                <img src="/home/1/3.webp" alt="Our story" className="w-full h-full object-cover" />
+              </div>
+              {/* timeline pill overlay */}
+              <div className="absolute -right-4 sm:-right-8 top-1/2 -translate-y-1/2 bg-card border border-border rounded-2xl p-5 shadow-xl max-w-[220px]">
+                <p className="text-xs font-bold text-primary uppercase tracking-wider mb-4">Our Journey</p>
+                <div className="space-y-3">
+                  {milestones.map((m) => (
+                    <div key={m.year} className="flex gap-3 items-start">
+                      <span className="text-xs font-black text-primary flex-shrink-0 mt-0.5">{m.year}</span>
+                      <span className="text-xs text-muted-foreground leading-snug">{m.event}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+
+            {/* text */}
+            <motion.div {...fadeRight(0)}>
+              <p className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Our Story</p>
+              <h2 className="section-title mb-6">
+                Born from a real <span className="text-primary">logistics problem</span>
+              </h2>
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
+                <p>
+                  TransportConnect was founded in Casablanca with a simple mission: to make freight transport in Morocco more accessible, efficient, and reliable. We witnessed firsthand the challenges that both shippers and drivers faced in the traditional logistics industry.
+                </p>
+                <p>
+                  Since our launch, we've grown from a small startup to a trusted platform serving thousands of users across Morocco. Our commitment to innovation, security, and customer satisfaction has made us a leader in the logistics technology space.
+                </p>
+                <p>
+                  Today, we continue to evolve our platform, adding new features and expanding our network to better serve our community of shippers and drivers who power Morocco's economy every day.
+                </p>
+              </div>
+              <div className="mt-10">
+                <Link to="/trips">
+                  <Button className="bg-primary hover:bg-primary/90 text-white min-h-[48px] px-8 uppercase font-bold tracking-wider text-sm rounded-none">
+                    Find trips <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          VALUES — dark bg bento grid
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-foreground dark:bg-card text-background dark:text-foreground">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">All the Perks</motion.p>
+            <motion.h2
+              {...fadeUp(0.08)}
+              className="text-3xl sm:text-4xl md:text-5xl font-black uppercase"
+              style={{ letterSpacing: "-0.02em" }}
+            >
+              Why choose <span className="text-primary">TransportConnect</span>
+            </motion.h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {values.map((v, i) => {
+              const Icon = v.icon
+              return (
+                <motion.div
+                  key={v.title}
+                  {...fadeUp(i * 0.07)}
+                  className="group border border-white/10 dark:border-border rounded-2xl p-7 hover:border-primary/50 hover:bg-white/5 dark:hover:bg-muted/50 transition-all duration-300"
+                >
+                  <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center mb-5 group-hover:bg-primary transition-colors duration-300">
+                    <Icon className="w-6 h-6 text-primary group-hover:text-white transition-colors duration-300" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-2">{v.title}</h3>
+                  <p className="text-sm opacity-60 leading-relaxed">{v.desc}</p>
+                </motion.div>
+              )
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          TESTIMONIALS — cards with accent border tops
+         ══════════════════════════════════════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 md:px-8 bg-muted/40 dark:bg-muted/20">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Happy Users</motion.p>
+            <motion.h2 {...fadeUp(0.08)} className="section-title">What our users say</motion.h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+            {testimonials.map((t, i) => (
+              <motion.div
+                key={t.name}
+                {...fadeUp(i * 0.1)}
+                className="bg-card border-t-4 border-primary rounded-2xl p-8 shadow-sm hover:shadow-lg transition-shadow duration-300"
+              >
+                <p className="text-4xl text-primary font-serif leading-none mb-4">"</p>
+                <p className="text-foreground text-sm leading-relaxed mb-8 flex-1">{t.quote}</p>
+                <div className="border-t border-border pt-4">
+                  <p className="font-bold text-foreground">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════════
+          CTA — full bleed image
+         ══════════════════════════════════════════════ */}
+      <section className="relative py-28 sm:py-36 overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
+        <div className="absolute inset-0 bg-black/70" />
+        <div className="relative z-10 text-center px-4">
+          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-5">
+            Ready to join us?
+          </motion.p>
+          <motion.h2
+            {...fadeUp(0.08)}
+            className="text-4xl sm:text-5xl md:text-6xl font-black uppercase text-white mb-8"
+            style={{ letterSpacing: "-0.03em" }}
+          >
+            See all trips & offers
+          </motion.h2>
+          <motion.div {...fadeUp(0.15)} className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link to="/trips">
+              <Button className="bg-primary hover:bg-primary/90 text-white min-h-[52px] px-10 uppercase font-black tracking-widest text-sm rounded-none">
+                Browse trips <ArrowRight className="w-4 h-4 ml-2 inline-block" />
+              </Button>
+            </Link>
+            <Link to="/contact">
+              <Button variant="outline" className="min-h-[52px] px-10 border-2 border-white/50 text-white hover:bg-white/10 rounded-none uppercase font-bold tracking-widest text-sm">
+                Contact us
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
 
@@ -199,5 +283,3 @@ const AboutUsPage = () => {
     </div>
   )
 }
-
-export default AboutUsPage
