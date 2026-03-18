@@ -201,7 +201,15 @@ const WelcomePage = () => {
       imageUrl: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1920&q=80",
       imageUrlMobile: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&h=1200&q=80",
     },
+    {
+      title: "Professional Drivers. Premium Fleet. Total Reliability.",
+      description:
+        "Partner with Morocco's most trusted drivers — modern vehicles, full cargo insurance, and real-time GPS tracking on every journey.",
+      imageUrl: "https://source.unsplash.com/NKr0qBAkU4s/1920x1080",
+      imageUrlMobile: "https://source.unsplash.com/NKr0qBAkU4s/800x1200",
+    },
   ]
+
 
   const [heroSlide, setHeroSlide] = useState(0)
   useEffect(() => {
@@ -243,11 +251,13 @@ const WelcomePage = () => {
             backgroundPosition: "right center",
           }}
         />
-        <div className="absolute inset-0 bg-slate-900/75 dark:bg-black/70 transition-opacity duration-500" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/50" />
+        <div className="absolute inset-0 bg-slate-900/65 dark:bg-black/60 transition-opacity duration-500" />
+        {/* Top gradient for navbar readability */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
 
-        <div className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 md:pt-10 pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] justify-between">
-          <div className="flex-1 flex flex-col justify-center pt-2 sm:pt-4 min-h-0">
+        <div className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 md:px-8 pt-[calc(4.5rem+env(safe-area-inset-top))] sm:pt-[calc(5rem+env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] justify-between">
+          <div className="flex-1 flex flex-col justify-center min-h-0">
             <div className="max-w-2xl w-full">
               <AnimatePresence mode="wait">
                 <motion.div
