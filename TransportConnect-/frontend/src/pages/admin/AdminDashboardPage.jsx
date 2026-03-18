@@ -16,14 +16,13 @@ import {
   BarChart3,
   AlertCircle,
 } from "../../utils/icons"
-import Card from "../../components/ui/Card"
 import Button from "../../components/ui/Button"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import Skeleton from "../../components/ui/Skeleton"
 import { adminAPI, documentsAPI } from "../../services/api"
 import { normalizeAvatarUrl } from "../../utils/avatar"
 import { useNavigate } from "react-router-dom"
-import { Bar, Line, Doughnut } from "react-chartjs-2"
+import { Bar, Doughnut } from "react-chartjs-2"
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -78,12 +77,11 @@ const AdminDashboardPage = () => {
   })
 
   const stats = statsData?.data || {}
-  
-  // Calculate activity statistics from recent data
+
   const allTrips = recentTrips?.data || []
   const allRequests = recentRequests?.data || []
   const allUsers = recentUsers?.data || []
-  
+
   const activityStats = {
     activeTrips: allTrips.filter(t => t.status === "active").length,
     completedTrips: allTrips.filter(t => t.status === "completed").length,
@@ -140,24 +138,32 @@ const AdminDashboardPage = () => {
       description: "View, modify and verify user accounts",
       icon: Users,
       href: "/admin/users",
+      color: "text-primary",
+      bgColor: "bg-primary/10",
     },
     {
       title: "Manage Trips",
       description: "Monitor and manage all trips",
       icon: Truck,
       href: "/admin/trips",
+      color: "text-info",
+      bgColor: "bg-info/10",
     },
     {
       title: "Manage Requests",
       description: "Process transport requests",
       icon: Package,
       href: "/admin/requests",
+      color: "text-warning",
+      bgColor: "bg-warning/10",
     },
     {
       title: "Verifications",
       description: "Approve new users",
       icon: Shield,
       href: "/admin/verifications",
+      color: "text-success",
+      bgColor: "bg-success/10",
     },
   ]
 
@@ -165,9 +171,7 @@ const AdminDashboardPage = () => {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.1 },
     },
   }
 
@@ -176,9 +180,7 @@ const AdminDashboardPage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.5,
-      },
+      transition: { duration: 0.5 },
     },
   }
 
@@ -187,35 +189,35 @@ const AdminDashboardPage = () => {
       <div className="p-3 sm:p-4 md:p-6 space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="p-4">
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-10 w-10 rounded-lg" />
-                <Skeleton className="h-5 w-12" />
+            <div key={i} className="stat-tile">
+              <div className="flex items-center justify-between mb-3">
+                <Skeleton className="h-9 w-9 rounded-xl" />
+                <Skeleton className="h-4 w-10" />
               </div>
-              <Skeleton className="h-8 w-20 mt-3" />
-              <Skeleton className="h-4 w-24 mt-2" />
-            </Card>
+              <Skeleton className="h-8 w-20 mt-2" />
+              <Skeleton className="h-3 w-24 mt-2" />
+            </div>
           ))}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="p-6">
+          <div className="detail-card p-6">
             <Skeleton className="h-6 w-40 mb-4" />
-            <Skeleton className="h-48 w-full rounded-lg" />
-          </Card>
-          <Card className="p-6">
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
+          <div className="detail-card p-6">
             <Skeleton className="h-6 w-32 mb-4" />
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} className="flex items-center gap-3">
                   <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-                  <div className="flex-1 space-y-1">
+                  <div className="flex-1 space-y-1.5">
                     <Skeleton className="h-4 w-full" />
                     <Skeleton className="h-3 w-2/3" />
                   </div>
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     )
@@ -233,30 +235,29 @@ const AdminDashboardPage = () => {
         <motion.div variants={itemVariants}>
           <div className="mb-2">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <BarChart3 className="w-6 h-6 sm:w-7 sm:h-7 text-primary" />
+              <div className="section-icon-badge bg-primary/15">
+                <BarChart3 className="w-5 h-5 text-primary" />
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1">
                   Admin Dashboard
                 </h1>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  Comprehensive overview of platform performance, user activity, trip statistics, and system-wide metrics at a glance
+                  Comprehensive overview of platform performance, user activity, trip statistics, and system-wide metrics
                 </p>
               </div>
             </div>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">Manage your platform and monitor activity</p>
           </div>
         </motion.div>
 
-        {/* Attention needed - user verifications & requests */}
+        {/* Attention banners */}
         {needsAttention && (
           <motion.div variants={itemVariants}>
             <Link to={(stats.pendingVerifications || 0) > 0 ? "/admin/verifications" : "/admin/requests"}>
-              <Card className="p-4 border-l-4 border-l-warning bg-warning/5 hover:bg-warning/10 transition-colors cursor-pointer">
+              <div className="detail-card p-4 border-l-4 border-l-warning hover:border-warning/80 cursor-pointer transition-all group">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-warning/20">
-                    <AlertCircle className="w-5 h-5 text-warning" />
+                  <div className="section-icon-badge bg-warning/15">
+                    <AlertCircle className="w-4 h-4 text-warning" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground text-sm sm:text-base">Attention needed</h3>
@@ -268,31 +269,30 @@ const AdminDashboardPage = () => {
                           : `${activityStats.pendingRequests} request(s) awaiting action`}
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-warning shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-warning shrink-0 group-hover:translate-x-1 transition-transform" />
                 </div>
-              </Card>
+              </div>
             </Link>
           </motion.div>
         )}
 
-        {/* Attention needed - document verifications (papers) — distinct color */}
         {pendingDocuments.length > 0 && (
           <motion.div variants={itemVariants}>
             <Link to="/admin/documents">
-              <Card className="p-4 border-l-4 border-l-info bg-info/5 hover:bg-info/10 transition-colors cursor-pointer">
+              <div className="detail-card p-4 border-l-4 border-l-info hover:border-info/80 cursor-pointer transition-all group">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-info/20">
-                    <AlertCircle className="w-5 h-5 text-info" />
+                  <div className="section-icon-badge bg-info/15">
+                    <AlertCircle className="w-4 h-4 text-info" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Attention needed</h3>
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Documents pending</h3>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                       {pendingDocuments.length} document verification(s) pending
                     </p>
                   </div>
-                  <ArrowRight className="w-5 h-5 text-info shrink-0" />
+                  <ArrowRight className="w-4 h-4 text-info shrink-0 group-hover:translate-x-1 transition-transform" />
                 </div>
-              </Card>
+              </div>
             </Link>
           </motion.div>
         )}
@@ -305,31 +305,33 @@ const AdminDashboardPage = () => {
             <div className="h-px flex-1 bg-border" />
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          {statCards.map((stat, index) => {
-            const Icon = stat.icon
-            return (
-              <Card key={index} hover className="p-3 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-2 sm:mb-4">
-                  <div className={`p-2 sm:p-3 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
+            {statCards.map((stat, index) => {
+              const Icon = stat.icon
+              const isPrimary = index === statCards.length - 1
+              return (
+                <div
+                  key={index}
+                  className={clsx("cursor-pointer", isPrimary ? "stat-tile-primary" : "stat-tile")}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={clsx("section-icon-badge", stat.bgColor)}>
+                      <Icon className={clsx("w-4 h-4 sm:w-5 sm:h-5", stat.color)} />
+                    </div>
+                    <div
+                      className={clsx(
+                        "flex items-center gap-1 text-xs font-semibold",
+                        stat.trend === "up" ? "text-success" : "text-destructive"
+                      )}
+                    >
+                      <TrendingUp className={clsx("w-3 h-3", stat.trend === "down" && "rotate-180")} />
+                      {stat.change}
+                    </div>
                   </div>
-                  <div
-                    className={clsx(
-                      "flex items-center gap-1 text-xs font-medium",
-                      stat.trend === "up" ? "text-success" : "text-destructive"
-                    )}
-                  >
-                    <TrendingUp className="w-3 h-3" />
-                    {stat.change}
-                  </div>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-0.5">{stat.value}</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{stat.title}</p>
                 </div>
-                <div>
-                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">{stat.value}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
-                </div>
-              </Card>
-            )
-          })}
+              )
+            })}
           </div>
         </motion.div>
 
@@ -341,121 +343,115 @@ const AdminDashboardPage = () => {
             <div className="h-px flex-1 bg-border" />
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-          {/* Platform Overview Statistics */}
-          <motion.div variants={itemVariants}>
-            <Card className="p-4 sm:p-5 md:p-6 h-full">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <BarChart3 className="w-5 h-5 text-primary" />
+            {/* Platform Overview chart */}
+            <motion.div variants={itemVariants}>
+              <div className="detail-card p-4 sm:p-5 md:p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="section-icon-badge bg-primary/15">
+                    <BarChart3 className="w-4 h-4 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="admin-card-title">Platform overview</h3>
+                    <p className="admin-card-subtitle">Users, trips, requests & verifications</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="admin-card-title">Platform overview</h3>
-                  <p className="admin-card-subtitle">Users, trips, requests & verifications</p>
-                </div>
-              </div>
-              <div className="h-48 sm:h-64 md:h-80">
-                <Bar
-                  data={{
-                    labels: ["Users", "Trips", "Requests", "Pending Verifications"],
-                    datasets: [
-                      {
-                        label: "Statistics",
-                        data: [
-                          stats.totalUsers || 0,
-                          stats.totalTrips || 0,
-                          stats.totalRequests || 0,
-                          stats.pendingVerifications || 0,
-                        ],
-                        backgroundColor: [
-                          "rgba(239, 68, 68, 0.8)",
-                          "rgba(59, 130, 246, 0.8)",
-                          "rgba(245, 158, 11, 0.8)",
-                          "rgba(34, 197, 94, 0.8)",
-                        ],
-                        borderRadius: 8,
-                        borderWidth: 1,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { display: false },
-                      title: { display: false },
-                    },
-                    scales: {
-                      y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 },
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Activity Statistics */}
-          <motion.div variants={itemVariants}>
-            <Card className="p-4 sm:p-5 md:p-6 h-full">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 rounded-lg bg-info/10">
-                  <TrendingUp className="w-5 h-5 text-info" />
-                </div>
-                <div>
-                  <h3 className="admin-card-title">Activity distribution</h3>
-                  <p className="admin-card-subtitle">Trips & requests by status</p>
-                </div>
-              </div>
-              <div className="h-48 sm:h-64 md:h-80">
-                <Doughnut
-                  data={{
-                    labels: ["Active Trips", "Completed Trips", "Pending Requests", "Accepted Requests"],
-                    datasets: [
-                      {
-                        label: "Activity",
-                        data: [
-                          activityStats.activeTrips,
-                          activityStats.completedTrips,
-                          activityStats.pendingRequests,
-                          activityStats.acceptedRequests,
-                        ],
-                        backgroundColor: [
-                          "rgba(59, 130, 246, 0.8)",
-                          "rgba(34, 197, 94, 0.8)",
-                          "rgba(245, 158, 11, 0.8)",
-                          "rgba(168, 85, 247, 0.8)",
-                        ],
-                        borderColor: [
-                          "rgba(59, 130, 246, 1)",
-                          "rgba(34, 197, 94, 1)",
-                          "rgba(245, 158, 11, 1)",
-                          "rgba(168, 85, 247, 1)",
-                        ],
-                        borderWidth: 2,
-                      },
-                    ],
-                  }}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: {
-                        display: true,
-                        position: "bottom",
-                        labels: {
-                          padding: 15,
-                          usePointStyle: true,
+                <div className="h-48 sm:h-64 md:h-80">
+                  <Bar
+                    data={{
+                      labels: ["Users", "Trips", "Requests", "Pending Verif."],
+                      datasets: [
+                        {
+                          label: "Statistics",
+                          data: [
+                            stats.totalUsers || 0,
+                            stats.totalTrips || 0,
+                            stats.totalRequests || 0,
+                            stats.pendingVerifications || 0,
+                          ],
+                          backgroundColor: [
+                            "rgba(239, 68, 68, 0.8)",
+                            "rgba(59, 130, 246, 0.8)",
+                            "rgba(245, 158, 11, 0.8)",
+                            "rgba(34, 197, 94, 0.8)",
+                          ],
+                          borderRadius: 8,
+                          borderWidth: 1,
                         },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                        title: { display: false },
                       },
-                      title: { display: false },
-                    },
-                  }}
-                />
+                      scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+                      },
+                    }}
+                  />
+                </div>
               </div>
-            </Card>
-          </motion.div>
+            </motion.div>
+
+            {/* Activity Distribution chart */}
+            <motion.div variants={itemVariants}>
+              <div className="detail-card p-4 sm:p-5 md:p-6 h-full">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="section-icon-badge bg-info/15">
+                    <TrendingUp className="w-4 h-4 text-info" />
+                  </div>
+                  <div>
+                    <h3 className="admin-card-title">Activity distribution</h3>
+                    <p className="admin-card-subtitle">Trips & requests by status</p>
+                  </div>
+                </div>
+                <div className="h-48 sm:h-64 md:h-80">
+                  <Doughnut
+                    data={{
+                      labels: ["Active Trips", "Completed Trips", "Pending Requests", "Accepted Requests"],
+                      datasets: [
+                        {
+                          label: "Activity",
+                          data: [
+                            activityStats.activeTrips,
+                            activityStats.completedTrips,
+                            activityStats.pendingRequests,
+                            activityStats.acceptedRequests,
+                          ],
+                          backgroundColor: [
+                            "rgba(59, 130, 246, 0.8)",
+                            "rgba(34, 197, 94, 0.8)",
+                            "rgba(245, 158, 11, 0.8)",
+                            "rgba(168, 85, 247, 0.8)",
+                          ],
+                          borderColor: [
+                            "rgba(59, 130, 246, 1)",
+                            "rgba(34, 197, 94, 1)",
+                            "rgba(245, 158, 11, 1)",
+                            "rgba(168, 85, 247, 1)",
+                          ],
+                          borderWidth: 2,
+                        },
+                      ],
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: true,
+                          position: "bottom",
+                          labels: { padding: 15, usePointStyle: true },
+                        },
+                        title: { display: false },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </motion.div>
           </div>
         </motion.div>
 
@@ -466,231 +462,220 @@ const AdminDashboardPage = () => {
             <h2 className="admin-label px-2">Quick access & activity</h2>
             <div className="h-px flex-1 bg-border" />
           </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-          {/* Left Column - 2/3 width */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Truck className="w-5 h-5 text-primary" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+            {/* Left Column - 2/3 */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Quick Actions */}
+              <motion.div variants={itemVariants}>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="section-icon-badge bg-primary/15">
+                      <Truck className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="admin-card-title">Quick actions</h3>
+                      <p className="admin-card-subtitle">Jump to management sections</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="admin-card-title">Quick actions</h3>
-                    <p className="admin-card-subtitle">Jump to management sections</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  {quickActions.map((action, index) => {
-                    const Icon = action.icon
-                    return (
-                      <button
-                        key={action.title}
-                        onClick={() => navigate(action.href)}
-                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 hover:shadow-md transition-all text-left group"
-                      >
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <h4 className="font-semibold text-foreground text-sm sm:text-base">{action.title}</h4>
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground">{action.description}</p>
-                      </button>
-                    )
-                  })}
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Recent Trips */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-info/10">
-                      <Truck className="w-4 h-4 text-info" />
-                    </div>
-                    <h3 className="admin-card-title">Recent trips</h3>
-                  </div>
-                  <Link to="/admin/trips">
-                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="space-y-3">
-                  {tripsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <LoadingSpinner />
-                    </div>
-                  ) : (recentTrips?.data || []).length > 0 ? (
-                    (recentTrips.data || []).slice(0, 5).map((trip) => (
-                      <div
-                        key={trip._id}
-                        className="p-4 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between mb-2 gap-2">
-                          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-                              <Truck className="w-3 h-3 sm:w-4 sm:h-4 text-primary" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="font-medium text-foreground text-sm sm:text-base truncate">
-                                {trip.departure?.city} → {trip.destination?.city}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                {trip.driver?.firstName} {trip.driver?.lastName}
-                              </p>
-                            </div>
-                          </div>
-                          <span className="text-base sm:text-lg font-bold text-primary flex-shrink-0 truncate" title={`${Number(trip.pricePerKg).toFixed(2)}€/kg`}>
-                            {Number(trip.pricePerKg).toFixed(2)}€/kg
-                          </span>
-                        </div>
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Package className="w-3 h-3" />
-                            {trip.availableCapacity?.weight}kg available
-                          </span>
-                          <span
-                            className={clsx(
-                              "px-2 py-1 rounded-md text-xs font-medium",
-                              trip.status === "active"
-                                ? "bg-success/10 text-success"
-                                : trip.status === "completed"
-                                  ? "bg-primary/10 text-primary"
-                                  : "bg-muted text-muted-foreground"
-                            )}
-                          >
-                            {trip.status}
-                          </span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No trips found</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* Right Column - 1/3 width */}
-          <div className="space-y-6">
-            {/* Recent Requests */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-warning/10">
-                      <Package className="w-4 h-4 text-warning" />
-                    </div>
-                    <h3 className="admin-card-title">Recent requests</h3>
-                  </div>
-                  <Link to="/admin/requests">
-                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="space-y-3">
-                  {requestsLoading ? (
-                    <div className="flex justify-center py-8">
-                      <LoadingSpinner />
-                    </div>
-                  ) : (recentRequests?.data || []).length > 0 ? (
-                    (recentRequests.data || []).slice(0, 3).map((request) => (
-                      <div
-                        key={request._id}
-                        className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
-                      >
-                        <div className="flex items-start justify-between mb-2 gap-2">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-xs sm:text-sm text-foreground truncate">
-                              {request.cargo?.description?.substring(0, 30)}...
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-1 truncate">
-                              {request.pickup?.city} → {request.delivery?.city}
-                            </p>
-                          </div>
-                          <span
-                            className={clsx(
-                              "px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-xs font-medium flex-shrink-0 capitalize",
-                              request.status === "pending"
-                                ? "bg-warning/10 text-warning"
-                                : request.status === "accepted"
-                                  ? "bg-success/10 text-success"
-                                  : request.status === "rejected"
-                                    ? "bg-destructive/10 text-destructive"
-                                    : request.status === "delivered"
-                                      ? "bg-success/10 text-success"
-                                      : request.status === "in_transit"
-                                        ? "bg-info/10 text-info"
-                                        : request.status === "cancelled"
-                                          ? "bg-muted text-muted-foreground"
-                                          : "bg-muted text-muted-foreground"
-                            )}
-                          >
-                            {request.status === "in_transit" ? "In Transit" : request.status}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{request.cargo?.weight}kg</span>
-                          <span className="font-medium text-foreground">{request.price}€</span>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No requests found</p>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Pending Verifications */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-success/10">
-                      <Shield className="w-4 h-4 text-success" />
-                    </div>
-                    <h3 className="admin-card-title">Pending verifications</h3>
-                  </div>
-                  <Link to="/admin/verifications">
-                    <Button variant="ghost" size="small" className="text-xs sm:text-sm">
-                      View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                    </Button>
-                  </Link>
-                </div>
-
-                <div className="space-y-3">
-                  {usersLoading ? (
-                    <div className="flex justify-center py-8">
-                      <LoadingSpinner />
-                    </div>
-                  ) : (recentUsers?.data || []).filter((u) => !u.isVerified)?.length > 0 ? (
-                    (recentUsers.data || []).filter((u) => !u.isVerified).slice(0, 3).map((user) => (
-                        <div
-                          key={user._id}
-                          className="p-3 bg-background rounded-lg border border-border hover:border-primary/50 transition-colors"
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {quickActions.map((action) => {
+                      const Icon = action.icon
+                      return (
+                        <button
+                          key={action.title}
+                          onClick={() => navigate(action.href)}
+                          className="route-step-card text-left group"
                         >
+                          <div className="flex items-center gap-3 mb-1.5">
+                            <div className={clsx("section-icon-badge shrink-0", action.bgColor)} style={{width:'2rem',height:'2rem'}}>
+                              <Icon className={clsx("w-3.5 h-3.5", action.color)} />
+                            </div>
+                            <h4 className="font-bold text-foreground text-sm">{action.title}</h4>
+                          </div>
+                          <p className="text-xs text-muted-foreground pl-9">{action.description}</p>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Recent Trips */}
+              <motion.div variants={itemVariants}>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="section-icon-badge bg-info/15" style={{width:'2rem',height:'2rem'}}>
+                        <Truck className="w-3.5 h-3.5 text-info" />
+                      </div>
+                      <h3 className="admin-card-title">Recent trips</h3>
+                    </div>
+                    <Link to="/admin/trips">
+                      <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                        View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2">
+                    {tripsLoading ? (
+                      <div className="flex justify-center py-8">
+                        <LoadingSpinner />
+                      </div>
+                    ) : (recentTrips?.data || []).length > 0 ? (
+                      (recentTrips.data || []).slice(0, 5).map((trip) => (
+                        <div key={trip._id} className="route-step-card">
+                          <div className="flex items-start justify-between mb-1 gap-2">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <div className="section-icon-badge bg-primary/10 shrink-0" style={{width:'1.75rem',height:'1.75rem'}}>
+                                <Truck className="w-3 h-3 text-primary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-bold text-foreground text-sm truncate">
+                                  {trip.departure?.city} → {trip.destination?.city}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {trip.driver?.firstName} {trip.driver?.lastName}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-sm font-bold text-primary flex-shrink-0">
+                              {Number(trip.pricePerKg).toFixed(2)}€/kg
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground pl-8">
+                            <span className="flex items-center gap-1">
+                              <Package className="w-3 h-3" />
+                              {trip.availableCapacity?.weight}kg
+                            </span>
+                            <span
+                              className={clsx(
+                                "px-2 py-0.5 rounded-lg text-[10px] font-bold",
+                                trip.status === "active"
+                                  ? "bg-success/10 text-success"
+                                  : trip.status === "completed"
+                                    ? "bg-primary/10 text-primary"
+                                    : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {trip.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Truck className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No trips found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Right Column - 1/3 */}
+            <div className="space-y-6">
+              {/* Recent Requests */}
+              <motion.div variants={itemVariants}>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="section-icon-badge bg-warning/15" style={{width:'2rem',height:'2rem'}}>
+                        <Package className="w-3.5 h-3.5 text-warning" />
+                      </div>
+                      <h3 className="admin-card-title">Recent requests</h3>
+                    </div>
+                    <Link to="/admin/requests">
+                      <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                        View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2">
+                    {requestsLoading ? (
+                      <div className="flex justify-center py-8">
+                        <LoadingSpinner />
+                      </div>
+                    ) : (recentRequests?.data || []).length > 0 ? (
+                      (recentRequests.data || []).slice(0, 3).map((request) => (
+                        <div key={request._id} className="route-step-card">
+                          <div className="flex items-start justify-between mb-1 gap-2">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-xs text-foreground truncate">
+                                {request.cargo?.description?.substring(0, 30)}...
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                                {request.pickup?.city} → {request.delivery?.city}
+                              </p>
+                            </div>
+                            <span
+                              className={clsx(
+                                "px-2 py-0.5 rounded-lg text-[10px] font-bold flex-shrink-0 capitalize",
+                                request.status === "pending"
+                                  ? "bg-warning/10 text-warning"
+                                  : request.status === "accepted"
+                                    ? "bg-success/10 text-success"
+                                    : request.status === "rejected"
+                                      ? "bg-destructive/10 text-destructive"
+                                      : request.status === "delivered"
+                                        ? "bg-success/10 text-success"
+                                        : request.status === "in_transit"
+                                          ? "bg-info/10 text-info"
+                                          : "bg-muted text-muted-foreground"
+                              )}
+                            >
+                              {request.status === "in_transit" ? "In Transit" : request.status}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground mt-1">
+                            <span>{request.cargo?.weight}kg</span>
+                            <span className="font-bold text-foreground">{request.price}€</span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8">
+                        <Package className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No requests found</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Pending Verifications */}
+              <motion.div variants={itemVariants}>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="section-icon-badge bg-success/15" style={{width:'2rem',height:'2rem'}}>
+                        <Shield className="w-3.5 h-3.5 text-success" />
+                      </div>
+                      <h3 className="admin-card-title">Pending verifications</h3>
+                    </div>
+                    <Link to="/admin/verifications">
+                      <Button variant="ghost" size="small" className="text-xs sm:text-sm">
+                        View all <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
+                      </Button>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2">
+                    {usersLoading ? (
+                      <div className="flex justify-center py-8">
+                        <LoadingSpinner />
+                      </div>
+                    ) : (recentUsers?.data || []).filter((u) => !u.isVerified)?.length > 0 ? (
+                      (recentUsers.data || []).filter((u) => !u.isVerified).slice(0, 3).map((user) => (
+                        <div key={user._id} className="route-step-card">
                           <div className="flex items-center gap-3">
                             {user.avatar ? (
                               <img
                                 src={normalizeAvatarUrl(user.avatar)}
                                 alt={`${user.firstName} ${user.lastName}`}
-                                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                                className="w-9 h-9 rounded-full object-cover flex-shrink-0"
                                 onError={(e) => {
                                   e.target.style.display = "none"
                                   e.target.nextSibling.style.display = "flex"
@@ -699,83 +684,73 @@ const AdminDashboardPage = () => {
                             ) : null}
                             <div
                               className={clsx(
-                                "w-10 h-10 bg-primary rounded-full flex items-center justify-center flex-shrink-0",
+                                "w-9 h-9 bg-primary rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm",
                                 user.avatar && "hidden"
                               )}
                             >
-                              <span className="text-white font-bold text-sm">
-                                {user.firstName?.charAt(0)}
-                                {user.lastName?.charAt(0)}
-                              </span>
+                              {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground text-sm truncate">
+                              <p className="font-semibold text-foreground text-sm truncate">
                                 {user.firstName} {user.lastName}
                               </p>
                               <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                             </div>
-                            <span className="px-2 py-1 bg-warning/10 text-warning rounded-md text-xs font-medium flex-shrink-0">
+                            <span className="px-2 py-0.5 bg-warning/10 text-warning rounded-lg text-[10px] font-bold flex-shrink-0">
                               Pending
                             </span>
                           </div>
                         </div>
                       ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No pending verifications</p>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="text-center py-8">
+                        <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-2 opacity-50" />
+                        <p className="text-sm text-muted-foreground">No pending verifications</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </Card>
-            </motion.div>
+              </motion.div>
 
-            {/* Platform at a glance */}
-            <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <BarChart3 className="w-5 h-5 text-primary" />
+              {/* Platform at a glance */}
+              <motion.div variants={itemVariants}>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="section-icon-badge bg-primary/15">
+                      <BarChart3 className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="admin-card-title">Platform at a glance</h3>
+                      <p className="admin-card-subtitle">Current counts</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="admin-card-title">Platform at a glance</h3>
-                    <p className="admin-card-subtitle">Current counts</p>
-                  </div>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
-                    <span className="admin-description">Active users</span>
-                    <span className="font-medium text-foreground">
-                      {(recentUsers?.data || []).filter((u) => u.isActive)?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
-                    <span className="admin-description">Verified users</span>
-                    <span className="font-medium text-foreground">
-                      {(recentUsers?.data || []).filter((u) => u.isVerified)?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
-                    <span className="admin-description">Active trips</span>
-                    <span className="font-medium text-foreground">
-                      {(recentTrips?.data || []).filter((t) => t.status === "active")?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm py-2 border-b border-border-subtle">
-                    <span className="admin-description">Pending requests</span>
-                    <span className="font-medium text-foreground">
-                      {(recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0}
-                    </span>
+                  <div className="stat-tile !p-3 space-y-2.5">
+                    {[
+                      { label: "Active users", value: (recentUsers?.data || []).filter((u) => u.isActive)?.length || 0 },
+                      { label: "Verified users", value: (recentUsers?.data || []).filter((u) => u.isVerified)?.length || 0 },
+                      { label: "Active trips", value: (recentTrips?.data || []).filter((t) => t.status === "active")?.length || 0 },
+                      { label: "Pending requests", value: (recentRequests?.data || []).filter((r) => r.status === "pending")?.length || 0 },
+                    ].map((row, i, arr) => (
+                      <div
+                        key={row.label}
+                        className={clsx(
+                          "flex items-center justify-between text-xs py-1.5",
+                          i < arr.length - 1 && "border-b border-white/5"
+                        )}
+                      >
+                        <span className="text-muted-foreground">{row.label}</span>
+                        <span className="font-bold text-foreground">{row.value}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </Card>
-            </motion.div>
+              </motion.div>
+            </div>
           </div>
-        </div>
         </motion.div>
       </motion.div>
     </div>
   )
 }
 
-export default AdminDashboardPage 
+export default AdminDashboardPage
