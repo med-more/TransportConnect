@@ -206,7 +206,7 @@ const DashboardPage = () => {
               </Card>
             ))}
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-6">
             <div className="lg:col-span-2 space-y-6">
               <Card className="p-4 sm:p-5 md:p-6">
                 <div className="flex justify-between mb-4">
@@ -283,10 +283,10 @@ const DashboardPage = () => {
           {statsCards.map((stat, index) => {
             const Icon = stat.icon
             return (
-              <Card key={index} hover className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-                    <Icon className={`w-6 h-6 ${stat.color}`} />
+              <Card key={index} hover className="p-3 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                  <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl ${stat.bgColor}`}>
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
                   </div>
                   <div
                     className={clsx(
@@ -299,7 +299,7 @@ const DashboardPage = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight mb-0.5">{stat.value}</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-0.5">{stat.value}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
                 </div>
               </Card>
@@ -308,9 +308,9 @@ const DashboardPage = () => {
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-          {/* Left Column - 2/3 width */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-5 md:gap-6">
+          {/* Left Column - full width on mobile, 2/3 on lg */}
+          <div className="col-span-2 lg:col-span-2 space-y-6">
             {/* Route Map Widget - Shipment Tracking */}
             <motion.div variants={itemVariants}>
               <Card className="p-4 sm:p-5 md:p-6">

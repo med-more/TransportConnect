@@ -144,21 +144,21 @@ export default function SupportPage() {
               Choose how to <span className="text-primary">reach us</span>
             </motion.h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
             {channels.map((ch, i) => {
               const Icon = ch.icon
               return (
                 <motion.div
                   key={ch.title}
                   {...fadeUp(i * 0.08)}
-                  className="group bg-card border border-border rounded-3xl p-7 flex flex-col gap-4 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
+                  className="group bg-card border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-7 flex flex-col gap-3 sm:gap-4 hover:border-primary/50 hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300">
-                    <Icon className="w-7 h-7 text-primary group-hover:text-white transition-colors duration-300" />
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors duration-300 flex-shrink-0">
+                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-primary group-hover:text-white transition-colors duration-300" />
                   </div>
-                  <div>
-                    <h3 className="font-bold text-foreground text-lg mb-2">{ch.title}</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{ch.desc}</p>
+                  <div className="min-w-0">
+                    <h3 className="font-bold text-foreground text-sm sm:text-lg mb-1 sm:mb-2">{ch.title}</h3>
+                    <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{ch.desc}</p>
                   </div>
                   <div className="mt-auto">
                     <a href={ch.href}>
@@ -217,7 +217,7 @@ export default function SupportPage() {
               Helpful resources
             </motion.h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
             {[
               { img: "/home/1/1.webp", title: "Getting Started Guide", desc: "Step-by-step tutorials for new shippers and drivers to get up and running fast." },
               { img: "/home/1/2.webp", title: "Video Tutorials", desc: "Watch and learn from our growing library of explainer and how-to videos." },

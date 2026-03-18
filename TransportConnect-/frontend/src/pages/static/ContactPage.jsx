@@ -127,7 +127,7 @@ export default function ContactPage() {
          ══════════════════════════════════════════════ */}
       <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 -translate-y-6 sm:-translate-y-8">
             {[
               { Icon: Clock, l: "Avg Response", v: "< 3m", s: "always online" },
               { Icon: Phone, l: "Phone Support", v: "24/7", s: "call us anytime" },
@@ -139,14 +139,14 @@ export default function ContactPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
+                className="group bg-card border border-border rounded-2xl px-4 py-4 sm:px-6 sm:py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-3xl sm:text-4xl font-black text-primary leading-none tracking-tight">{st.v}</span>
-                  <st.Icon className="w-6 h-6 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                  <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary leading-none tracking-tight">{st.v}</span>
+                  <st.Icon className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground/30 group-hover:text-primary transition-colors flex-shrink-0" />
                 </div>
-                <span className="text-sm font-bold text-foreground mt-2">{st.l}</span>
-                <span className="text-xs text-muted-foreground">{st.s}</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground mt-2">{st.l}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{st.s}</span>
               </motion.div>
             ))}
           </div>

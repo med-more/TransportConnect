@@ -106,7 +106,7 @@ export default function AboutUsPage() {
          ══════════════════════════════════════════════ */}
       <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 -translate-y-6 sm:-translate-y-8">
             {[
               { v: "12K+", l: "Active Shippers", s: "and growing daily" },
               { v: "8K+", l: "Verified Drivers", s: "background-checked" },
@@ -118,11 +118,11 @@ export default function AboutUsPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
+                className="group bg-card border border-border rounded-2xl px-4 py-4 sm:px-6 sm:py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
-                <span className="text-3xl sm:text-4xl font-black text-primary leading-none">{st.v}</span>
-                <span className="text-sm font-bold text-foreground mt-1">{st.l}</span>
-                <span className="text-xs text-muted-foreground">{st.s}</span>
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary leading-none">{st.v}</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground mt-1">{st.l}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{st.s}</span>
               </motion.div>
             ))}
           </div>
@@ -198,7 +198,7 @@ export default function AboutUsPage() {
               Why choose <span className="text-primary">TransportConnect</span>
             </motion.h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {values.map((v, i) => {
               const Icon = v.icon
               return (
@@ -228,7 +228,7 @@ export default function AboutUsPage() {
             <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.25em] uppercase text-primary mb-4">Happy Users</motion.p>
             <motion.h2 {...fadeUp(0.08)} className="section-title">What our users say</motion.h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {testimonials.map((t, i) => (
               <motion.div
                 key={t.name}

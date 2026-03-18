@@ -107,7 +107,7 @@ export default function ServicesPage() {
       {/* ── STATS STRIP ── */}
       <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 -translate-y-6 sm:-translate-y-8">
             {[
               { v: "98%", l: "On-Time Delivery", s: "industry-leading rate" },
               { v: "8K+", l: "Verified Drivers", s: "background-checked drivers" },
@@ -119,11 +119,11 @@ export default function ServicesPage() {
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
+                className="group bg-card border border-border rounded-2xl px-4 py-4 sm:px-6 sm:py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
-                <span className="text-3xl sm:text-4xl font-black text-primary leading-none">{st.v}</span>
-                <span className="text-sm font-bold text-foreground mt-1">{st.l}</span>
-                <span className="text-xs text-muted-foreground">{st.s}</span>
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary leading-none">{st.v}</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground mt-1">{st.l}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{st.s}</span>
               </motion.div>
             ))}
           </div>
@@ -265,7 +265,7 @@ export default function ServicesPage() {
           </div>
           <div className="relative">
             <div className="hidden lg:block absolute left-0 right-0 h-px bg-primary/30" style={{ top: "2.5rem" }} />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-10">
               {howSteps.map((s, i) => (
                 <motion.div key={s.step} {...fadeUp(i * 0.1)} className="relative flex flex-col items-center text-center">
                   <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center mb-6 flex-shrink-0 z-10 shadow-xl">

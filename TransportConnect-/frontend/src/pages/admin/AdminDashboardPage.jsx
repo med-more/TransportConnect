@@ -185,7 +185,7 @@ const AdminDashboardPage = () => {
   if (statsLoading) {
     return (
       <div className="p-3 sm:p-4 md:p-6 space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="p-4">
               <div className="flex items-center justify-between">
@@ -308,10 +308,10 @@ const AdminDashboardPage = () => {
           {statCards.map((stat, index) => {
             const Icon = stat.icon
             return (
-              <Card key={index} hover className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`w-6 h-6 ${stat.color}`} />
+              <Card key={index} hover className="p-3 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-2 sm:mb-4">
+                  <div className={`p-2 sm:p-3 rounded-lg ${stat.bgColor}`}>
+                    <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${stat.color}`} />
                   </div>
                   <div
                     className={clsx(
@@ -324,7 +324,7 @@ const AdminDashboardPage = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-bold text-foreground mb-1">{stat.value}</p>
+                  <p className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-0.5 sm:mb-1">{stat.value}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
                 </div>
               </Card>

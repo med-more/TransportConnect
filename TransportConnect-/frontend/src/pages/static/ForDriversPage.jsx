@@ -166,18 +166,18 @@ export default function ForDriversPage() {
          ══════════════════════════════════════════════ */}
       <section className="relative z-10 -mt-1 px-4 sm:px-6 md:px-8 bg-background">
         <div className="container mx-auto max-w-6xl">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 -translate-y-6 sm:-translate-y-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 -translate-y-6 sm:-translate-y-8">
             {stats.map((s, i) => (
               <motion.div
                 key={s.label}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="group bg-card border border-border rounded-2xl px-6 py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
+                className="group bg-card border border-border rounded-2xl px-4 py-4 sm:px-6 sm:py-5 shadow-lg hover:shadow-xl hover:border-primary/40 transition-all duration-300 flex flex-col gap-1"
               >
-                <span className="text-3xl sm:text-4xl font-black text-primary leading-none">{s.value}</span>
-                <span className="text-sm font-bold text-foreground mt-1">{s.label}</span>
-                <span className="text-xs text-muted-foreground">{s.sub}</span>
+                <span className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary leading-none">{s.value}</span>
+                <span className="text-xs sm:text-sm font-bold text-foreground mt-1">{s.label}</span>
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{s.sub}</span>
               </motion.div>
             ))}
           </div>
@@ -265,7 +265,7 @@ export default function ForDriversPage() {
             </motion.h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
             {steps.map((s, i) => (
               <motion.div key={s.step} {...fadeUp(i * 0.1)} className="relative flex flex-col items-center text-center">
                 {/* connector line */}
@@ -356,7 +356,7 @@ export default function ForDriversPage() {
               Driver success <span className="text-primary">stories</span>
             </motion.h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             {stories.map((s, i) => (
               <motion.div
                 key={s.name}

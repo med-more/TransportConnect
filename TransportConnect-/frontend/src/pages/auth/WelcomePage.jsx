@@ -613,13 +613,13 @@ const WelcomePage = () => {
       {/* Bento highlight – Awwwards-style */}
       <section className="py-12 sm:py-16 md:py-20 px-3 sm:px-4 md:px-6 bg-background">
         <div className="container mx-auto max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={transitionSmooth}
               viewport={viewportDefaults}
-              className="md:col-span-2 md:row-span-2 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-end min-h-[200px] sm:min-h-[280px] md:min-h-[320px]"
+              className="col-span-2 md:col-span-2 md:row-span-2 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-end min-h-[200px] sm:min-h-[280px] md:min-h-[320px]"
             >
               <p className="text-white/80 text-sm sm:text-base font-medium uppercase tracking-widest mb-2">
                 One platform

@@ -440,7 +440,7 @@ const TripsPage = () => {
           transition={{ duration: 0.3 }}
           className="overflow-hidden"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pb-3 sm:pb-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 pb-3 sm:pb-4">
             <Input
               placeholder={t("trips.departureCity")}
               value={filters.departure}
