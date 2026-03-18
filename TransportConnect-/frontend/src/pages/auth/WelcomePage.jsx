@@ -205,8 +205,8 @@ const WelcomePage = () => {
       title: "Professional Drivers. Premium Fleet. Total Reliability.",
       description:
         "Partner with Morocco's most trusted drivers — modern vehicles, full cargo insurance, and real-time GPS tracking on every journey.",
-      imageUrl: "https://source.unsplash.com/NKr0qBAkU4s/1920x1080",
-      imageUrlMobile: "https://source.unsplash.com/NKr0qBAkU4s/800x1200",
+      imageUrl: "https://images.unsplash.com/photo-1473445730015-841f29a9490b?auto=format&fit=crop&w=1920&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1473445730015-841f29a9490b?auto=format&fit=crop&w=800&h=1200&q=80",
     },
   ]
 
