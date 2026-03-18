@@ -184,7 +184,7 @@ const WelcomePage = () => {
       title: "Smarter Transport. Faster Deliveries. Nationwide Reach.",
       description:
         "Experience technology-driven transport solutions built for speed, safety, and efficiency — from freight and logistics to last-mile delivery.",
-      imageUrl: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1920&q=80",
+      imageUrl: "https://images.unsplash.com/photo-1733269783959-46b276c9597c?auto=format&fit=crop&w=1920&q=80",
       imageUrlMobile: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=800&h=1200&q=80",
     },
     {
@@ -199,7 +199,7 @@ const WelcomePage = () => {
       description:
         "Verified drivers, transparent ratings, and direct chat — so your shipments get there safely and on schedule.",
       imageUrl: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1920&q=80",
-      imageUrlMobile: "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=800&h=1200&q=80",
+      imageUrlMobile: "https://images.unsplash.com/photo-1733269783959-46b276c9597c?auto=format&fit=crop&w=800&h=1200&q=80",
     },
     {
       title: "Professional Drivers. Premium Fleet. Total Reliability.",
