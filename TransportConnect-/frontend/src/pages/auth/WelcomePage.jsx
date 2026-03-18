@@ -233,10 +233,13 @@ const WelcomePage = () => {
 
       <PublicHeader />
 
-      {/* Hero: single section, fully responsive — mobile image on small screens, desktop image on sm+ */}
+      {/* ─── FIRST VIEWPORT: Hero + Trust strip — both visible without scrolling ─── */}
+      <div className="h-[100dvh] flex flex-col">
+
+      {/* Hero section fills remaining space above the marquee */}
       <section
         ref={heroRef}
-        className="relative min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] flex flex-col justify-between overflow-hidden"
+        className="relative flex-1 min-h-0 flex flex-col justify-between overflow-hidden"
       >
         {/* Mobile background (trucks/transport, optimized for small screens) */}
         <div
@@ -256,7 +259,9 @@ const WelcomePage = () => {
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/60 via-black/20 to-transparent pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
 
-        <div className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 md:px-8 pt-[calc(4.5rem+env(safe-area-inset-top))] sm:pt-[calc(5rem+env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col min-h-[85dvh] sm:min-h-[88vh] lg:min-h-[90vh] justify-between">
+        <div
+          className="container mx-auto max-w-7xl relative z-10 px-4 sm:px-6 md:px-8 pt-[calc(4rem+env(safe-area-inset-top))] sm:pt-[calc(5rem+env(safe-area-inset-top))] pb-4 sm:pb-6 flex flex-col h-full justify-between"
+        >
           <div className="flex-1 flex flex-col justify-center min-h-0">
             <div className="max-w-2xl w-full">
               <AnimatePresence mode="wait">
@@ -325,10 +330,10 @@ const WelcomePage = () => {
         </div>
       </section>
 
-      {/* Marquee – Trust strip (Awwwards-style) - always dark for contrast */}
-      <section className="relative py-4 sm:py-5 border-y border-border bg-slate-900 dark:bg-black overflow-hidden">
+      {/* Marquee – Trust strip anchored at the bottom of the first viewport */}
+      <section className="relative flex-shrink-0 py-3 sm:py-4 border-t border-border bg-slate-900 dark:bg-black overflow-hidden">
         <motion.div
-          className="flex whitespace-nowrap text-white/90 text-sm sm:text-base font-medium tracking-wide"
+          className="flex whitespace-nowrap text-white/90 text-xs sm:text-sm font-medium tracking-wide"
           animate={{ x: ["0%", "-50%"] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         >
@@ -369,6 +374,8 @@ const WelcomePage = () => {
             ))}
         </motion.div>
       </section>
+
+      </div>{/* end first viewport wrapper */}
 
       {/* Find your shipment — category cards only */}
       <section className="py-10 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 bg-background">
