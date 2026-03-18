@@ -98,7 +98,7 @@ export const PublicHeader = () => {
             ? "bg-transparent"
             : isDark
               ? "bg-black/95 backdrop-blur-md border-b border-white/10 shadow-2xl"
-              : "bg-white/98 backdrop-blur-md border-b border-slate-200/80 shadow-lg"
+              : "bg-white border-b border-slate-200 shadow-md"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -386,9 +386,31 @@ export const PublicFooter = () => {
   return (
     <footer className="bg-slate-900 dark:bg-black text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 border-t border-white/10">
       <div className="container mx-auto max-w-7xl">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12">
-          {/* Brand Column */}
-          <div>
+        {/* Compact mobile footer: only core links */}
+        <div className="sm:hidden mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-white/80">
+            <Link to="/" className="hover:text-white transition-colors">
+              Home
+            </Link>
+            <Link to="/for-shippers" className="hover:text-white transition-colors">
+              Shippers
+            </Link>
+            <Link to="/for-drivers" className="hover:text-white transition-colors">
+              Drivers
+            </Link>
+            <Link to="/contact" className="hover:text-white transition-colors">
+              Contact
+            </Link>
+            <Link to="/login" className="hover:text-white transition-colors">
+              Login
+            </Link>
+          </div>
+        </div>
+
+        {/* Full footer grid — desktop/tablet only, no duplicate main-nav links */}
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 md:gap-12 mb-8 sm:mb-10 md:mb-12">
+          {/* Brand + social */}
+          <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2 sm:gap-3 mb-4">
               <img src={logo} alt="TransportConnect" className="h-16 sm:h-20 md:h-24 w-auto flex-shrink-0" />
               <div className="min-w-0">
@@ -417,73 +439,8 @@ export const PublicFooter = () => {
               </a>
             </div>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Quick Links</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              <li>
-                <Link to="/" className="text-white/70 hover:text-white transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/register" className="text-white/70 hover:text-white transition-colors">
-                  Sign Up
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="text-white/70 hover:text-white transition-colors">
-                  Sign In
-                </Link>
-              </li>
-              <li>
-                <Link to="/about-us" className="text-white/70 hover:text-white transition-colors">
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-white/70 hover:text-white transition-colors">
-                  Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Services</h4>
-            <ul className="space-y-2 sm:space-y-3">
-              <li>
-                <Link to="/services" className="text-white/70 hover:text-white transition-colors">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link to="/for-shippers" className="text-white/70 hover:text-white transition-colors">
-                  For Shippers
-                </Link>
-              </li>
-              <li>
-                <Link to="/for-drivers" className="text-white/70 hover:text-white transition-colors">
-                  For Drivers
-                </Link>
-              </li>
-              <li>
-                <Link to="/features" className="text-white/70 hover:text-white transition-colors">
-                  Features
-                </Link>
-              </li>
-              <li>
-                <Link to="/support" className="text-white/70 hover:text-white transition-colors">
-                  Support
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
+          {/* Contact (desktop/tablet) */}
+          <div className="space-y-3">
             <h4 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Contact Us</h4>
             <ul className="space-y-2 sm:space-y-3">
               <li className="flex items-center gap-2 sm:gap-3 text-white/70 text-sm sm:text-base">
