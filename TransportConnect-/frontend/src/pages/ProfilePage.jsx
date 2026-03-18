@@ -430,104 +430,71 @@ const ProfilePage = () => {
           transition={{ duration: 0.5 }}
           className="lg:col-span-1"
         >
-          <Card className="p-4 sm:p-5 md:p-6">
-            <div className="text-center mb-6">
-              <div className="relative inline-block mb-4">
+          <div className="detail-card p-4 sm:p-6">
+            <div className="text-center mb-5">
+              <div className="relative inline-block mb-3">
                 <div
                   className={clsx(
-                    "relative w-32 h-32 bg-primary rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-lg overflow-hidden cursor-pointer group",
+                    "relative w-28 h-28 bg-gradient-to-br from-primary to-primary/70 rounded-full flex items-center justify-center text-white text-4xl font-bold shadow-xl overflow-hidden cursor-pointer group",
                     isUploadingAvatar && "opacity-50"
                   )}
                   onClick={handleAvatarClick}
                 >
                   {avatarPreview ? (
-                    <img
-                      src={avatarPreview}
-                      alt="Avatar preview"
-                      className="w-32 h-32 rounded-full object-cover"
-                    />
+                    <img src={avatarPreview} alt="Avatar preview" className="w-28 h-28 rounded-full object-cover" />
                   ) : user?.avatar ? (
-                    <img
-                      src={normalizeAvatarUrl(user.avatar)}
-                      alt="Avatar"
-                      className="w-32 h-32 rounded-full object-cover"
-                    />
+                    <img src={normalizeAvatarUrl(user.avatar)} alt="Avatar" className="w-28 h-28 rounded-full object-cover" />
                   ) : (
-                    <span>
-                      {user?.firstName?.charAt(0)?.toUpperCase()}
-                      {user?.lastName?.charAt(0)?.toUpperCase()}
-                    </span>
+                    <span>{user?.firstName?.charAt(0)?.toUpperCase()}{user?.lastName?.charAt(0)?.toUpperCase()}</span>
                   )}
-                  {/* Overlay on hover */}
                   <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Camera className="w-6 h-6 text-white" />
                   </div>
-                  {/* Upload indicator */}
                   {isUploadingAvatar && (
                     <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
                       <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>
-                {/* Hidden file input */}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarChange}
-                  className="hidden"
-                  disabled={isUploadingAvatar}
-                />
-                <div className="absolute bottom-0 right-0 bg-card border-2 border-border rounded-full p-2">
-                  <Shield className="w-4 h-4 text-primary" />
+                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" disabled={isUploadingAvatar} />
+                <div className="absolute bottom-0 right-0 bg-success/20 border-2 border-success/40 rounded-full p-1.5">
+                  <Shield className="w-3.5 h-3.5 text-success" />
                 </div>
               </div>
-              <button
-                onClick={handleAvatarClick}
-                disabled={isUploadingAvatar}
-                className="text-xs text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-              >
+              <button onClick={handleAvatarClick} disabled={isUploadingAvatar} className="text-xs text-muted-foreground hover:text-primary transition-colors disabled:opacity-50 mb-2 block mx-auto">
                 {isUploadingAvatar ? t("profile.uploading") : t("profile.clickToChangePhoto")}
               </button>
-              <h2 className="text-2xl font-semibold text-foreground mb-1">
-                {user?.firstName} {user?.lastName}
-              </h2>
-              <p className="text-sm text-muted-foreground mb-4 capitalize">{getRoleLabel(user?.role)}</p>
+              <h2 className="text-xl font-bold text-foreground mb-0.5">{user?.firstName} {user?.lastName}</h2>
+              <span className="inline-block px-3 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold capitalize">{getRoleLabel(user?.role)}</span>
+            </div>
 
-              <div className="space-y-2 text-left">
-                <div className="flex items-center gap-2 text-sm">
-                  <Mail className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-foreground">{user?.email}</span>
-                </div>
-                {user?.phone && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground">{user?.phone}</span>
-                  </div>
-                )}
-                {user?.address && (
-                  <div className="flex items-center gap-2 text-sm">
-                    <MapPin className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-foreground">{formatAddress(user.address)}</span>
-                  </div>
-                )}
+            <div className="stat-tile !p-3 space-y-2 mb-4">
+              <div className="flex items-center gap-2 text-sm">
+                <Mail className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                <span className="text-foreground text-xs truncate">{user?.email}</span>
               </div>
+              {user?.phone && (
+                <div className="flex items-center gap-2 text-sm">
+                  <Phone className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-foreground text-xs">{user?.phone}</span>
+                </div>
+              )}
+              {user?.address && (
+                <div className="flex items-center gap-2 text-sm">
+                  <MapPin className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-foreground text-xs">{formatAddress(user.address)}</span>
+                </div>
+              )}
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-border">
-              <Button
-                className="w-full"
-                onClick={() => setIsEditing(!isEditing)}
-                variant={isEditing ? "outline" : "primary"}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                {isEditing ? t("profile.cancelEditing") : t("profile.editProfile")}
-              </Button>
-            </div>
-          </Card>
+            <Button className="w-full" onClick={() => setIsEditing(!isEditing)} variant={isEditing ? "outline" : "primary"}>
+              <Edit className="w-4 h-4 mr-2" />
+              {isEditing ? t("profile.cancelEditing") : t("profile.editProfile")}
+            </Button>
+          </div>
 
           {/* Stats Cards */}
-          <div className="mt-6 space-y-4">
+          <div className="mt-4 grid grid-cols-3 gap-2">
             {statsCards.map((stat, index) => {
               const Icon = stat.icon
               return (
@@ -536,18 +503,13 @@ const ProfilePage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={index === 0 ? "stat-tile-primary text-center !p-3" : "stat-tile text-center !p-3"}
                 >
-                  <Card className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">{stat.title}</p>
-                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      </div>
-                      <div className={clsx("p-3 rounded-lg", stat.bgColor)}>
-                        <Icon className={clsx("w-6 h-6", stat.color)} />
-                      </div>
-                    </div>
-                  </Card>
+                  <div className={clsx("section-icon-badge mx-auto mb-1.5", stat.bgColor)} style={{width:'2rem',height:'2rem'}}>
+                    <Icon className={clsx("w-3.5 h-3.5", stat.color)} />
+                  </div>
+                  <p className={clsx("text-xl font-bold", index === 0 ? "text-primary" : "text-foreground")}>{stat.value}</p>
+                  <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight mt-0.5">{stat.title}</p>
                 </motion.div>
               )
             })}
@@ -561,12 +523,14 @@ const ProfilePage = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="lg:col-span-2 space-y-6"
         >
-          <Card className="p-4 sm:p-5 md:p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" />
-                {t("profile.personalInformation")}
-              </h3>
+          <div className="detail-card p-4 sm:p-5">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="section-icon-badge bg-primary/15">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("profile.personalInformation")}</h3>
+              </div>
               {isEditing && (
                 <div className="flex gap-2">
                   <Button
@@ -637,15 +601,17 @@ const ProfilePage = () => {
                 })}
               />
             </form>
-          </Card>
+          </div>
 
           {/* Saved addresses */}
-          <Card className="p-4 sm:p-5 md:p-6">
+          <div className="detail-card p-4 sm:p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                {t("profile.savedAddresses") || "Saved addresses"}
-              </h3>
+              <div className="flex items-center gap-3">
+                <div className="section-icon-badge bg-primary/15">
+                  <MapPin className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("profile.savedAddresses") || "Saved addresses"}</h3>
+              </div>
               {!showAddAddress && (
                 <Button
                   type="button"
@@ -658,12 +624,12 @@ const ProfilePage = () => {
                 </Button>
               )}
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-xs text-muted-foreground mb-3">
               {t("profile.savedAddressesHint") || "Use these when creating requests for faster checkout."}
             </p>
             {showAddAddress && (
               <form
-                className="mb-6 p-4 rounded-xl border border-border bg-muted/20 space-y-3"
+                className="mb-4 stat-tile !p-4 space-y-3"
                 onSubmit={(e) => {
                   e.preventDefault()
                   if (!newAddressLabel.trim() || !newAddressAddress.trim() || !newAddressCity.trim()) {
@@ -714,12 +680,9 @@ const ProfilePage = () => {
             {savedAddresses.length === 0 && !showAddAddress && (
               <p className="text-sm text-muted-foreground py-4">{t("profile.noSavedAddresses") || "No saved addresses yet."}</p>
             )}
-            <ul className="space-y-3">
+            <ul className="space-y-2.5">
               {savedAddresses.map((addr) => (
-                <li
-                  key={addr._id}
-                  className="p-3 rounded-xl border border-border bg-card hover:bg-accent/30 transition-colors"
-                >
+                <li key={addr._id} className="route-step-card">
                   {editingAddressId === addr._id ? (
                     <form
                       className="space-y-3"
@@ -798,16 +761,20 @@ const ProfilePage = () => {
                 </li>
               ))}
             </ul>
-          </Card>
+          </div>
 
           {/* Vehicle Information (for drivers) */}
           {user?.role === "conducteur" && (
-            <Card className="p-4 sm:p-5 md:p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold text-foreground flex items-center gap-2">
-                  <Truck className="w-5 h-5 text-primary" />
-                  {t("profile.vehicleInformation")}
-                </h3>
+            <div className="detail-card p-4 sm:p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="section-icon-badge bg-primary/15">
+                    <Truck className="w-4 h-4 text-primary" />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                    {t("profile.vehicleInformation")}
+                  </h3>
+                </div>
                 {!isEditing && (
                   <Button
                     onClick={() => setIsEditing(true)}
@@ -930,52 +897,45 @@ const ProfilePage = () => {
                   </div>
                 </form>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="stat-tile !p-3 grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">{t("profile.vehicleType")}</p>
-                    <p className="font-medium text-foreground capitalize">
-                      {user?.vehicleInfo?.type || t("profile.notSet")}
-                    </p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{t("profile.vehicleType")}</p>
+                    <p className="font-bold text-foreground text-sm capitalize">{user?.vehicleInfo?.type || t("profile.notSet")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">{t("dashboard.capacity")}</p>
-                    <p className="font-medium text-foreground">
-                      {user?.vehicleInfo?.capacity ? `${user.vehicleInfo.capacity} kg` : t("profile.notSet")}
-                    </p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{t("dashboard.capacity")}</p>
+                    <p className="font-bold text-foreground text-sm">{user?.vehicleInfo?.capacity ? `${user.vehicleInfo.capacity} kg` : t("profile.notSet")}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">{t("profile.licensePlate")}</p>
-                    <p className="font-medium text-foreground">
-                      {user?.vehicleInfo?.licensePlate || t("profile.notSet")}
-                    </p>
+                    <p className="text-xs text-muted-foreground mb-0.5">{t("profile.licensePlate")}</p>
+                    <p className="font-bold text-foreground text-sm">{user?.vehicleInfo?.licensePlate || t("profile.notSet")}</p>
                   </div>
                   {user?.vehicleInfo?.dimensions && (
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">{t("trips.dimensions")}</p>
-                      <p className="font-medium text-foreground">
-                        {user.vehicleInfo.dimensions.length} × {user.vehicleInfo.dimensions.width} ×{" "}
-                        {user.vehicleInfo.dimensions.height} cm
-                      </p>
+                      <p className="text-xs text-muted-foreground mb-0.5">{t("trips.dimensions")}</p>
+                      <p className="font-bold text-foreground text-sm">{user.vehicleInfo.dimensions.length} × {user.vehicleInfo.dimensions.width} × {user.vehicleInfo.dimensions.height} cm</p>
                     </div>
                   )}
                 </div>
               )}
-            </Card>
+            </div>
           )}
 
           {/* Document verification (drivers only) */}
           {user?.role === "conducteur" && (
-            <Card className="p-4 sm:p-5 md:p-6">
-              <h3 className="text-xl font-semibold text-foreground mb-2 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-primary" />
-                Document verification
-              </h3>
+            <div className="detail-card p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="section-icon-badge bg-primary/15">
+                  <FileText className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">Document verification</h3>
+              </div>
               <p className="text-sm text-muted-foreground mb-4">
                 Upload your license, insurance, or registration. Admin will review and approve or reject with a reason.
               </p>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <form
-                  className="flex flex-wrap items-end gap-3 p-3 rounded-xl border border-border bg-muted/20"
+                  className="flex flex-wrap items-end gap-3 stat-tile !p-3"
                   onSubmit={(e) => {
                     e.preventDefault()
                     if (!docUploadFile) {
@@ -1018,10 +978,7 @@ const ProfilePage = () => {
                     <p className="text-sm text-muted-foreground py-2">No documents uploaded yet.</p>
                   )}
                   {documents.map((doc) => (
-                    <li
-                      key={doc._id}
-                      className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-lg border border-border bg-card"
-                    >
+                    <li key={doc._id} className="route-step-card flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <FileText className="w-4 h-4 text-muted-foreground flex-shrink-0" />
                         <span className="font-medium text-foreground capitalize">{doc.type.replace("_", " ")}</span>
@@ -1067,128 +1024,98 @@ const ProfilePage = () => {
                   ))}
                 </ul>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Role Selection */}
           {user?.role !== "admin" && (
-            <Card className="p-4 sm:p-5 md:p-6">
-              <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-primary" />
-                {t("profile.switchRole")}
-              </h3>
-              <p className="text-sm text-muted-foreground mb-6">
-                {t("profile.switchRoleDescription")}
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Card
-                    className={clsx(
-                      "p-4 cursor-pointer transition-all border-2",
-                      user?.role === "expediteur"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/30"
-                    )}
+            <div className="detail-card p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="section-icon-badge bg-primary/15">
+                  <RefreshCw className="w-4 h-4 text-primary" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("profile.switchRole")}</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">{t("profile.switchRoleDescription")}</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <button
                     onClick={() => handleRoleChange("expediteur")}
+                    className={clsx(
+                      "w-full route-step-card text-left transition-all",
+                      user?.role === "expediteur" && "!border-primary/50 !bg-primary/5"
+                    )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={clsx(
-                        "p-3 rounded-lg",
-                        user?.role === "expediteur" ? "bg-primary/10" : "bg-accent"
-                      )}>
-                        <Package className={clsx(
-                          "w-6 h-6",
-                          user?.role === "expediteur" ? "text-primary" : "text-muted-foreground"
-                        )} />
+                      <div className={clsx("section-icon-badge", user?.role === "expediteur" ? "bg-primary/15" : "bg-muted/60")} style={{width:'2.5rem',height:'2.5rem'}}>
+                        <Package className={clsx("w-5 h-5", user?.role === "expediteur" ? "text-primary" : "text-muted-foreground")} />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">{t("profile.shipperMode")}</h4>
+                        <h4 className="font-bold text-foreground text-sm">{t("profile.shipperMode")}</h4>
                         <p className="text-xs text-muted-foreground">{t("profile.shipperModeDesc")}</p>
                       </div>
-                      {user?.role === "expediteur" && (
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      )}
+                      {user?.role === "expediteur" && <div className="w-2 h-2 bg-primary rounded-full shrink-0" />}
                     </div>
-                  </Card>
+                  </button>
                 </motion.div>
-                <motion.div
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Card
-                    className={clsx(
-                      "p-4 cursor-pointer transition-all border-2",
-                      user?.role === "conducteur"
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/30"
-                    )}
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <button
                     onClick={() => handleRoleChange("conducteur")}
+                    className={clsx(
+                      "w-full route-step-card text-left transition-all",
+                      user?.role === "conducteur" && "!border-primary/50 !bg-primary/5"
+                    )}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={clsx(
-                        "p-3 rounded-lg",
-                        user?.role === "conducteur" ? "bg-primary/10" : "bg-accent"
-                      )}>
-                        <Truck className={clsx(
-                          "w-6 h-6",
-                          user?.role === "conducteur" ? "text-primary" : "text-muted-foreground"
-                        )} />
+                      <div className={clsx("section-icon-badge", user?.role === "conducteur" ? "bg-primary/15" : "bg-muted/60")} style={{width:'2.5rem',height:'2.5rem'}}>
+                        <Truck className={clsx("w-5 h-5", user?.role === "conducteur" ? "text-primary" : "text-muted-foreground")} />
                       </div>
                       <div className="flex-1">
-                        <h4 className="font-semibold text-foreground">{t("profile.driverMode")}</h4>
+                        <h4 className="font-bold text-foreground text-sm">{t("profile.driverMode")}</h4>
                         <p className="text-xs text-muted-foreground">{t("profile.driverModeDesc")}</p>
                       </div>
-                      {user?.role === "conducteur" && (
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                      )}
+                      {user?.role === "conducteur" && <div className="w-2 h-2 bg-primary rounded-full shrink-0" />}
                     </div>
-                  </Card>
+                  </button>
                 </motion.div>
               </div>
-            </Card>
+            </div>
           )}
 
           {/* Account Status */}
-          <Card className="p-4 sm:p-5 md:p-6">
-            <h3 className="text-xl font-semibold text-foreground mb-6 flex items-center gap-2">
-              <Shield className="w-5 h-5 text-primary" />
-              {t("profile.accountStatus")}
-            </h3>
-            <div className="space-y-4">
+          <div className="detail-card p-4 sm:p-5">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="section-icon-badge bg-success/15">
+                <Shield className="w-4 h-4 text-success" />
+              </div>
+              <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("profile.accountStatus")}</h3>
+            </div>
+            <div className="stat-tile !p-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium text-foreground">{t("profile.verificationStatus")}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-semibold text-foreground text-sm">{t("profile.verificationStatus")}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     {user?.isVerified ? t("profile.accountVerified") : t("profile.accountPendingVerification")}
                   </p>
                 </div>
-                <div
-                  className={clsx(
-                    "px-3 py-1 rounded-md text-sm font-medium",
-                    user?.isVerified
-                      ? "bg-success/10 text-success"
-                      : "bg-warning/10 text-warning"
-                  )}
-                >
+                <span className={clsx(
+                  "px-2.5 py-1 rounded-lg text-xs font-bold",
+                  user?.isVerified ? "bg-success/10 text-success" : "bg-warning/10 text-warning"
+                )}>
                   {user?.isVerified ? t("profile.verified") : t("status.pending")}
-                </div>
+                </span>
               </div>
               {user?.lastLogin && (
-                <div className="flex items-center justify-between pt-4 border-t border-border">
+                <div className="flex items-center justify-between pt-2 border-t border-white/5">
                   <div>
-                    <p className="font-medium text-foreground">{t("profile.lastLogin")}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(user.lastLogin).toLocaleString("en-US")}
-                    </p>
+                    <p className="font-semibold text-foreground text-sm">{t("profile.lastLogin")}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{new Date(user.lastLogin).toLocaleString("en-US")}</p>
                   </div>
-                  <Calendar className="w-5 h-5 text-muted-foreground" />
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
                 </div>
               )}
             </div>
-          </Card>
+          </div>
         </motion.div>
       </div>
     </div>
