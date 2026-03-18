@@ -16,6 +16,7 @@ import {
   Mail,
   Ruler,
   Euro,
+  MessageCircle,
   CheckCircle,
   Clock,
   XCircle,
@@ -316,17 +317,17 @@ const TripDetailPage = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
             {/* Route Information */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                    <Navigation className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="detail-card p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="section-icon-badge bg-primary/15">
+                    <Navigation className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Route</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Route</h2>
                 </div>
 
                 {routeWaypoints.length >= 2 && (
                   <div className="mb-4 sm:mb-5">
-                    <p className="text-sm font-medium text-foreground mb-2">Route on map</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Route on map</p>
                     <RouteStepsMap
                       waypoints={routeWaypoints}
                       routeGeometry={routeEstimate?.geometry}
@@ -335,18 +336,18 @@ const TripDetailPage = () => {
                     />
                   </div>
                 )}
-                <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
-                  <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="route-step-card">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
                         <MapPin className="w-4 h-4 text-white" />
                       </div>
-                      <h3 className="font-semibold text-foreground text-sm sm:text-base">Departure</h3>
+                      <h3 className="font-bold text-foreground text-sm">Departure</h3>
                     </div>
-                    <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{trip.departure?.address}</p>
-                    <p className="text-muted-foreground text-xs sm:text-sm">{trip.departure?.city}</p>
-                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                    <p className="text-foreground text-sm break-words font-medium">{trip.departure?.address}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">{trip.departure?.city}</p>
+                    <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5 shrink-0" />
                       {new Date(trip.departureDate).toLocaleString("en-US", {
                         dateStyle: "medium",
                         timeStyle: "short",
@@ -365,15 +366,15 @@ const TripDetailPage = () => {
                             <Navigation className="w-4 h-4 text-muted-foreground rotate-90" />
                           </div>
                         </div>
-                        <div className="p-3 sm:p-4 bg-accent/30 rounded-xl border border-border/50">
-                          <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                              <MapPin className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <h3 className="font-semibold text-foreground text-sm sm:text-base">Stop {idx + 1}</h3>
+                        <div className="p-3 bg-accent/20 rounded-xl border border-border/50">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0">
+                            <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
                           </div>
-                          <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{stop.address || "—"}</p>
-                          <p className="text-muted-foreground text-xs sm:text-sm">{stop.city || ""}</p>
+                          <h3 className="font-semibold text-foreground text-sm">Stop {idx + 1}</h3>
+                        </div>
+                        <p className="text-foreground text-sm break-words font-medium">{stop.address || "—"}</p>
+                        <p className="text-muted-foreground text-xs">{stop.city || ""}</p>
                         </div>
                         <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>
                           <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
@@ -390,17 +391,17 @@ const TripDetailPage = () => {
                     </div>
                   </div>
 
-                  <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
-                    <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                      <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0">
+                  <div className="route-step-card">
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0 shadow-md">
                         <MapPin className="w-4 h-4 text-white" />
                       </div>
-                      <h3 className="font-semibold text-foreground text-sm sm:text-base">Destination</h3>
+                      <h3 className="font-bold text-foreground text-sm">Destination</h3>
                     </div>
-                    <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{trip.destination?.address}</p>
-                    <p className="text-muted-foreground text-xs sm:text-sm">{trip.destination?.city}</p>
-                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                    <p className="text-foreground text-sm break-words font-medium">{trip.destination?.address}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">{trip.destination?.city}</p>
+                    <div className="mt-3 pt-3 border-t border-border/50 flex items-center gap-2 text-xs text-muted-foreground">
+                      <Calendar className="w-3.5 h-3.5 shrink-0" />
                       {new Date(trip.arrivalDate).toLocaleString("en-US", {
                         dateStyle: "medium",
                         timeStyle: "short",
@@ -408,62 +409,62 @@ const TripDetailPage = () => {
                     </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             </motion.div>
 
             {/* Capacity and Pricing */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                    <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="detail-card p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="section-icon-badge bg-primary/15">
+                    <Package className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Capacity & pricing</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Capacity &amp; pricing</h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                  <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                      <Weight className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Weight</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="stat-tile min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Weight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Weight</h3>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold text-foreground truncate">{trip.availableCapacity?.weight ?? "—"} kg</p>
+                    <p className="text-2xl font-bold text-foreground truncate">{trip.availableCapacity?.weight ?? "—"} kg</p>
                   </div>
-                  <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
-                    <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                      <Ruler className="w-4 h-4 text-muted-foreground shrink-0" />
-                      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Dimensions</h3>
+                  <div className="stat-tile min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Ruler className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Dimensions</h3>
                     </div>
-                    <p className="text-foreground font-semibold text-xs sm:text-sm break-words">
+                    <p className="text-foreground font-bold text-xs sm:text-sm break-words">
                       {trip.availableCapacity?.dimensions
                         ? `${trip.availableCapacity.dimensions.length} × ${trip.availableCapacity.dimensions.width} × ${trip.availableCapacity.dimensions.height} cm`
                         : "—"}
                     </p>
                   </div>
-                  <div className="p-3 sm:p-4 bg-primary/10 rounded-xl border border-primary/20 min-w-0 sm:col-span-2 md:col-span-1">
-                    <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                      <Euro className="w-4 h-4 text-primary shrink-0" />
-                      <h3 className="text-xs sm:text-sm font-medium text-primary truncate">Price per kg</h3>
+                  <div className="stat-tile-primary min-w-0 sm:col-span-2 md:col-span-1">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Euro className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-primary truncate">Price per kg</h3>
                     </div>
-                    <p className="text-xl sm:text-2xl font-bold text-primary truncate" title={formatCurrency(trip.pricePerKg || 0) + "/kg"}>
+                    <p className="text-2xl font-bold text-primary truncate" title={formatCurrency(trip.pricePerKg || 0) + "/kg"}>
                       {formatCurrency(trip.pricePerKg || 0)}/kg
                     </p>
                   </div>
                   {trip.insured && (
-                    <div className="p-3 sm:p-4 bg-info/10 rounded-xl border border-info/30 min-w-0 sm:col-span-2 md:col-span-3">
-                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                        <Shield className="w-4 h-4 text-info shrink-0" />
-                        <h3 className="text-xs sm:text-sm font-medium text-info truncate">Insurance</h3>
+                    <div className="stat-tile min-w-0 sm:col-span-2 md:col-span-3" style={{background: 'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.05) 100%)', borderColor: 'rgba(59,130,246,0.2)'}}>
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Shield className="w-3.5 h-3.5 text-info shrink-0" />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-info truncate">Insurance</h3>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
                         Insured shipment up to{" "}
-                        <span className="font-semibold text-foreground">
+                        <span className="font-bold text-foreground">
                           {(trip.coverageAmount || trip.declaredValue || 0).toLocaleString()} MAD
                         </span>
                         {trip.insurancePremium != null && trip.insurancePremium > 0 && (
                           <>
                             {" "}with premium{" "}
-                            <span className="font-semibold text-foreground">
+                            <span className="font-bold text-foreground">
                               {trip.insurancePremium.toLocaleString()} MAD
                             </span>
                           </>
@@ -472,16 +473,16 @@ const TripDetailPage = () => {
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             </motion.div>
 
             {/* Accepted Cargo Types */}
             {trip.acceptedCargoTypes && trip.acceptedCargoTypes.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <div className="flex items-center gap-3 mb-3 sm:mb-4">
-                    <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                      <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="section-icon-badge bg-primary/15">
+                      <Package className="w-5 h-5 text-primary" />
                     </div>
                     <h2 className="text-base font-semibold text-foreground sm:text-lg">Cargo types</h2>
                   </div>
@@ -489,44 +490,49 @@ const TripDetailPage = () => {
                     {trip.acceptedCargoTypes.map((type) => (
                       <span
                         key={type}
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-accent rounded-lg text-xs sm:text-sm font-medium text-foreground"
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold stat-tile"
                       >
                         {type}
                       </span>
                     ))}
                   </div>
-                </Card>
+                </div>
               </motion.div>
             )}
 
             {/* Description */}
             {trip.description && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 sm:text-lg">Description</h2>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="section-icon-badge bg-primary/15">
+                      <MessageCircle className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-base font-semibold text-foreground sm:text-lg">Description</h2>
+                  </div>
                   <p className="text-muted-foreground text-sm sm:text-base leading-relaxed break-words">{trip.description}</p>
-                </Card>
+                </div>
               </motion.div>
             )}
 
             {/* Requests (for trip owner) */}
             {isOwner && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                    <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                      <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="section-icon-badge bg-primary/15">
+                      <Package className="w-5 h-5 text-primary" />
                     </div>
                     <h2 className="text-base font-semibold text-foreground sm:text-lg">
                       Requests ({trip.requests?.length || 0})
                     </h2>
                   </div>
                   {trip.requests?.length > 0 ? (
-                    <div className="space-y-3 sm:space-y-4">
+                    <div className="space-y-2.5">
                       {trip.requests.map((request) => (
                         <div
                           key={request._id}
-                          className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border hover:border-primary/20 transition-colors"
+                          className="route-step-card"
                         >
                           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                             <div className="min-w-0 flex-1">
@@ -569,7 +575,7 @@ const TripDetailPage = () => {
                       <p className="text-sm sm:text-base text-muted-foreground">No requests for this trip yet.</p>
                     </div>
                   )}
-                </Card>
+                </div>
               </motion.div>
             )}
           </div>
@@ -578,11 +584,13 @@ const TripDetailPage = () => {
           <div className="space-y-4 sm:space-y-5 md:space-y-6">
             {/* Driver Card */}
             <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2 sm:text-lg">
-                  <User className="w-5 h-5 text-primary shrink-0" />
-                  Driver
-                </h2>
+              <div className="detail-card p-4 sm:p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="section-icon-badge bg-primary/15">
+                    <User className="w-5 h-5 text-primary" />
+                  </div>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Driver</h2>
+                </div>
                 <div className="flex flex-row items-center gap-4 sm:flex-col sm:text-center sm:gap-4">
                   <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-full bg-primary flex items-center justify-center overflow-hidden shrink-0">
                     {trip.driver?.avatar ? (
@@ -633,17 +641,19 @@ const TripDetailPage = () => {
                     )}
                   </div>
                 </div>
-              </Card>
+              </div>
             </motion.div>
 
             {/* Vehicle Info */}
             {trip.driver?.vehicleInfo && (
               <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 }}>
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2 sm:text-lg">
-                    <Truck className="w-5 h-5 text-primary shrink-0" />
-                    Vehicle
-                  </h2>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="section-icon-badge bg-primary/15">
+                      <Truck className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-base font-semibold text-foreground sm:text-lg">Vehicle</h2>
+                  </div>
                   <div className="grid grid-cols-1 gap-2 sm:gap-2.5">
                     <div>
                       <p className="text-xs sm:text-sm text-muted-foreground">Type</p>
@@ -664,15 +674,20 @@ const TripDetailPage = () => {
                       </div>
                     )}
                   </div>
-                </Card>
+                </div>
               </motion.div>
             )}
 
             {/* Actions (owner) */}
             {isOwner && trip.status === "active" && (
               <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                <Card className="p-4 sm:p-5 md:p-6">
-                  <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 sm:text-lg">Actions</h2>
+                <div className="detail-card p-4 sm:p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="section-icon-badge bg-primary/15">
+                      <CheckCircle className="w-5 h-5 text-primary" />
+                    </div>
+                    <h2 className="text-base font-semibold text-foreground sm:text-lg">Actions</h2>
+                  </div>
                   <div className="space-y-2.5 sm:space-y-3">
                     <Button
                       className="w-full min-h-[44px] sm:min-h-0 bg-gradient-to-r from-success to-success/90"
@@ -692,7 +707,7 @@ const TripDetailPage = () => {
                       Delete trip
                     </Button>
                   </div>
-                </Card>
+                </div>
               </motion.div>
             )}
 
@@ -700,7 +715,7 @@ const TripDetailPage = () => {
             {user?.role !== "conducteur" && trip.status === "active" && (
               <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.25 }} className="hidden sm:block">
                 {hasActiveRequest ? (
-                  <Card className="p-4 sm:p-5 md:p-6">
+                  <div className="detail-card p-4 sm:p-5">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                       <div className="p-2 bg-warning/10 rounded-lg w-fit">
                         <Clock className="w-5 h-5 text-warning" />
@@ -718,7 +733,7 @@ const TripDetailPage = () => {
                         </Button>
                       </Link>
                     </div>
-                  </Card>
+                  </div>
                 ) : (
                   <Link to={`/requests/create/${trip._id}`} className="block">
                     <Button className="w-full min-h-[44px] sm:min-h-0 bg-gradient-to-r from-primary to-primary/90 shadow-lg">

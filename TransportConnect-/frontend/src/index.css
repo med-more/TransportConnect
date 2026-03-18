@@ -211,6 +211,122 @@ body {
     @apply bg-card text-card-foreground rounded-xl border border-border shadow-sm transition-shadow duration-200;
   }
 
+  /* ─── Premium Detail Page Cards (inspired by dark dashboard aesthetic) ─── */
+
+  /* Main section card: deeper background, no harsh border, subtle glow */
+  .detail-card {
+    @apply rounded-2xl transition-all duration-200;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow:
+      0 1px 3px rgba(0,0,0,0.07),
+      0 4px 16px rgba(0,0,0,0.06),
+      inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .dark .detail-card {
+    background: #111111;
+    border-color: rgba(255,255,255,0.07);
+    box-shadow:
+      0 1px 3px rgba(0,0,0,0.4),
+      0 8px 24px rgba(0,0,0,0.3),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  /* Section header icon badge with colored ring */
+  .section-icon-badge {
+    @apply flex items-center justify-center rounded-xl shrink-0;
+    width: 2.5rem;
+    height: 2.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Stat tile: frosted-glass panel for metrics */
+  .stat-tile {
+    @apply rounded-xl p-3 sm:p-4 transition-all duration-200;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(0,0,0,0.06);
+    backdrop-filter: blur(8px);
+  }
+
+  .dark .stat-tile {
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.06);
+  }
+
+  .stat-tile:hover {
+    background: rgba(255,255,255,0.65);
+    border-color: rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .dark .stat-tile:hover {
+    background: rgba(255,255,255,0.07);
+    border-color: rgba(255,255,255,0.1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+
+  /* Highlighted stat tile (price, primary) */
+  .stat-tile-primary {
+    @apply rounded-xl p-3 sm:p-4 transition-all duration-200;
+    background: linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(239,68,68,0.06) 100%);
+    border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  .dark .stat-tile-primary {
+    background: linear-gradient(135deg, rgba(239,68,68,0.16) 0%, rgba(239,68,68,0.08) 100%);
+    border-color: rgba(239,68,68,0.25);
+  }
+
+  /* Route / address step block */
+  .route-step-card {
+    @apply rounded-xl p-3 sm:p-4 transition-all duration-200;
+    background: rgba(255,255,255,0.55);
+    border: 1px solid rgba(0,0,0,0.06);
+    backdrop-filter: blur(6px);
+  }
+
+  .dark .route-step-card {
+    background: rgba(255,255,255,0.035);
+    border-color: rgba(255,255,255,0.06);
+  }
+
+  /* Tracking step pill */
+  .tracking-step {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200;
+    border: 1px solid transparent;
+  }
+
+  .tracking-step-done {
+    background: linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(34,197,94,0.05) 100%);
+    border-color: rgba(34,197,94,0.2);
+  }
+
+  .dark .tracking-step-done {
+    background: linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(34,197,94,0.06) 100%);
+    border-color: rgba(34,197,94,0.25);
+  }
+
+  .tracking-step-transit {
+    background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.05) 100%);
+    border-color: rgba(59,130,246,0.2);
+  }
+
+  .dark .tracking-step-transit {
+    background: linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(59,130,246,0.06) 100%);
+    border-color: rgba(59,130,246,0.25);
+  }
+
+  .tracking-step-pending {
+    background: rgba(255,255,255,0.4);
+    border-color: rgba(0,0,0,0.04);
+  }
+
+  .dark .tracking-step-pending {
+    background: rgba(255,255,255,0.03);
+    border-color: rgba(255,255,255,0.05);
+  }
+
   /* Subtle dividers (professional look) */
   .divider {
     @apply border-border-subtle;

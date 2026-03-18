@@ -393,94 +393,94 @@ const RequestDetailPage = () => {
           <div className="lg:col-span-2 space-y-4 sm:space-y-5 md:space-y-6">
             {/* Cargo Information */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
-              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-                <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                    <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="detail-card p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="section-icon-badge bg-primary/15">
+                    <Package className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Package</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Package</h2>
                 </div>
 
                 <div className="space-y-4 sm:space-y-5">
                   <div>
-                    <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1.5 sm:mb-2">Description</h3>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1.5">Description</h3>
                     <p className="text-foreground text-sm sm:text-base break-words">{request.cargo?.description}</p>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                        <Package className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Type</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="stat-tile min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Package className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Type</h3>
                       </div>
-                      <p className="text-foreground font-semibold text-sm sm:text-base capitalize">{request.cargo?.type ?? "—"}</p>
+                      <p className="text-foreground font-bold text-sm sm:text-base capitalize">{request.cargo?.type ?? "—"}</p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                        <Weight className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Weight</h3>
+                    <div className="stat-tile min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Weight className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Weight</h3>
                       </div>
-                      <p className="text-foreground font-semibold text-sm sm:text-base">{request.cargo?.weight ?? "—"} kg</p>
+                      <p className="text-foreground font-bold text-sm sm:text-base">{request.cargo?.weight ?? "—"} kg</p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50 min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                        <Ruler className="w-4 h-4 text-muted-foreground shrink-0" />
-                        <h3 className="text-xs sm:text-sm font-medium text-muted-foreground truncate">Dimensions</h3>
+                    <div className="stat-tile min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Ruler className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Dimensions</h3>
                       </div>
-                      <p className="text-foreground font-semibold text-xs sm:text-sm break-words">
+                      <p className="text-foreground font-bold text-xs sm:text-sm break-words">
                         {request.cargo?.dimensions
                           ? `${request.cargo.dimensions.length} × ${request.cargo.dimensions.width} × ${request.cargo.dimensions.height} cm`
                           : "—"}
                       </p>
                     </div>
-                    <div className="p-3 sm:p-4 bg-primary/10 rounded-xl border border-primary/20 min-w-0 sm:col-span-2 md:col-span-1">
-                      <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
-                        <Euro className="w-4 h-4 text-primary shrink-0" />
-                        <h3 className="text-xs sm:text-sm font-medium text-primary truncate">Price</h3>
+                    <div className="stat-tile-primary min-w-0 sm:col-span-2 md:col-span-1">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <Euro className="w-3.5 h-3.5 text-primary shrink-0" />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider text-primary truncate">Price</h3>
                       </div>
-                      <p className="text-primary font-bold text-lg truncate">{request.price != null ? formatCurrency(request.price) : "—"}</p>
+                      <p className="text-primary font-bold text-xl truncate">{request.price != null ? formatCurrency(request.price) : "—"}</p>
                     </div>
                   </div>
 
                   {request.cargo?.value && (
-                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
-                      <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">Declared Value</h3>
-                      <p className="text-foreground font-semibold">{formatCurrency(request.cargo.value)}</p>
+                    <div className="stat-tile">
+                      <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Declared Value</h3>
+                      <p className="text-foreground font-bold">{formatCurrency(request.cargo.value)}</p>
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             </motion.div>
 
           {/* Addresses */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-              <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                  <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <div className="detail-card p-4 sm:p-5 md:p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="section-icon-badge bg-primary/15">
+                  <MapPin className="w-5 h-5 text-primary" />
                 </div>
-                <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Addresses</h2>
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">Addresses</h2>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2 md:gap-6">
-                <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
-                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                <div className="route-step-card">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
                       <Navigation className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Pickup</h3>
+                    <h3 className="font-bold text-foreground text-sm">Pickup</h3>
                   </div>
-                  <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{request.pickup?.address}</p>
-                  <p className="text-muted-foreground text-xs sm:text-sm">{request.pickup?.city}</p>
+                  <p className="text-foreground text-sm break-words font-medium">{request.pickup?.address}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">{request.pickup?.city}</p>
                   {request.pickup?.contactPerson?.name && (
-                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border">
-                      <div className="flex items-center gap-2 mb-0.5 text-xs sm:text-sm">
-                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
-                        <span className="font-medium text-foreground truncate">{request.pickup.contactPerson.name}</span>
+                    <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-semibold text-foreground truncate">{request.pickup.contactPerson.name}</span>
                       </div>
                       {request.pickup.contactPerson.phone && (
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground truncate">
-                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">{request.pickup.contactPerson.phone}</span>
                         </div>
                       )}
@@ -489,29 +489,29 @@ const RequestDetailPage = () => {
                 </div>
 
                 <div className="flex items-center justify-center py-1 md:hidden" aria-hidden>
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <Navigation className="w-4 h-4 text-muted-foreground rotate-90" />
+                  <div className="w-7 h-7 rounded-full bg-muted/60 flex items-center justify-center shrink-0">
+                    <Navigation className="w-3.5 h-3.5 text-muted-foreground rotate-90" />
                   </div>
                 </div>
 
-                <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border/50">
-                  <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                    <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0">
+                <div className="route-step-card">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0 shadow-md">
                       <MapPin className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm sm:text-base">Delivery</h3>
+                    <h3 className="font-bold text-foreground text-sm">Delivery</h3>
                   </div>
-                  <p className="text-foreground text-sm sm:text-base mb-0.5 break-words">{request.delivery?.address}</p>
-                  <p className="text-muted-foreground text-xs sm:text-sm">{request.delivery?.city}</p>
+                  <p className="text-foreground text-sm break-words font-medium">{request.delivery?.address}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">{request.delivery?.city}</p>
                   {request.delivery?.contactPerson?.name && (
-                    <div className="mt-2.5 pt-2.5 sm:mt-3 sm:pt-3 border-t border-border">
-                      <div className="flex items-center gap-2 mb-0.5 text-xs sm:text-sm">
-                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-muted-foreground shrink-0" />
-                        <span className="font-medium text-foreground truncate">{request.delivery.contactPerson.name}</span>
+                    <div className="mt-3 pt-3 border-t border-border/50 space-y-1">
+                      <div className="flex items-center gap-2 text-xs">
+                        <User className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <span className="font-semibold text-foreground truncate">{request.delivery.contactPerson.name}</span>
                       </div>
                       {request.delivery.contactPerson.phone && (
-                        <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground truncate">
-                          <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <Phone className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">{request.delivery.contactPerson.phone}</span>
                         </div>
                       )}
@@ -519,43 +519,47 @@ const RequestDetailPage = () => {
                   )}
                 </div>
               </div>
-            </Card>
+            </div>
           </motion.div>
 
           {/* Trip Information */}
           {request.trip && (
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-                <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                    <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="detail-card p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="section-icon-badge bg-primary/15">
+                    <Truck className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Trip</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Trip</h2>
                 </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Navigation className="w-5 h-5 text-primary shrink-0" />
+                <div className="space-y-3">
+                  <div className="stat-tile flex items-center gap-3 !p-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Navigation className="w-4 h-4 text-primary" />
+                    </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Route</p>
-                      <p className="text-foreground font-semibold text-sm sm:text-base truncate">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Route</p>
+                      <p className="text-foreground font-bold text-sm truncate">
                         {request.trip.departure?.city} → {request.trip.destination?.city}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Calendar className="w-5 h-5 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Departure</p>
-                      <p className="text-foreground font-semibold text-sm sm:text-base">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="stat-tile">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Departure</p>
+                      </div>
+                      <p className="text-foreground font-bold text-xs">
                         {new Date(request.trip.departureDate).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 min-w-0">
-                    <Calendar className="w-5 h-5 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm text-muted-foreground">Arrival</p>
-                      <p className="text-foreground font-semibold text-sm sm:text-base">
+                    <div className="stat-tile">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Arrival</p>
+                      </div>
+                      <p className="text-foreground font-bold text-xs">
                         {new Date(request.trip.arrivalDate).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
                       </p>
                     </div>
@@ -563,14 +567,14 @@ const RequestDetailPage = () => {
                   {request.trip._id && (
                     <Link
                       to={`/trips/${request.trip._id}`}
-                      className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline mt-2"
+                      className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline mt-1"
                     >
                       View trip details
                       <ArrowLeft className="w-4 h-4 rotate-180" />
                     </Link>
                   )}
                 </div>
-              </Card>
+              </div>
             </motion.div>
           )}
 
@@ -579,10 +583,10 @@ const RequestDetailPage = () => {
             request.trip &&
             (request.status === "accepted" || request.status === "in_transit") && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-                <Card className="p-3 sm:p-4 md:p-5 overflow-hidden">
-                  <div className="flex items-center justify-between gap-2 mb-3 sm:mb-4">
+                <div className="detail-card p-4 sm:p-5 overflow-hidden">
+                  <div className="flex items-center justify-between gap-2 mb-4">
                     <h2 className="text-base font-semibold text-foreground sm:text-lg flex items-center gap-2">
-                      <MapPin className="w-5 h-5 text-primary shrink-0" />
+                      <span className="section-icon-badge bg-primary/15"><MapPin className="w-4 h-4 text-primary" /></span>
                       Où est le chauffeur ?
                     </h2>
                     <div className="flex items-center gap-2">
@@ -622,75 +626,66 @@ const RequestDetailPage = () => {
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     Position du chauffeur en temps réel · Utilisez Message ou Appeler pour le contacter
                   </p>
-                </Card>
+                </div>
               </motion.div>
             )}
 
           {/* Messages */}
           {(request.message || request.driverResponse?.message) && (
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-                <div className="flex items-center gap-3 mb-4 sm:mb-5">
-                  <div className="p-2.5 sm:p-3 bg-primary/10 rounded-lg shrink-0">
-                    <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+              <div className="detail-card p-4 sm:p-5 md:p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="section-icon-badge bg-primary/15">
+                    <MessageCircle className="w-5 h-5 text-primary" />
                   </div>
-                  <h2 className="text-base font-semibold text-foreground sm:text-lg md:text-xl">Messages</h2>
+                  <h2 className="text-base font-semibold text-foreground sm:text-lg">Messages</h2>
                 </div>
-                <div className="space-y-3 sm:space-y-4">
+                <div className="space-y-3">
                   {request.message && (
-                    <div className="p-3 sm:p-4 bg-accent/50 rounded-xl border border-border">
+                    <div className="route-step-card">
                       <div className="flex items-center gap-2 mb-2">
-                        <User className="w-4 h-4 text-primary" />
-                        <h3 className="font-medium text-foreground">From Sender</h3>
+                        <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                          <User className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <h3 className="font-semibold text-foreground text-sm">From Sender</h3>
                       </div>
-                      <p className="text-muted-foreground text-sm sm:text-base break-words">{request.message}</p>
+                      <p className="text-muted-foreground text-sm break-words pl-9">{request.message}</p>
                     </div>
                   )}
                   {request.driverResponse?.message && (
                     <div
                       className={clsx(
-                        "p-3 sm:p-4 rounded-xl border",
+                        "rounded-xl p-3 sm:p-4 border",
                         request.status === "rejected"
                           ? "bg-destructive/5 border-destructive/20"
                           : request.status === "accepted"
                           ? "bg-success/5 border-success/20"
-                          : "bg-accent border-border"
+                          : "stat-tile"
                       )}
                     >
                       <div className="flex items-center gap-2 mb-2">
-                        <Truck
-                          className={clsx(
-                            "w-4 h-4",
-                            request.status === "rejected"
-                              ? "text-destructive"
-                              : request.status === "accepted"
-                              ? "text-success"
-                              : "text-primary"
-                          )}
-                        />
-                        <h3 className="font-medium text-foreground">
+                        <div className={clsx(
+                          "w-7 h-7 rounded-full flex items-center justify-center shrink-0",
+                          request.status === "rejected" ? "bg-destructive/10" : request.status === "accepted" ? "bg-success/10" : "bg-primary/10"
+                        )}>
+                          <Truck className={clsx("w-3.5 h-3.5", request.status === "rejected" ? "text-destructive" : request.status === "accepted" ? "text-success" : "text-primary")} />
+                        </div>
+                        <h3 className="font-semibold text-foreground text-sm">
                           From Driver
-                          {request.status === "accepted" && (
-                            <span className="ml-2 text-xs font-normal text-success">(Accepted)</span>
-                          )}
-                          {request.status === "rejected" && (
-                            <span className="ml-2 text-xs font-normal text-destructive">(Rejected)</span>
-                          )}
+                          {request.status === "accepted" && <span className="ml-2 text-xs font-normal text-success">(Accepted)</span>}
+                          {request.status === "rejected" && <span className="ml-2 text-xs font-normal text-destructive">(Rejected)</span>}
                         </h3>
                       </div>
-                      <p className="text-foreground text-sm sm:text-base mb-2 break-words">{request.driverResponse.message}</p>
+                      <p className="text-foreground text-sm mb-2 break-words pl-9">{request.driverResponse.message}</p>
                       {request.driverResponse.respondedAt && (
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(request.driverResponse.respondedAt).toLocaleString("en-US", {
-                            dateStyle: "long",
-                            timeStyle: "short",
-                          })}
+                        <p className="text-xs text-muted-foreground pl-9">
+                          {new Date(request.driverResponse.respondedAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}
                         </p>
                       )}
                     </div>
                   )}
                 </div>
-              </Card>
+              </div>
             </motion.div>
           )}
 
@@ -704,88 +699,63 @@ const RequestDetailPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.25 }}
               >
-                <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-                  <h2 className="text-base font-semibold text-foreground mb-4 sm:mb-5 sm:text-lg">Tracking</h2>
-                  <div className="space-y-3 sm:space-y-4">
-                    <div
-                      className={clsx(
-                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
-                        request.tracking?.pickupConfirmed?.confirmed
-                          ? "bg-success/10 border border-success/20"
-                          : "bg-accent"
-                      )}
-                    >
-                      <CheckCircle
-                        className={clsx(
-                          "w-5 h-5",
-                          request.tracking?.pickupConfirmed?.confirmed ? "text-success" : "text-muted-foreground"
-                        )}
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-foreground">Pickup Confirmed</span>
+                <div className="detail-card p-4 sm:p-5 md:p-6">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="section-icon-badge bg-success/10">
+                      <CheckCircle className="w-5 h-5 text-success" />
+                    </div>
+                    <h2 className="text-base font-semibold text-foreground sm:text-lg">Tracking</h2>
+                  </div>
+                  <div className="space-y-2.5">
+                    <div className={clsx("tracking-step", request.tracking?.pickupConfirmed?.confirmed ? "tracking-step-done" : "tracking-step-pending")}>
+                      <div className={clsx("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", request.tracking?.pickupConfirmed?.confirmed ? "bg-success/15" : "bg-muted/60")}>
+                        <CheckCircle className={clsx("w-5 h-5", request.tracking?.pickupConfirmed?.confirmed ? "text-success" : "text-muted-foreground/50")} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-foreground text-sm">Pickup Confirmed</span>
                         {request.tracking?.pickupConfirmed?.confirmedAt && (
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(request.tracking.pickupConfirmed.confirmedAt).toLocaleString("en-US", {
-                              dateStyle: "long",
-                              timeStyle: "short",
-                            })}
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {new Date(request.tracking.pickupConfirmed.confirmedAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}
                           </p>
                         )}
                       </div>
+                      {request.tracking?.pickupConfirmed?.confirmed && (
+                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-success/15 text-success shrink-0">✓</span>
+                      )}
                     </div>
 
-                    <div
-                      className={clsx(
-                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
-                        request.tracking?.inTransit?.confirmed
-                          ? "bg-info/10 border border-info/20"
-                          : "bg-accent"
-                      )}
-                    >
-                      <Truck
-                        className={clsx(
-                          "w-5 h-5",
-                          request.tracking?.inTransit?.confirmed ? "text-info" : "text-muted-foreground"
-                        )}
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-foreground">In Transit</span>
+                    <div className={clsx("tracking-step", request.tracking?.inTransit?.confirmed ? "tracking-step-transit" : "tracking-step-pending")}>
+                      <div className={clsx("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", request.tracking?.inTransit?.confirmed ? "bg-info/15" : "bg-muted/60")}>
+                        <Truck className={clsx("w-5 h-5", request.tracking?.inTransit?.confirmed ? "text-info" : "text-muted-foreground/50")} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-foreground text-sm">In Transit</span>
                         {request.tracking?.inTransit?.confirmedAt && (
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(request.tracking.inTransit.confirmedAt).toLocaleString("en-US", {
-                              dateStyle: "long",
-                              timeStyle: "short",
-                            })}
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {new Date(request.tracking.inTransit.confirmedAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}
                           </p>
                         )}
                       </div>
+                      {request.tracking?.inTransit?.confirmed && (
+                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-info/15 text-info shrink-0">✓</span>
+                      )}
                     </div>
 
-                    <div
-                      className={clsx(
-                        "flex items-center gap-3 p-3 sm:p-4 rounded-xl",
-                        request.tracking?.delivered?.confirmed
-                          ? "bg-success/10 border border-success/20"
-                          : "bg-accent"
-                      )}
-                    >
-                      <CheckCircle
-                        className={clsx(
-                          "w-5 h-5",
-                          request.tracking?.delivered?.confirmed ? "text-success" : "text-muted-foreground"
-                        )}
-                      />
-                      <div className="flex-1">
-                        <span className="font-medium text-foreground">Delivery Confirmed</span>
+                    <div className={clsx("tracking-step", request.tracking?.delivered?.confirmed ? "tracking-step-done" : "tracking-step-pending")}>
+                      <div className={clsx("w-9 h-9 rounded-xl flex items-center justify-center shrink-0", request.tracking?.delivered?.confirmed ? "bg-success/15" : "bg-muted/60")}>
+                        <CheckCircle className={clsx("w-5 h-5", request.tracking?.delivered?.confirmed ? "text-success" : "text-muted-foreground/50")} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="font-semibold text-foreground text-sm">Delivery Confirmed</span>
                         {request.tracking?.delivered?.confirmedAt && (
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(request.tracking.delivered.confirmedAt).toLocaleString("en-US", {
-                              dateStyle: "long",
-                              timeStyle: "short",
-                            })}
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {new Date(request.tracking.delivered.confirmedAt).toLocaleString("en-US", { dateStyle: "long", timeStyle: "short" })}
                           </p>
                         )}
                       </div>
+                      {request.tracking?.delivered?.confirmed && (
+                        <span className="text-xs font-bold px-2 py-1 rounded-full bg-success/15 text-success shrink-0">✓</span>
+                      )}
                     </div>
 
                     {/* Proof of delivery — photo, signature, notes */}
@@ -819,7 +789,7 @@ const RequestDetailPage = () => {
                       </div>
                     )}
                   </div>
-                </Card>
+                </div>
               </motion.div>
             )}
         </div>
@@ -828,11 +798,15 @@ const RequestDetailPage = () => {
         <div className="space-y-4 sm:space-y-5 md:space-y-6">
           {/* User Info */}
           <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-              <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 flex items-center gap-2 sm:text-lg">
-                <User className="w-5 h-5 text-primary shrink-0" />
-                {isDriver ? "Shipper" : "Driver"}
-              </h2>
+            <div className="detail-card p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="section-icon-badge bg-primary/15">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">
+                  {isDriver ? "Shipper" : "Driver"}
+                </h2>
+              </div>
 
               {isDriver ? (
                 <div className="space-y-3 sm:space-y-4">
@@ -973,13 +947,18 @@ const RequestDetailPage = () => {
                   )}
                 </div>
               )}
-            </Card>
+            </div>
           </motion.div>
 
           {/* Actions */}
           <motion.div initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="p-3 sm:p-4 md:p-5 lg:p-6">
-              <h2 className="text-base font-semibold text-foreground mb-3 sm:mb-4 sm:text-lg">Actions</h2>
+            <div className="detail-card p-4 sm:p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="section-icon-badge bg-primary/15">
+                  <CheckCircle className="w-5 h-5 text-primary" />
+                </div>
+                <h2 className="text-base font-semibold text-foreground sm:text-lg">Actions</h2>
+              </div>
               <div className="space-y-2.5 sm:space-y-3">
                 {(isDriver || isSender) && (
                   <Button
@@ -1188,7 +1167,7 @@ const RequestDetailPage = () => {
                   </div>
                 )}
               </div>
-            </Card>
+            </div>
           </motion.div>
         </div>
       </div>
