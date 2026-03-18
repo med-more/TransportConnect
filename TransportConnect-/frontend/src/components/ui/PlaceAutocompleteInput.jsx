@@ -6,6 +6,14 @@ import clsx from "clsx"
 const DEBOUNCE_MS = 400
 const MAX_SUGGESTIONS = 8
 
+function formatPlaceLabel(label) {
+  const s = (label || "").trim()
+  if (!s) return ""
+  // Nominatim display_name often comes as: "City, Subregion, Region, Country"
+  // For UX, show only the first segment (usually the city).
+  return s.split(",")[0]?.trim() || s
+}
+
 /**
  * Place autocomplete for Morocco: suggestions as user types + "Ma position" (GPS).
  * Fills two form fields: city and address. Use with react-hook-form setValue + register.
@@ -39,8 +47,8 @@ export default function PlaceAutocompleteInput({
 
   // Sync visible input when form values change externally
   useEffect(() => {
-    if (address && !open) setInputValue(address)
-    else if (city && !address && !open) setInputValue(city)
+    if (address && !open) setInputValue(formatPlaceLabel(address))
+    else if (city && !address && !open) setInputValue(formatPlaceLabel(city))
   }, [city, address, open])
 
   const fetchSuggestions = useCallback(async (q) => {
@@ -78,7 +86,7 @@ export default function PlaceAutocompleteInput({
     setValue(addressField, place.address)
     if (coordFields?.lat && place.lat != null) setValue(coordFields.lat, place.lat)
     if (coordFields?.lng && place.lng != null) setValue(coordFields.lng, place.lng)
-    setInputValue(place.display_name || place.address)
+    setInputValue(formatPlaceLabel(place.display_name || place.address))
     setSuggestions([])
     setOpen(false)
   }
@@ -97,7 +105,7 @@ export default function PlaceAutocompleteInput({
               setValue(addressField, result.address)
               if (coordFields?.lat) setValue(coordFields.lat, pos.coords.latitude)
               if (coordFields?.lng) setValue(coordFields.lng, pos.coords.longitude)
-              setInputValue(result.display_name || result.address)
+              setInputValue(formatPlaceLabel(result.display_name || result.address))
               setSuggestions([])
               setOpen(false)
             }
@@ -184,7 +192,7 @@ export default function PlaceAutocompleteInput({
                   )}
                   onClick={() => handleSelect(place)}
                 >
-                  {place.display_name || place.address}
+                  {formatPlaceLabel(place.display_name || place.address)}
                 </li>
               ))}
             </ul>
