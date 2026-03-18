@@ -482,13 +482,15 @@ const DashboardPage = () => {
             </motion.div>
           </div>
 
-          {/* Right Column - 1/3 width */}
-          <div className="space-y-6">
+          {/* Right Column - full width on mobile */}
+          <div className="col-span-2 lg:col-span-1 space-y-6">
+            {/* Full-width stacked cards on mobile */}
+            <div className="grid grid-cols-1 gap-4 sm:gap-6">
             {/* Alerts & Notifications */}
             <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.alertsNotifications")}</h3>
+              <Card className="p-3 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground leading-tight">{t("dashboard.alertsNotifications")}</h3>
                   {notifications.some((n) => !n.read) && (
                     <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0" title="Unread" />
                   )}
@@ -499,7 +501,7 @@ const DashboardPage = () => {
                       <div
                         key={notif._id}
                         className={clsx(
-                          "p-3 rounded-xl border-l-4 transition-colors",
+                          "p-2 sm:p-3 rounded-xl border-l-4 transition-colors",
                           notif.read
                             ? "bg-muted/30 dark:bg-muted/50 border-border"
                             : "bg-primary/5 border-primary"
@@ -520,7 +522,7 @@ const DashboardPage = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground py-2">{t("dashboard.noNotificationsYet")}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground py-2">{t("dashboard.noNotificationsYet")}</p>
                   )}
                 </div>
               </Card>
@@ -528,14 +530,14 @@ const DashboardPage = () => {
 
             {/* Shipment Details */}
             <motion.div variants={itemVariants}>
-              <Card className="p-4 sm:p-5 md:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-base sm:text-lg font-semibold text-foreground">{t("dashboard.shipmentDetails")}</h3>
+              <Card className="p-3 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-semibold text-foreground leading-tight">{t("dashboard.shipmentDetails")}</h3>
                   {(activeTrip || activeRequest) && (
                     <Button
                       variant="ghost"
                       size="small"
-                      className="text-xs sm:text-sm"
+                      className="text-[11px] sm:text-xs md:text-sm whitespace-nowrap"
                       onClick={() =>
                         navigate(
                           activeTrip
@@ -591,7 +593,7 @@ const DashboardPage = () => {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Rating</span>
                           <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-warning text-warning" />
+                            <Star className="w-4 h-4 sm:w-5 sm:h-5 fill-warning text-warning" />
                             <span className="font-medium">
                               {stats?.averageRating != null
                                 ? Number(stats.averageRating).toFixed(1)
@@ -619,7 +621,7 @@ const DashboardPage = () => {
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Rating</span>
                           <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-muted-foreground" />
+                            <Star className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                             <span className="font-medium">
                               {stats?.averageRating != null
                                 ? Number(stats.averageRating).toFixed(1)
@@ -633,6 +635,7 @@ const DashboardPage = () => {
                 </div>
               </Card>
             </motion.div>
+            </div>
 
             {/* Current Truck Capacity - drivers only */}
             {user?.role === "conducteur" && (
