@@ -112,8 +112,14 @@ export default function ForDriversPage() {
          ══════════════════════════════════════════════ */}
       <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[92vh] flex items-end overflow-hidden">
         {/* bg */}
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/92 via-black/70 to-black/30" />
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-45"
+          style={{
+            backgroundImage:
+              "url(https://images.unsplash.com/photo-1600320254374-ce2d293c324e?auto=format&fit=crop&w=1920&q=80)",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/65 to-black/45" />
         {/* diagonal accent stripe */}
         <div
           className="absolute right-0 top-0 h-full w-[38%] opacity-20"
@@ -130,7 +136,7 @@ export default function ForDriversPage() {
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase text-white leading-none mb-6 sm:mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase text-white leading-none mb-6 sm:mb-8 drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
             style={{ letterSpacing: "-0.03em" }}
           >
             Drive More.<br />
@@ -139,7 +145,7 @@ export default function ForDriversPage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}
-            className="text-white/75 text-base sm:text-lg max-w-lg mb-10 leading-relaxed"
+            className="text-white/90 text-base sm:text-lg max-w-lg mb-10 leading-relaxed drop-shadow-[0_5px_14px_rgba(0,0,0,0.28)]"
           >
             Join thousands of drivers across Morocco. Set your rates, choose your routes, and get paid directly — with zero commissions.
           </motion.p>
