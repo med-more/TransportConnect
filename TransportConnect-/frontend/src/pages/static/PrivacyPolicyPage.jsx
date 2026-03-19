@@ -134,7 +134,14 @@ export default function PrivacyPolicyPage() {
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           className="hidden lg:block absolute right-0 top-0 w-[48%] h-full"
         >
-          <img src="/home/1/3.webp" alt="Privacy" className="w-full h-full object-cover opacity-40" />
+          <img
+            src="https://source.unsplash.com/C5pXRFEjq3w/1200x800"
+            alt="Privacy"
+            className="w-full h-full object-cover opacity-40"
+            onError={(e) => {
+              e.currentTarget.src = "/home/1/3.webp"
+            }}
+          />
           <div className="absolute inset-0 bg-gradient-to-r from-foreground dark:from-card via-transparent to-transparent" />
         </motion.div>
       </section>

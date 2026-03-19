@@ -53,11 +53,27 @@ export default function AboutUsPage() {
       <PublicHeader />
 
       {/* ══════════════════════════════════════════════
-          HERO — split: text left / image right
+          HERO — full bleed image + diagonal accent
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[85vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
-        {/* left text half */}
-        <div className="relative z-10 w-full lg:w-1/2 px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[85vh] flex items-end overflow-hidden bg-foreground dark:bg-card">
+        {/* background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-45"
+          style={{
+            backgroundImage:
+              "url(https://images.unsplash.com/photo-1750981091421-5ae1eb56cd69?auto=format&fit=crop&w=1920&q=80)",
+          }}
+        />
+        {/* dark overlay for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/65 to-black/45" />
+        {/* diagonal accent stripe */}
+        <div
+          className="absolute right-0 top-0 h-full w-[38%] opacity-20"
+          style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
+        />
+
+        {/* content */}
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-20 pb-16 sm:pb-20 md:pb-28 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
           <motion.p
             {...fadeUp(0)}
             className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
@@ -66,14 +82,17 @@ export default function AboutUsPage() {
           </motion.p>
           <motion.h1
             {...fadeUp(0.1)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8 drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
             style={{ letterSpacing: "-0.03em" }}
           >
             We Move<br />
             <span className="text-primary">Morocco</span><br />
             Forward
           </motion.h1>
-          <motion.p {...fadeUp(0.2)} className="text-white/70 dark:text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mb-10">
+          <motion.p
+            {...fadeUp(0.2)}
+            className="text-white/90 text-base sm:text-lg max-w-md mb-10 leading-relaxed drop-shadow-[0_5px_14px_rgba(0,0,0,0.28)]"
+          >
             Built to make freight in Morocco simple, secure, and fair — connecting shippers and drivers in one seamless platform.
           </motion.p>
           <motion.div {...fadeUp(0.28)}>
@@ -84,21 +103,6 @@ export default function AboutUsPage() {
             </Link>
           </motion.div>
         </div>
-
-        {/* right image half */}
-        <motion.div
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="hidden lg:block absolute right-0 top-0 w-[52%] h-full"
-        >
-          <img
-            src="/home/4/1.webp"
-            alt="Morocco logistics"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground dark:from-card via-transparent to-transparent" />
-        </motion.div>
       </section>
 
       {/* ══════════════════════════════════════════════

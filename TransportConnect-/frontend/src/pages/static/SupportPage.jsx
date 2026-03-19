@@ -76,6 +76,19 @@ function FAQItem({ q, a }) {
 }
 
 export default function SupportPage() {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [ctaBgFailed, setCtaBgFailed] = useState(false)
+
+  const normalizedQuery = searchQuery.trim().toLowerCase()
+  const filteredFaqs =
+    !normalizedQuery
+      ? faqs
+      : faqs.filter((f) => {
+          const q = (f.q || "").toLowerCase()
+          const a = (f.a || "").toLowerCase()
+          return q.includes(normalizedQuery) || a.includes(normalizedQuery)
+        })
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
@@ -83,54 +96,73 @@ export default function SupportPage() {
       {/* ══════════════════════════════════════════════
           HERO — search + image
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[70vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
-        {/* left */}
-        <div className="relative z-10 w-full lg:w-1/2 px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
-          <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[70vh] lg:min-h-[85vh] flex items-end overflow-hidden">
+        {/* bg */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-45"
+          style={{
+            backgroundImage:
+              "url(https://plus.unsplash.com/premium_photo-1666299884107-2c2cf920ee59?auto=format&fit=crop&w=1920&q=80)",
+          }}
+        />
+        {/* dark gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/65 to-black/45" />
+        {/* diagonal accent stripe */}
+        <div
+          className="absolute right-0 top-0 h-full w-[40%] opacity-20"
+          style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
+        />
+
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-16 pb-14 sm:pb-20 md:pb-24 lg:pb-28 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
+          <motion.p
+            {...fadeUp(0)}
+            className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
+          >
             — We're here 24/7
           </motion.p>
           <motion.h1
             {...fadeUp(0.1)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8 drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
             style={{ letterSpacing: "-0.03em" }}
           >
             How can<br />
             we <span className="text-primary">help</span>?
           </motion.h1>
-          <motion.p {...fadeUp(0.18)} className="text-white/70 dark:text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mb-8 sm:mb-10">
+          <motion.p
+            {...fadeUp(0.18)}
+            className="text-white/90 text-base sm:text-lg leading-relaxed max-w-md mb-8 sm:mb-10 drop-shadow-[0_5px_14px_rgba(0,0,0,0.28)]"
+          >
             Search our help center or choose a support channel that works best for you.
           </motion.p>
+
           {/* search */}
           <motion.div {...fadeUp(0.25)} className="relative max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/60" />
             <Input
               placeholder="Search for help articles..."
-              className="pl-12 pr-4 py-4 text-base rounded-xl"
+              className="pl-12 pr-4 py-4 text-base rounded-xl border-white/20 bg-background/60"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </motion.div>
+
           {/* quick stats */}
           <motion.div {...fadeUp(0.33)} className="flex flex-wrap gap-6 mt-10">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-primary" />
-              <span className="text-sm text-white/70 dark:text-muted-foreground">Avg. response: <strong className="text-white dark:text-foreground">3 min</strong></span>
+              <span className="text-sm text-white/80">
+                Avg. response:{" "}
+                <strong className="text-white">3 min</strong>
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <UserCheck className="w-5 h-5 text-primary" />
-              <span className="text-sm text-white/70 dark:text-muted-foreground">Support: <strong className="text-white dark:text-foreground">24/7</strong></span>
+              <span className="text-sm text-white/80">
+                Support: <strong className="text-white">24/7</strong>
+              </span>
             </div>
           </motion.div>
         </div>
-
-        {/* right image */}
-        <motion.div
-          initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="hidden lg:block absolute right-0 top-0 w-[52%] h-full"
-        >
-          <img src="/home/1/3.webp" alt="Support center" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground dark:from-card via-transparent to-transparent" />
-        </motion.div>
       </section>
 
       {/* ══════════════════════════════════════════════
@@ -196,11 +228,17 @@ export default function SupportPage() {
             </motion.div>
             {/* accordion */}
             <motion.div {...fadeRight(0)} className="space-y-4">
-              {faqs.map((f, i) => (
-                <motion.div key={i} {...fadeUp(i * 0.07)}>
-                  <FAQItem q={f.q} a={f.a} />
-                </motion.div>
-              ))}
+              {filteredFaqs.length > 0 ? (
+                filteredFaqs.map((f, i) => (
+                  <motion.div key={f.q} {...fadeUp(i * 0.07)}>
+                    <FAQItem q={f.q} a={f.a} />
+                  </motion.div>
+                ))
+              ) : (
+                <div className="p-4 rounded-2xl border border-border bg-card text-muted-foreground text-sm">
+                  No matching results for "{searchQuery}".
+                </div>
+              )}
             </motion.div>
           </div>
         </div>
@@ -244,7 +282,15 @@ export default function SupportPage() {
           CTA STRIP
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
+        <div className="absolute inset-0">
+          <img
+            src={ctaBgFailed ? "/home/3/1.webp" : "https://source.unsplash.com/3vEtYOjWwC4/1920x1080"}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={() => setCtaBgFailed(true)}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">Still need help?</motion.p>

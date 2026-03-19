@@ -57,7 +57,13 @@ export default function ServicesPage() {
          ══════════════════════════════════════════════ */}
       <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[88vh] flex items-end overflow-hidden">
         {/* bg */}
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url(https://plus.unsplash.com/premium_photo-1771361191366-4f65572326ab?auto=format&fit=crop&w=1920&q=80)",
+          }}
+        />
         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/65 to-black/25" />
         {/* diagonal accent */}
         <div

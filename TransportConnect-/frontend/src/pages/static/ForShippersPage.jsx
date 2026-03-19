@@ -121,11 +121,14 @@ export default function ForShippersPage() {
       <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[92vh] flex items-end overflow-hidden">
         {/* bg image */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: "url(/home/2/1.webp)" }}
+          className="absolute inset-0 bg-cover bg-center opacity-45"
+          style={{
+            backgroundImage:
+              "url(https://plus.unsplash.com/premium_photo-1682141618819-cc11059daf9a?auto=format&fit=crop&w=1920&q=80)",
+          }}
         />
-        {/* dark gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30" />
+        {/* dark gradient (stronger for better readability) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/65 to-black/45" />
 
         {/* diagonal accent stripe */}
         <div
@@ -145,7 +148,7 @@ export default function ForShippersPage() {
             </motion.p>
             <motion.h1
               {...fadeUp(0.1)}
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8 drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
               style={{ letterSpacing: "-0.03em" }}
             >
               For<br />
@@ -153,7 +156,7 @@ export default function ForShippersPage() {
             </motion.h1>
             <motion.p
               {...fadeUp(0.2)}
-              className="text-base sm:text-lg text-white/80 max-w-lg mb-10 leading-relaxed"
+            className="text-base sm:text-lg text-white/90 max-w-lg mb-10 leading-relaxed drop-shadow-[0_5px_14px_rgba(0,0,0,0.28)]"
             >
               Connect with trusted transporters. Ship your goods safely and
               efficiently across Morocco — all in one platform.
@@ -429,7 +432,13 @@ export default function ForShippersPage() {
           CTA STRIP — full bleed image + overlay
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/4.webp)" }} />
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage:
+              "url(https://plus.unsplash.com/premium_photo-1726776092398-98a1620d877e?auto=format&fit=crop&w=1920&q=80)",
+          }}
+        />
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
