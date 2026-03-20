@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Cookie, Settings, BarChart3, Shield, CheckCircle, ArrowRight } from "../../utils/icons"
@@ -77,6 +78,8 @@ const highlights = [
 ]
 
 export default function CookiePolicyPage() {
+  const [ctaBgFailed, setCtaBgFailed] = useState(false)
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
@@ -249,7 +252,15 @@ export default function CookiePolicyPage() {
           CTA
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/3/1.webp)" }} />
+        <div className="absolute inset-0">
+          <img
+            src={ctaBgFailed ? "/home/3/1.webp" : "https://source.unsplash.com/9tL15PCrj6A/1920x1080"}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={() => setCtaBgFailed(true)}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.h2 {...fadeUp(0)} className="text-2xl sm:text-3xl md:text-4xl font-black uppercase text-white mb-5 sm:mb-6" style={{ letterSpacing: "-0.02em" }}>

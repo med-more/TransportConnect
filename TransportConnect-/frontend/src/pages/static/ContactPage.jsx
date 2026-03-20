@@ -53,6 +53,7 @@ export default function ContactPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
+  const [ctaBgFailed, setCtaBgFailed] = useState(false)
 
   const onSubmit = async () => {
     setIsSubmitting(true)
@@ -298,7 +299,15 @@ export default function ContactPage() {
           IMAGE STRIP + CTA
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/4/2.webp)" }} />
+        <div className="absolute inset-0">
+          <img
+            src={ctaBgFailed ? "/home/4/2.webp" : "https://unsplash.com/photos/1Tjwapb3wow/download?force=true&w=1920"}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={() => setCtaBgFailed(true)}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">

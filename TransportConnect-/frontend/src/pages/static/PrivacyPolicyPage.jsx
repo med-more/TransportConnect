@@ -243,7 +243,7 @@ export default function PrivacyPolicyPage() {
           CTA
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/2/1.webp)" }} />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(https://unsplash.com/photos/___7eqBnp3M/download?force=true&w=1920)" }} />
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.h2 {...fadeUp(0)} className="text-2xl sm:text-3xl md:text-4xl font-black uppercase text-white mb-5 sm:mb-6" style={{ letterSpacing: "-0.02em" }}>

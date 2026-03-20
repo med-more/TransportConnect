@@ -284,7 +284,7 @@ export default function SupportPage() {
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-32 overflow-hidden">
         <div className="absolute inset-0">
           <img
-            src={ctaBgFailed ? "/home/3/1.webp" : "https://source.unsplash.com/3vEtYOjWwC4/1920x1080"}
+            src={ctaBgFailed ? "/home/3/1.webp" : "https://source.unsplash.com/gPQ9sCx8psg/1920x1080"}
             alt=""
             className="w-full h-full object-cover"
             loading="eager"

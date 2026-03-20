@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Package, Truck, Shield, MapPin, Clock, TrendingUp, CheckCircle, ArrowRight, Globe } from "../../utils/icons"
@@ -76,6 +77,8 @@ const integrations = [
 ]
 
 export default function FeaturesPage() {
+  const [ctaBgFailed, setCtaBgFailed] = useState(false)
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
@@ -362,7 +365,15 @@ export default function FeaturesPage() {
           CTA STRIP
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/1/4.webp)" }} />
+        <div className="absolute inset-0">
+          <img
+            src={ctaBgFailed ? "/home/1/4.webp" : "https://unsplash.com/photos/3jG-UM8IZ40/download?force=true&w=1920"}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={() => setCtaBgFailed(true)}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">Experience all features today</motion.p>

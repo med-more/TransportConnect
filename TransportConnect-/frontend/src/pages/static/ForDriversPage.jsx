@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Truck, DollarSign, MapPin, TrendingUp, Clock, CheckCircle, ArrowRight, Shield } from "../../utils/icons"
@@ -103,6 +104,8 @@ const stories = [
 ]
 
 export default function ForDriversPage() {
+  const [ctaBgFailed, setCtaBgFailed] = useState(false)
+
   return (
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <PublicHeader />
@@ -400,7 +403,15 @@ export default function ForDriversPage() {
           CTA — full bleed image
          ══════════════════════════════════════════════ */}
       <section className="relative py-16 sm:py-24 md:py-28 lg:py-36 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url(/home/4/2.webp)" }} />
+        <div className="absolute inset-0">
+          <img
+            src={ctaBgFailed ? "/home/4/2.webp" : "https://unsplash.com/photos/Vz3HZLrkPBE/download?force=true&w=1920"}
+            alt=""
+            className="w-full h-full object-cover"
+            loading="eager"
+            onError={() => setCtaBgFailed(true)}
+          />
+        </div>
         <div className="absolute inset-0 bg-black/75" />
         <div className="relative z-10 text-center px-4 sm:px-6">
           <motion.p {...fadeUp(0)} className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-5">
