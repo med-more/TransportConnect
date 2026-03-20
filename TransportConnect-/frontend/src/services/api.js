@@ -189,6 +189,17 @@ export const adminAPI = {
   getStats: () => api.get("/admin/stats").then(res => res.data),
   updateUserVehicle: (userId, vehicleInfo) =>
     api.patch(`/admin/users/${userId}/vehicle`, { vehicleInfo }).then(res => res.data),
+  getContactMessages: (params = {}) => api.get("/contact/admin/messages", { params }).then((res) => res.data?.data),
+  getContactMessageById: (id) => api.get(`/contact/admin/messages/${id}`).then((res) => res.data?.data),
+  updateContactMessageStatus: (id, status) =>
+    api.patch(`/contact/admin/messages/${id}/status`, { status }).then((res) => res.data?.data),
+  replyToContactMessage: (id, replyMessage) =>
+    api.post(`/contact/admin/messages/${id}/reply`, { replyMessage }).then((res) => res.data?.data),
+  deleteContactMessage: (id) => api.delete(`/contact/admin/messages/${id}`).then((res) => res.data),
+}
+
+export const contactAPI = {
+  submitMessage: (payload) => api.post("/contact", payload).then((res) => res.data),
 }
 
 export default api

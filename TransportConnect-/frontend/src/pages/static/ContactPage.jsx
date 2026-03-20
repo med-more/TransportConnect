@@ -7,6 +7,7 @@ import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import { PublicHeader, PublicFooter } from "../../components/PublicLayout"
 import toast from "react-hot-toast"
+import { contactAPI } from "../../services/api"
 
 /* ─── helpers ──────────────────────────────────────────────── */
 const fadeUp = (delay = 0) => ({
@@ -55,15 +56,26 @@ export default function ContactPage() {
   const [sent, setSent] = useState(false)
   const [ctaBgFailed, setCtaBgFailed] = useState(false)
 
-  const onSubmit = async () => {
+  const onSubmit = async (formData) => {
     setIsSubmitting(true)
-    setTimeout(() => {
-      toast.success("Thank you! We'll get back to you soon.")
+    try {
+      const res = await contactAPI.submitMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || "",
+        message: formData.message,
+      })
+      const ticketId = res?.data?.ticketId
+      toast.success(ticketId ? `Message sent. Ticket: ${ticketId}` : "Thank you! We'll get back to you soon.")
       reset()
-      setIsSubmitting(false)
       setSent(true)
       setTimeout(() => setSent(false), 4000)
-    }, 1000)
+    } catch (error) {
+      const apiMessage = error?.response?.data?.message
+      toast.error(apiMessage || "Unable to send message. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -71,11 +83,27 @@ export default function ContactPage() {
       <PublicHeader />
 
       {/* ══════════════════════════════════════════════
-          HERO — bold split with image right
+          HERO — full bleed like other static pages
          ══════════════════════════════════════════════ */}
-      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] flex items-center overflow-hidden bg-foreground dark:bg-card">
-        {/* text left */}
-        <div className="relative z-10 w-full lg:w-[55%] px-4 sm:px-6 md:px-12 lg:px-20 py-16 sm:py-20 md:py-24 lg:py-28">
+      <section className="relative min-h-[55vh] sm:min-h-[65vh] md:min-h-[75vh] lg:min-h-[88vh] flex items-end overflow-hidden">
+        {/* background */}
+        <div className="absolute inset-0">
+          <img
+            src="https://source.unsplash.com/gWWnqqX8rMA/1920x1080"
+            alt="Contact TransportConnect"
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              e.currentTarget.src = "/home/4/1.webp"
+            }}
+          />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/65 to-black/45" />
+        <div
+          className="absolute right-0 top-0 h-full w-[38%] opacity-20"
+          style={{ background: "linear-gradient(135deg, transparent 50%, var(--primary) 50%)" }}
+        />
+
+        <div className="relative z-10 w-full px-4 sm:px-6 md:px-12 lg:px-20 pb-14 sm:pb-18 md:pb-24 pt-24 sm:pt-28 md:pt-36 max-w-6xl mx-auto">
           <motion.p
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }}
             className="text-xs font-bold tracking-[0.3em] uppercase text-primary mb-4 sm:mb-6"
@@ -84,7 +112,7 @@ export default function ContactPage() {
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white dark:text-foreground leading-none mb-6 sm:mb-8"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-none mb-6 sm:mb-8"
             style={{ letterSpacing: "-0.03em" }}
           >
             Contact<br />
@@ -92,7 +120,7 @@ export default function ContactPage() {
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.18 }}
-            className="text-white/70 dark:text-muted-foreground text-base sm:text-lg leading-relaxed max-w-md mb-10"
+            className="text-white/85 text-base sm:text-lg leading-relaxed max-w-2xl mb-10"
           >
             Have a question or need help? Our team is ready to assist you. We typically respond within 24 hours.
           </motion.p>
@@ -101,26 +129,16 @@ export default function ContactPage() {
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.26 }}
             className="flex flex-col sm:flex-row flex-wrap gap-3"
           >
-            <a href="mailto:contact@transportconnect.ma" className="flex items-center gap-2 bg-white/10 dark:bg-muted hover:bg-primary transition-colors duration-200 rounded-full px-4 py-2.5 group">
+            <a href="mailto:contact@transportconnect.ma" className="flex items-center gap-2 bg-white/10 hover:bg-primary transition-colors duration-200 rounded-full px-4 py-2.5 group">
               <Mail className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
-              <span className="text-xs font-semibold text-white dark:text-foreground group-hover:text-white transition-colors">contact@transportconnect.ma</span>
+              <span className="text-xs font-semibold text-white group-hover:text-white transition-colors">contact@transportconnect.ma</span>
             </a>
-            <a href="tel:+2126XXXXXXXX" className="flex items-center gap-2 bg-white/10 dark:bg-muted hover:bg-primary transition-colors duration-200 rounded-full px-4 py-2.5 group">
+            <a href="tel:+2126XXXXXXXX" className="flex items-center gap-2 bg-white/10 hover:bg-primary transition-colors duration-200 rounded-full px-4 py-2.5 group">
               <Phone className="w-4 h-4 text-primary group-hover:text-white transition-colors" />
-              <span className="text-xs font-semibold text-white dark:text-foreground group-hover:text-white transition-colors">+212 6XX XXX XXX</span>
+              <span className="text-xs font-semibold text-white group-hover:text-white transition-colors">+212 6XX XXX XXX</span>
             </a>
           </motion.div>
         </div>
-
-        {/* image right */}
-        <motion.div
-          initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-          className="hidden lg:block absolute right-0 top-0 w-[48%] h-full"
-        >
-          <img src="/home/4/1.webp" alt="Contact TransportConnect" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-foreground dark:from-card via-transparent to-transparent" />
-        </motion.div>
       </section>
 
       {/* ══════════════════════════════════════════════

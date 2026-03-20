@@ -1,15 +1,52 @@
 import nodemailer from "nodemailer"
 import User from "../models/User.js"
+import path from "path"
+import fs from "fs"
+import { fileURLToPath } from "url"
 
 // Create reusable transporter
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const LOGO_CID = "transportconnect-logo"
+
+const resolveEmailLogoAttachment = () => {
+  try {
+    const logoPath = path.resolve(__dirname, "../../frontend/src/assets/logo2.svg")
+    if (!fs.existsSync(logoPath)) return null
+    return {
+      filename: "transportconnect-logo.svg",
+      path: logoPath,
+      cid: LOGO_CID,
+      contentType: "image/svg+xml",
+    }
+  } catch {
+    return null
+  }
+}
+
+const buildEmailHeaderLogo = () => `
+  <div style="display:flex;align-items:center;gap:10px;">
+    <img src="cid:${LOGO_CID}" alt="TransportConnect" style="display:block;width:34px;height:34px;border-radius:8px;" />
+    <div style="font-family:Inter,system-ui,Arial,sans-serif;font-weight:800;font-size:16px;letter-spacing:0.2px;color:#f9fafb;">
+      TransportConnect
+    </div>
+  </div>
+`
+
 const createTransporter = () => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    throw new Error("Email service is not configured: EMAIL_USER/EMAIL_PASSWORD missing")
+  }
+  const normalizedEmailUser = String(process.env.EMAIL_USER).trim()
+  const normalizedEmailPassword = String(process.env.EMAIL_PASSWORD).replace(/\s+/g, "").trim()
+
   // Check if we're using Gmail or custom SMTP
   if (process.env.EMAIL_SERVICE === "gmail") {
     return nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD, // App password for Gmail
+        user: normalizedEmailUser,
+        pass: normalizedEmailPassword, // Gmail app password (normalized)
       },
     })
   }
@@ -20,8 +57,8 @@ const createTransporter = () => {
     port: parseInt(process.env.SMTP_PORT || "587"),
     secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASSWORD,
+      user: normalizedEmailUser,
+      pass: normalizedEmailPassword,
     },
   })
 }
@@ -260,4 +297,183 @@ export const sendNotificationEmailToUser = async (userId, subject, body, html = 
   } catch (error) {
     console.error("Error sending notification email to user:", error)
   }
+}
+
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;")
+
+const CONTACT_INBOX_EMAIL = process.env.CONTACT_INBOX_EMAIL || "transportconnect.help@gmail.com"
+
+export const sendContactAutoReplyEmail = async ({ to, name, subject, ticketId }) => {
+  const normalizedTo = String(to || "").trim().toLowerCase()
+  if (!normalizedTo) {
+    throw new Error("Missing recipient email for contact auto-reply")
+  }
+
+  const safeName = escapeHtml(name || "there")
+  const safeSubject = escapeHtml(subject || "Contact request")
+  const safeTicket = escapeHtml(ticketId || "N/A")
+  const transporter = createTransporter()
+
+  const mailOptions = {
+    from: `"TransportConnect Support" <${process.env.EMAIL_USER}>`,
+    to: normalizedTo,
+    replyTo: CONTACT_INBOX_EMAIL,
+    subject: `Support request received (${safeTicket})`,
+    text: `Hi ${name || "there"},
+
+We have received your support request.
+Ticket: ${ticketId || "N/A"}
+Subject: ${subject || "Contact request"}
+Status: In review
+Estimated response: within 24 hours or less.
+
+If needed, you can reply directly to this email.
+
+TransportConnect Support`,
+    headers: {
+      "X-Auto-Response-Suppress": "OOF, AutoReply",
+      AutoSubmitted: "auto-generated",
+      Precedence: "bulk",
+    },
+    attachments: [resolveEmailLogoAttachment()].filter(Boolean),
+    html: `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>Contact confirmation</title>
+        </head>
+        <body style="margin:0;padding:0;background:#06070a;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:radial-gradient(circle at top,#111827 0%,#06070a 55%,#03040a 100%);">
+            <tr>
+              <td align="center" style="padding:24px 12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:separate;max-width:640px;">
+                  <tr>
+                    <td style="padding:0 0 12px 0;text-align:left;">
+                      ${buildEmailHeaderLogo()}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;overflow:hidden;box-shadow:0 20px 45px rgba(0,0,0,0.45);">
+                      <div style="height:6px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 50%,#ef4444 100%);"></div>
+                      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                        <tr>
+                          <td style="padding:22px 22px 8px 22px;font-family:Inter,system-ui,Arial,sans-serif;font-size:22px;font-weight:800;color:#f9fafb;">
+                            Your request is in good hands
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 22px 12px 22px;font-family:Inter,system-ui,Arial,sans-serif;font-size:14px;line-height:1.7;color:#cbd5e1;">
+                            Hi ${safeName}, thank you for contacting TransportConnect support. We have received your request successfully and assigned it to our support queue.
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 22px 12px 22px;">
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:#0b1220;border:1px solid #253246;border-radius:12px;">
+                              <tr>
+                                <td style="padding:14px;font-family:Inter,system-ui,Arial,sans-serif;font-size:13px;line-height:1.7;color:#94a3b8;">
+                                  <strong style="color:#f8fafc;">Ticket:</strong> ${safeTicket}<br />
+                                  <strong style="color:#f8fafc;">Subject:</strong> ${safeSubject}<br />
+                                  <strong style="color:#f8fafc;">Status:</strong> In review<br />
+                                  <strong style="color:#f8fafc;">Estimated response:</strong> within 24 hours or less
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:0 22px 22px 22px;font-family:Inter,system-ui,Arial,sans-serif;font-size:14px;line-height:1.7;color:#cbd5e1;">
+                            A support specialist will reply by email within <strong>24 hours or less</strong>. We appreciate your trust and patience.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `,
+  }
+  const info = await transporter.sendMail(mailOptions)
+  console.log("Contact auto-reply email sent:", info.messageId, "to:", normalizedTo)
+  return info
+}
+
+export const sendContactAdminNotificationEmail = async ({ name, email, subject, message, ticketId }) => {
+  const transporter = createTransporter()
+  const safeName = escapeHtml(name)
+  const safeEmail = escapeHtml(email)
+  const safeSubject = escapeHtml(subject || "No subject")
+  const safeTicket = escapeHtml(ticketId)
+  const safeMessage = escapeHtml(message).replace(/\n/g, "<br />")
+
+  return transporter.sendMail({
+    from: `"TransportConnect Contact" <${process.env.EMAIL_USER}>`,
+    to: CONTACT_INBOX_EMAIL,
+    replyTo: email,
+    subject: `New contact message (${safeTicket}) - ${safeSubject}`,
+    html: `
+      <div style="font-family:Inter,system-ui,Arial,sans-serif;max-width:700px;margin:0 auto;padding:20px;background:#ffffff;border:1px solid #e5e7eb;border-radius:14px;">
+        <h2 style="margin:0 0 16px 0;color:#111827;">New Contact Message</h2>
+        <p style="margin:0 0 8px 0;color:#374151;"><strong>Ticket:</strong> ${safeTicket}</p>
+        <p style="margin:0 0 8px 0;color:#374151;"><strong>Name:</strong> ${safeName}</p>
+        <p style="margin:0 0 8px 0;color:#374151;"><strong>Email:</strong> ${safeEmail}</p>
+        <p style="margin:0 0 8px 0;color:#374151;"><strong>Subject:</strong> ${safeSubject}</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:16px 0;" />
+        <p style="margin:0;color:#111827;line-height:1.7;">${safeMessage}</p>
+      </div>
+    `,
+  })
+}
+
+export const sendContactAdminReplyEmail = async ({ to, name, subject, replyMessage, ticketId }) => {
+  const transporter = createTransporter()
+  const safeName = escapeHtml(name || "there")
+  const safeSubject = escapeHtml(subject || "Contact request")
+  const safeTicket = escapeHtml(ticketId || "N/A")
+  const safeReply = escapeHtml(replyMessage || "").replace(/\n/g, "<br />")
+
+  return transporter.sendMail({
+    from: `"TransportConnect Support" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `Reply to your request (${safeTicket})`,
+    attachments: [resolveEmailLogoAttachment()].filter(Boolean),
+    html: `
+      <!doctype html>
+      <html lang="en">
+        <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+        <body style="margin:0;padding:0;background:#06070a;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:radial-gradient(circle at top,#111827 0%,#06070a 55%,#03040a 100%);">
+            <tr><td align="center" style="padding:24px 12px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;border-collapse:separate;">
+                <tr><td style="padding:0 0 12px 0;">${buildEmailHeaderLogo()}</td></tr>
+                <tr><td style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;overflow:hidden;">
+                  <div style="height:6px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 50%,#ef4444 100%);"></div>
+                  <div style="padding:22px;font-family:Inter,system-ui,Arial,sans-serif;">
+                    <h2 style="margin:0 0 12px 0;color:#f8fafc;">Support reply</h2>
+                    <p style="margin:0 0 10px 0;color:#cbd5e1;line-height:1.7;">Hi ${safeName},</p>
+                    <p style="margin:0 0 14px 0;color:#cbd5e1;line-height:1.7;">Regarding your request about <strong style="color:#f8fafc;">${safeSubject}</strong> (Ticket: ${safeTicket}), here is our reply:</p>
+                    <div style="padding:14px;border:1px solid #253246;border-radius:12px;background:#0b1220;color:#f8fafc;line-height:1.7;">
+                      ${safeReply}
+                    </div>
+                    <p style="margin:14px 0 0 0;color:#94a3b8;line-height:1.7;">If you need more help, simply reply to this email.</p>
+                  </div>
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        </body>
+      </html>
+    `,
+  })
 }

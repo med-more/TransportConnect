@@ -56,6 +56,7 @@ import AdminRequestsPage from "./pages/admin/AdminRequestsPage"
 import AdminVerificationsPage from "./pages/admin/AdminVerificationsPage"
 import AdminVehiclesPage from "./pages/admin/AdminVehiclesPage"
 import AdminDocumentsPage from "./pages/admin/AdminDocumentsPage"
+import AdminContactMessagesPage from "./pages/admin/AdminContactMessagesPage"
 
 function AppRoutes() {
   const { user, isAuthenticated } = useAuth()
@@ -308,6 +309,16 @@ function AppRoutes() {
           <ProtectedRoute roles={["admin"]}>
             <AdminLayout>
               <AdminDocumentsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/contact-messages"
+        element={
+          <ProtectedRoute roles={["admin"]}>
+            <AdminLayout>
+              <AdminContactMessagesPage />
             </AdminLayout>
           </ProtectedRoute>
         }

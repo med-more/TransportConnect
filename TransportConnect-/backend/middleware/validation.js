@@ -217,3 +217,29 @@ export const validateTripSearch = [
 
   handleValidationErrors,
 ]
+
+export const validateContactMessage = [
+  body("name")
+    .trim()
+    .isLength({ min: 2, max: 120 })
+    .withMessage("Name must contain between 2 and 120 characters"),
+  body("email").trim().isEmail().normalizeEmail().withMessage("Invalid email address"),
+  body("subject")
+    .optional({ nullable: true })
+    .trim()
+    .isLength({ min: 0, max: 200 })
+    .withMessage("Subject must not exceed 200 characters"),
+  body("message")
+    .trim()
+    .isLength({ min: 10, max: 5000 })
+    .withMessage("Message must contain between 10 and 5000 characters"),
+  handleValidationErrors,
+]
+
+export const validateContactReply = [
+  body("replyMessage")
+    .trim()
+    .isLength({ min: 5, max: 5000 })
+    .withMessage("Reply must contain between 5 and 5000 characters"),
+  handleValidationErrors,
+]

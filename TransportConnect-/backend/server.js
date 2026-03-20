@@ -26,6 +26,7 @@ import configRoutes from "./routes/config.route.js"
 import estimateRoutes from "./routes/estimate.route.js"
 import recurringTripsRoutes from "./routes/recurringTrips.route.js"
 import documentsRoutes from "./routes/documents.route.js"
+import contactRoutes from "./routes/contact.route.js"
 import { runRecurringTripsJob } from "./services/recurringTrip.service.js"
 
 const app = express()
@@ -98,6 +99,7 @@ app.use("/api/config", configRoutes)
 app.use("/api/estimate", estimateRoutes)
 app.use("/api/recurring-trips", recurringTripsRoutes)
 app.use("/api/documents", documentsRoutes)
+app.use("/api/contact", contactRoutes)
 
 app.get("/api/health", (_, res) => res.status(200).json({ ok: true }))
 

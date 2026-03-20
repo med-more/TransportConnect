@@ -21,6 +21,7 @@ import {
   Moon,
   Car,
   FileText,
+  MessageSquare,
 } from "../utils/icons"
 import clsx from "clsx"
 import Button from "./ui/Button"
@@ -62,6 +63,7 @@ const AdminLayout = ({ children }) => {
     { name: "Demandes", href: "/admin/requests", icon: Package },
     { name: "Véhicules", href: "/admin/vehicles", icon: Car },
     { name: "Documents (KYC)", href: "/admin/documents", icon: FileText },
+    { name: "Contact Inbox", href: "/admin/contact-messages", icon: MessageSquare },
     { name: "Vérifications", href: "/admin/verifications", icon: Shield },
   ]
 
