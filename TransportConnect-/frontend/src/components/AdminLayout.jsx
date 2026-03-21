@@ -572,6 +572,8 @@ const AdminLayout = ({ children }) => {
                                 setShowNotifications(false)
                                 if (notif.type === "document_submitted") {
                                   navigate("/admin/documents")
+                                } else if (notif.type === "contact_ticket") {
+                                  navigate("/admin/contact-messages")
                                 } else if (notif.relatedRequest?._id || notif.relatedRequest) {
                                   navigate(`/admin/requests`)
                                 } else if (notif.relatedTrip?._id || notif.relatedTrip) {

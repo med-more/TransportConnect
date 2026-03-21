@@ -30,6 +30,7 @@ const notificationSchema = new mongoose.Schema(
         "account_reactivated", // Admin reactivated user account
         "document_submitted", // Driver submitted a document for review (notify admins)
         "document_reviewed", // Admin approved or rejected a document (notify driver)
+        "contact_ticket", // New contact ticket submitted by a website visitor
       ],
     },
     title: {

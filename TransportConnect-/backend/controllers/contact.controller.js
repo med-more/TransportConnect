@@ -1,9 +1,11 @@
 import ContactMessage from "../models/ContactMessage.js"
+import User from "../models/User.js"
 import {
   sendContactAdminNotificationEmail,
   sendContactAdminReplyEmail,
   sendContactAutoReplyEmail,
 } from "../services/email.service.js"
+import { createNotification } from "../utils/notifications.js"
 
 const buildTicketId = (id) => `TC-${String(id).slice(-6).toUpperCase()}`
 
@@ -49,6 +51,28 @@ export const submitContactMessage = async (req, res) => {
     sendContactAdminNotificationEmail({ name, email, subject, message, ticketId }).catch((error) => {
       console.error("sendContactAdminNotificationEmail error:", error)
     })
+
+    // In-app admin bell notification (best-effort).
+    User.find({ role: "admin", isActive: { $ne: false } })
+      .select("_id")
+      .lean()
+      .then(async (admins) => {
+        if (!admins?.length) return
+        await Promise.allSettled(
+          admins.map((admin) =>
+            createNotification({
+              recipientId: admin._id,
+              type: "contact_ticket",
+              title: "New contact ticket",
+              message: `${name} sent a new support message${subject ? `: ${subject}` : ""}.`,
+              link: "/admin/contact-messages",
+            })
+          )
+        )
+      })
+      .catch((error) => {
+        console.error("create admin contact notification error:", error)
+      })
 
     return res.status(201).json({
       message: "Message sent successfully. Our support team will respond soon.",
