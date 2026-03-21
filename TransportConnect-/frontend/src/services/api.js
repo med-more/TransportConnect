@@ -207,7 +207,12 @@ export const adminAPI = {
 }
 
 export const contactAPI = {
-  submitMessage: (payload) => api.post("/contact", payload).then((res) => res.data),
+  submitMessage: (payload) =>
+    api
+      .post("/contact", payload, {
+        timeout: 30000,
+      })
+      .then((res) => res.data),
 }
 
 export default api

@@ -72,7 +72,11 @@ export default function ContactPage() {
       setTimeout(() => setSent(false), 4000)
     } catch (error) {
       const apiMessage = error?.response?.data?.message
-      toast.error(apiMessage || "Unable to send message. Please try again.")
+      if (error?.code === "ECONNABORTED") {
+        toast.error("Request timed out. Please try again.")
+      } else {
+        toast.error(apiMessage || "Unable to send message. Please try again.")
+      }
     } finally {
       setIsSubmitting(false)
     }
