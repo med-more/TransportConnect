@@ -24,6 +24,12 @@ const sendWithRetry = async (fn, attempts = 2, delayMs = 500) => {
   throw lastError
 }
 
+const isSmtpTimeoutError = (error) => {
+  const code = error?.code || ""
+  const message = String(error?.message || "").toLowerCase()
+  return code === "ETIMEDOUT" || message.includes("connection timeout")
+}
+
 export const submitContactMessage = async (req, res) => {
   try {
     const { name, email, subject = "", message } = req.body
@@ -40,12 +46,21 @@ export const submitContactMessage = async (req, res) => {
 
     const ticketId = buildTicketId(contact._id)
 
-    // Auto-reply is mandatory: if it fails, API returns error so frontend doesn't show false success.
-    await sendWithRetry(
-      () => sendContactAutoReplyEmail({ to: email, name, subject, ticketId }),
-      2,
-      700
-    )
+    // Auto-reply email: attempt with retry; on SMTP timeout, do not block ticket creation.
+    let autoReplyDelivered = true
+    try {
+      await sendWithRetry(
+        () => sendContactAutoReplyEmail({ to: email, name, subject, ticketId }),
+        2,
+        700
+      )
+    } catch (error) {
+      autoReplyDelivered = false
+      if (!isSmtpTimeoutError(error)) {
+        throw error
+      }
+      console.error("Auto-reply SMTP timeout (non-blocking):", error)
+    }
 
     // Admin notification is best-effort and should not block user flow.
     sendContactAdminNotificationEmail({ name, email, subject, message, ticketId }).catch((error) => {
@@ -75,10 +90,13 @@ export const submitContactMessage = async (req, res) => {
       })
 
     return res.status(201).json({
-      message: "Message sent successfully. Our support team will respond soon.",
+      message: autoReplyDelivered
+        ? "Message sent successfully. Our support team will respond soon."
+        : "Message sent successfully. Support received your ticket; email confirmation may be delayed.",
       data: {
         id: contact._id,
         ticketId,
+        autoReplyDelivered,
       },
     })
   } catch (error) {

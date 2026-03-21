@@ -56,6 +56,12 @@ const createTransporter = () => {
     host: process.env.SMTP_HOST || "smtp.gmail.com",
     port: parseInt(process.env.SMTP_PORT || "587"),
     secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+    connectionTimeout: parseInt(process.env.SMTP_CONNECTION_TIMEOUT_MS || "20000"),
+    greetingTimeout: parseInt(process.env.SMTP_GREETING_TIMEOUT_MS || "15000"),
+    socketTimeout: parseInt(process.env.SMTP_SOCKET_TIMEOUT_MS || "30000"),
+    tls: {
+      servername: process.env.SMTP_HOST || "smtp.gmail.com",
+    },
     auth: {
       user: normalizedEmailUser,
       pass: normalizedEmailPassword,
