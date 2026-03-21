@@ -137,7 +137,7 @@ export default function AdminContactMessagesPage() {
 
   return (
     <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-4">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="text-2xl md:text-3xl font-black text-foreground">Contact Inbox</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage incoming support messages and reply professionally.</p>
@@ -148,7 +148,7 @@ export default function AdminContactMessagesPage() {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { key: "total", label: "Total", icon: MessageSquare },
           { key: "new", label: "New", icon: Mail },
@@ -170,8 +170,8 @@ export default function AdminContactMessagesPage() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 md:gap-6">
-        <Card className="xl:col-span-5 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <Card className={clsx("xl:col-span-5 p-4 sm:p-5", selectedId && "hidden xl:block")}>
+          <div className="flex flex-col gap-3 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -181,24 +181,26 @@ export default function AdminContactMessagesPage() {
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
-            <select
-              value={pageSize}
-              onChange={(e) => setPageSize(Number(e.target.value))}
-              className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {[10, 20, 30, 50].map((n) => (
-                <option key={n} value={n}>{n}/page</option>
-              ))}
-            </select>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              {statusOptions.map((s) => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {[10, 20, 30, 50].map((n) => (
+                  <option key={n} value={n}>{n}/page</option>
+                ))}
+              </select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                {statusOptions.map((s) => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="space-y-2 max-h-[620px] overflow-auto pr-1">
@@ -236,7 +238,7 @@ export default function AdminContactMessagesPage() {
               ))
             )}
           </div>
-          <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-3">
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-border pt-3">
             <p className="text-xs text-muted-foreground">
               Page {pagination.page} / {pagination.totalPages} - {pagination.total} tickets
             </p>
@@ -261,7 +263,7 @@ export default function AdminContactMessagesPage() {
           </div>
         </Card>
 
-        <Card className="xl:col-span-7 p-4 sm:p-5">
+        <Card className={clsx("xl:col-span-7 p-4 sm:p-5", !selectedId && "hidden xl:block")}>
           {!selectedId ? (
             <div className="h-full min-h-[360px] flex flex-col items-center justify-center text-center text-muted-foreground">
               <Mail className="w-10 h-10 mb-3 opacity-70" />
@@ -273,6 +275,14 @@ export default function AdminContactMessagesPage() {
             <div className="space-y-5">
               <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedId(null)}
+                    className="xl:hidden inline-flex items-center gap-1 text-xs font-semibold text-primary mb-2"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Back to tickets
+                  </button>
                   <p className="text-xs uppercase tracking-wider text-muted-foreground">{selectedMessage.ticketId}</p>
                   <h2 className="text-xl font-black text-foreground mt-1">{selectedMessage.subject || "No subject"}</h2>
                   <div className="flex flex-wrap gap-2 mt-2 text-xs text-muted-foreground">
@@ -280,12 +290,12 @@ export default function AdminContactMessagesPage() {
                     <span className="inline-flex items-center gap-1"><Mail className="w-3.5 h-3.5" /> {selectedMessage.email}</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
                   <select
                     value={selectedMessage.status}
                     onChange={(e) => handleStatusUpdate(e.target.value)}
                     disabled={updatingStatus}
-                    className="rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full sm:w-auto rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     {statusOptions.filter((s) => s.value !== "all").map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
@@ -293,7 +303,7 @@ export default function AdminContactMessagesPage() {
                   </select>
                   <Button
                     variant="outline"
-                    className="min-h-[38px] px-3 border-destructive/40 text-destructive hover:bg-destructive/10"
+                    className="min-h-[38px] px-3 border-destructive/40 text-destructive hover:bg-destructive/10 w-full sm:w-auto"
                     onClick={handleDeleteTicket}
                     disabled={deletingTicket}
                   >
@@ -337,7 +347,7 @@ export default function AdminContactMessagesPage() {
                     onClick={handleReply}
                     disabled={!replyMessage.trim() || submittingReply}
                     loading={submittingReply}
-                    className="min-h-[46px] px-6"
+                    className="min-h-[46px] px-6 w-full sm:w-auto"
                   >
                     Send reply <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>

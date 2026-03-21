@@ -194,7 +194,15 @@ export const adminAPI = {
   updateContactMessageStatus: (id, status) =>
     api.patch(`/contact/admin/messages/${id}/status`, { status }).then((res) => res.data?.data),
   replyToContactMessage: (id, replyMessage) =>
-    api.post(`/contact/admin/messages/${id}/reply`, { replyMessage }).then((res) => res.data?.data),
+    api
+      .post(
+        `/contact/admin/messages/${id}/reply`,
+        { replyMessage },
+        {
+          timeout: 30000,
+        }
+      )
+      .then((res) => res.data?.data),
   deleteContactMessage: (id) => api.delete(`/contact/admin/messages/${id}`).then((res) => res.data),
 }
 

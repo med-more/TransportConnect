@@ -442,16 +442,35 @@ export const sendContactAdminReplyEmail = async ({ to, name, subject, replyMessa
   const safeSubject = escapeHtml(subject || "Contact request")
   const safeTicket = escapeHtml(ticketId || "N/A")
   const safeReply = escapeHtml(replyMessage || "").replace(/\n/g, "<br />")
+  const plainReply = String(replyMessage || "").trim()
 
   return transporter.sendMail({
     from: `"TransportConnect Support" <${process.env.EMAIL_USER}>`,
     to,
+    replyTo: CONTACT_INBOX_EMAIL,
     subject: `Reply to your request (${safeTicket})`,
+    text: `Hi ${name || "there"},
+
+We reviewed your support request.
+Ticket: ${ticketId || "N/A"}
+Subject: ${subject || "Contact request"}
+
+Support reply:
+${plainReply}
+
+If you need anything else, reply directly to this email.
+
+TransportConnect Support`,
     attachments: [resolveEmailLogoAttachment()].filter(Boolean),
     html: `
       <!doctype html>
       <html lang="en">
-        <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <meta name="color-scheme" content="dark light" />
+          <meta name="supported-color-schemes" content="dark light" />
+        </head>
         <body style="margin:0;padding:0;background:#06070a;">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:radial-gradient(circle at top,#111827 0%,#06070a 55%,#03040a 100%);">
             <tr><td align="center" style="padding:24px 12px;">
@@ -460,15 +479,36 @@ export const sendContactAdminReplyEmail = async ({ to, name, subject, replyMessa
                 <tr><td style="background:#0f172a;border:1px solid #1f2937;border-radius:16px;overflow:hidden;">
                   <div style="height:6px;background:linear-gradient(90deg,#ef4444 0%,#dc2626 50%,#ef4444 100%);"></div>
                   <div style="padding:22px;font-family:Inter,system-ui,Arial,sans-serif;">
-                    <h2 style="margin:0 0 12px 0;color:#f8fafc;">Support reply</h2>
-                    <p style="margin:0 0 10px 0;color:#cbd5e1;line-height:1.7;">Hi ${safeName},</p>
-                    <p style="margin:0 0 14px 0;color:#cbd5e1;line-height:1.7;">Regarding your request about <strong style="color:#f8fafc;">${safeSubject}</strong> (Ticket: ${safeTicket}), here is our reply:</p>
-                    <div style="padding:14px;border:1px solid #253246;border-radius:12px;background:#0b1220;color:#f8fafc;line-height:1.7;">
+                    <p style="margin:0 0 8px 0;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#94a3b8;">TransportConnect Support</p>
+                    <h2 style="margin:0 0 10px 0;color:#f8fafc;font-size:24px;line-height:1.2;">We have an update on your request</h2>
+                    <p style="margin:0 0 16px 0;color:#cbd5e1;line-height:1.7;">Hi ${safeName}, our team reviewed your message and prepared the following response.</p>
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;background:#0b1220;border:1px solid #253246;border-radius:12px;">
+                      <tr>
+                        <td style="padding:12px 14px;font-size:12px;line-height:1.7;color:#94a3b8;font-family:Inter,system-ui,Arial,sans-serif;">
+                          <strong style="color:#f8fafc;">Ticket:</strong> ${safeTicket}<br />
+                          <strong style="color:#f8fafc;">Subject:</strong> ${safeSubject}<br />
+                          <strong style="color:#f8fafc;">Status:</strong> Replied
+                        </td>
+                      </tr>
+                    </table>
+
+                    <div style="margin-top:14px;padding:16px;border:1px solid #334155;border-radius:12px;background:linear-gradient(180deg,#111827 0%,#0b1220 100%);color:#f8fafc;line-height:1.8;font-size:14px;">
                       ${safeReply}
                     </div>
-                    <p style="margin:14px 0 0 0;color:#94a3b8;line-height:1.7;">If you need more help, simply reply to this email.</p>
+
+                    <div style="margin-top:16px;padding:14px;border-radius:12px;background:#101828;border:1px dashed #334155;">
+                      <p style="margin:0;color:#cbd5e1;line-height:1.7;font-size:13px;">
+                        Need more help? Reply directly to this email and our support team will continue assisting you.
+                      </p>
+                    </div>
                   </div>
                 </td></tr>
+                <tr>
+                  <td style="padding:12px 4px 0 4px;text-align:center;font-family:Inter,system-ui,Arial,sans-serif;font-size:11px;color:#64748b;">
+                    © ${new Date().getFullYear()} TransportConnect · Professional logistics support
+                  </td>
+                </tr>
               </table>
             </td></tr>
           </table>
