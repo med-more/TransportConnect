@@ -41,12 +41,22 @@ const frontendOrigins = [
 if (process.env.FRONTEND_URL) {
   frontendOrigins.push(process.env.FRONTEND_URL.replace(/\/$/, ""))
 }
+if (process.env.FRONTEND_URLS) {
+  const extraOrigins = String(process.env.FRONTEND_URLS)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) => s.replace(/\/$/, ""))
+  frontendOrigins.push(...extraOrigins)
+}
 // Allow any *.vercel.app (production + preview deployments)
 const corsOptions = {
   origin: (origin, cb) => {
     if (!origin) return cb(null, true)
     if (frontendOrigins.some((allowed) => origin === allowed)) return cb(null, true)
     if (origin.endsWith(".vercel.app")) return cb(null, true)
+    // Optional wildcard for netlify previews if used in deployment.
+    if (origin.endsWith(".netlify.app")) return cb(null, true)
     return cb(null, false)
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
