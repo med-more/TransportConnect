@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom"
 import { motion, useScroll, AnimatePresence } from "framer-motion"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useLayoutEffect } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import {
   Truck,
   MessageCircle,
@@ -28,10 +30,15 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
 } from "../../utils/icons"
 import Button from "../../components/ui/Button"
 import logo from "../../assets/logo2.svg"
 import { PublicHeader } from "../../components/PublicLayout"
+
+gsap.registerPlugin(ScrollTrigger)
+// Reference so `no-unused-vars` sees `motion` (used as motion.* in JSX below)
+void motion
 
 // Image Card Component for "Our Platform in Action" section
 const ImageCard = ({ item, index }) => {
@@ -96,9 +103,122 @@ const ImageCard = ({ item, index }) => {
 const viewportDefaults = { once: true, amount: 0.2 }
 const transitionSmooth = { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
 
+const aboutServicePoints = [
+  "National truckload",
+  "Pallet & groupage",
+  "Temperature-sensitive",
+  "Express & same-day",
+  "Cross-city corridors",
+  "Hub & relay routes",
+]
+
+const ABOUT_MAIN_IMAGE =
+  "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=900&q=80"
+const ABOUT_OVERLAY_IMAGE =
+  "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=700&q=80"
+
 const WelcomePage = () => {
   const heroRef = useRef(null)
+  const belowHeroRootRef = useRef(null)
   const { scrollYProgress: pageProgress } = useScroll()
+  const [reducedMotion, setReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)")
+    setReducedMotion(mq.matches)
+    const onChange = () => setReducedMotion(mq.matches)
+    mq.addEventListener("change", onChange)
+    return () => mq.removeEventListener("change", onChange)
+  }, [])
+
+  useLayoutEffect(() => {
+    if (reducedMotion) return
+    const root = belowHeroRootRef.current
+    if (!root) return
+
+    const ctx = gsap.context(() => {
+      root.querySelectorAll(".welcome-route-img").forEach((el) => {
+        const card = el.closest(".welcome-route-card")
+        if (!card) return
+        gsap.fromTo(
+          el,
+          { yPercent: -8 },
+          {
+            yPercent: 8,
+            ease: "none",
+            scrollTrigger: {
+              trigger: card,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          }
+        )
+      })
+
+      root.querySelectorAll(".welcome-showcase-frame").forEach((frame) => {
+        const img = frame.querySelector("img")
+        if (!img) return
+        gsap.fromTo(
+          img,
+          { scale: 1, yPercent: 0 },
+          {
+            scale: 1.06,
+            yPercent: -4,
+            ease: "none",
+            scrollTrigger: {
+              trigger: frame,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          }
+        )
+      })
+
+      root.querySelectorAll(".welcome-about-visual").forEach((wrap) => {
+        const main = wrap.querySelector(".welcome-about-main-img")
+        const overlay = wrap.querySelector(".welcome-about-overlay-img")
+        if (main) {
+          gsap.fromTo(
+            main,
+            { yPercent: -6 },
+            {
+              yPercent: 6,
+              ease: "none",
+              scrollTrigger: {
+                trigger: wrap,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
+            }
+          )
+        }
+        if (overlay) {
+          gsap.fromTo(
+            overlay,
+            { yPercent: 8 },
+            {
+              yPercent: -8,
+              ease: "none",
+              scrollTrigger: {
+                trigger: wrap,
+                start: "top bottom",
+                end: "bottom top",
+                scrub: true,
+              },
+            }
+          )
+        }
+      })
+
+    }, root)
+
+    return () => {
+      ctx.revert()
+    }
+  }, [reducedMotion])
 
   const features = [
     {
@@ -377,6 +497,150 @@ const WelcomePage = () => {
 
       </div>{/* end first viewport wrapper */}
 
+      <div ref={belowHeroRootRef} className="relative overflow-x-hidden">
+      <section
+        className="relative py-12 sm:py-16 md:py-20 lg:py-24 bg-background border-t border-border/60 overflow-hidden"
+        aria-labelledby="welcome-about-heading"
+      >
+        <div className="container mx-auto max-w-7xl px-3 sm:px-4 md:px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 xl:gap-20 items-center">
+            {/* Left: copy, list, CTA */}
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: -32 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={transitionSmooth}
+              viewport={viewportDefaults}
+              className="order-2 lg:order-1"
+            >
+              <h2
+                id="welcome-about-heading"
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.35rem] font-bold text-foreground tracking-tight leading-[1.15] text-balance"
+              >
+                We&apos;ll keep your cargo protected—from pickup to proof of delivery
+              </h2>
+              <p className="mt-4 text-sm sm:text-base text-muted-foreground leading-relaxed max-w-xl">
+                TransportConnect links shippers and verified drivers across Morocco. Whether you need full truckload,
+                pallets, or time-critical runs, you get clear pricing, in-app chat, live GPS tracking, and partners who
+                treat every load like their own.
+              </p>
+              <ul className="mt-6 sm:mt-8 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 sm:gap-y-3 max-w-lg">
+                {aboutServicePoints.map((line) => (
+                  <li key={line} className="flex items-start gap-2 text-sm sm:text-base text-foreground">
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0 mt-0.5" aria-hidden />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row sm:items-center gap-5 sm:gap-6">
+                <Link
+                  to="/contact"
+                  className="inline-flex items-stretch rounded-xl overflow-hidden bg-slate-900 text-white shadow-md hover:bg-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background w-fit"
+                >
+                  <span className="px-5 sm:px-6 py-3 text-sm font-semibold flex items-center">Contact us</span>
+                  <span
+                    className="flex items-center justify-center px-3 sm:px-4 border-l border-white/15 bg-slate-800/90 dark:bg-slate-900/90"
+                    aria-hidden
+                  >
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </span>
+                </Link>
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <div
+                    className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary"
+                    aria-hidden
+                  >
+                    <Phone className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs sm:text-sm text-muted-foreground">Have questions?</p>
+                    <a
+                      href="tel:+212600000000"
+                      className="text-base sm:text-lg font-bold text-foreground hover:text-primary transition-colors tabular-nums"
+                    >
+                      +212 6XX XXX XXX
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Right: layered visuals */}
+            <motion.div
+              initial={reducedMotion ? false : { opacity: 0, x: 32 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ ...transitionSmooth, delay: reducedMotion ? 0 : 0.08 }}
+              viewport={viewportDefaults}
+              className="order-1 lg:order-2 relative w-full max-w-xl mx-auto lg:max-w-none lg:mx-0"
+            >
+              <div className="welcome-about-visual relative aspect-[4/3] sm:aspect-[5/4] lg:min-h-[420px]">
+                {/* Floating accent chevrons */}
+                {!reducedMotion && (
+                  <div className="absolute -top-1 right-4 sm:right-8 z-20 flex gap-1.5 pointer-events-none" aria-hidden>
+                    {[
+                      { bg: "bg-blue-500", d: 0 },
+                      { bg: "bg-primary", d: 0.06 },
+                      { bg: "bg-red-500", d: 0.12 },
+                    ].map((c, i) => (
+                      <motion.span
+                        key={i}
+                        initial={{ opacity: 0, y: 12 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ ...transitionSmooth, delay: 0.2 + c.d }}
+                        viewport={viewportDefaults}
+                        className={`flex h-9 w-7 sm:h-10 sm:w-8 items-center justify-center rounded-md ${c.bg} text-white shadow-lg`}
+                      >
+                        <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6" />
+                      </motion.span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="absolute inset-0 z-10 overflow-hidden rounded-tl-[2rem] rounded-br-[2rem] sm:rounded-tl-[2.5rem] sm:rounded-br-[2.5rem] shadow-xl ring-1 ring-border/60">
+                  <img
+                    src={ABOUT_MAIN_IMAGE}
+                    alt="Logistics professional coordinating safe freight operations"
+                    className="welcome-about-main-img h-full w-full object-cover scale-105"
+                    loading="lazy"
+                  />
+                </div>
+
+                <div className="absolute bottom-[12%] right-0 z-20 w-[52%] sm:w-[48%] overflow-hidden rounded-xl border-4 border-background shadow-2xl ring-1 ring-border/40">
+                  <img
+                    src={ABOUT_OVERLAY_IMAGE}
+                    alt="Heavy truck with shipping container on the road"
+                    className="welcome-about-overlay-img h-full w-full object-cover min-h-[120px] sm:min-h-[140px]"
+                    loading="lazy"
+                  />
+                </div>
+
+                <motion.div
+                  initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ ...transitionSmooth, delay: 0.18 }}
+                  viewport={viewportDefaults}
+                  className="absolute bottom-2 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border/80 bg-card/95 px-3 py-2 sm:px-4 sm:py-2.5 shadow-lg backdrop-blur-sm"
+                >
+                  <span className="flex -space-x-1.5" aria-hidden>
+                    <span className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-muted text-xs ring-2 ring-card">
+                      🇲🇦
+                    </span>
+                    <span className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-muted text-xs ring-2 ring-card">
+                      🇪🇺
+                    </span>
+                    <span className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-muted text-xs ring-2 ring-card">
+                      🌍
+                    </span>
+                  </span>
+                  <span className="text-[10px] sm:text-xs font-semibold text-foreground whitespace-nowrap">
+                    50+ cities · nationwide
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
       {/* Find your shipment — category cards only */}
       <section className="py-10 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 bg-background">
         <div className="container mx-auto max-w-4xl">
@@ -392,12 +656,17 @@ const WelcomePage = () => {
               { label: "Express", icon: Zap },
               { label: "Pallet", icon: Package },
               { label: "Fragile", icon: Shield },
-            ].map((item, i) => (
+            ].map((item) => (
               <Link key={item.label} to="/trips" className="block">
-                <div className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-all duration-300 text-center">
+                <motion.div
+                  whileHover={reducedMotion ? undefined : { y: -4 }}
+                  whileTap={reducedMotion ? undefined : { scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 24 }}
+                  className="rounded-2xl border-2 border-border bg-card p-4 sm:p-5 hover:border-primary/50 hover:shadow-md transition-shadow duration-300 text-center h-full"
+                >
                   <item.icon className="w-8 h-8 sm:w-10 sm:h-10 text-primary mx-auto mb-2" />
                   <span className="text-sm font-semibold text-foreground">{item.label}</span>
-                </div>
+                </motion.div>
               </Link>
             ))}
           </motion.div>
@@ -439,7 +708,7 @@ const WelcomePage = () => {
                   { number: "12k+", label: "Happy & Satisfied Users" },
                   { number: "10+", label: "Years Logistics Experience" },
                   { number: "50+", label: "Cities Covered in Morocco" },
-                ].map((stat, i) => (
+                ].map((stat) => (
                   <div key={stat.label} className="text-center">
                     <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
                       <span className="text-xl sm:text-2xl font-bold text-primary">{stat.number}</span>
@@ -453,7 +722,7 @@ const WelcomePage = () => {
                   { icon: MapPin, title: "Local Expertise", desc: "Network of verified drivers across Morocco" },
                   { icon: Package, title: "All-in-One Booking", desc: "From request to delivery in one platform" },
                   { icon: Clock, title: "24/7 Support", desc: "Get help whenever you need it" },
-                ].map((item, i) => (
+                ].map((item) => (
                   <div key={item.title} className="rounded-2xl border border-border bg-card p-4 sm:p-5 hover:shadow-lg transition-all duration-300">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
                       <item.icon className="w-6 h-6 text-primary" />
@@ -494,11 +763,12 @@ const WelcomePage = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ ...transitionSmooth, delay: i * 0.08 }}
                 viewport={viewportDefaults}
+                whileHover={reducedMotion ? undefined : { y: -6 }}
               >
                 <Link to="/trips" className="block group">
-                  <div className="rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-all duration-300">
+                  <div className="welcome-route-card rounded-2xl border border-border bg-card overflow-hidden hover:shadow-xl transition-shadow duration-300">
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={route.image} alt={`${route.from} to ${route.to}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <img src={route.image} alt={`${route.from} to ${route.to}`} className="welcome-route-img w-full h-full min-h-full object-cover scale-110 group-hover:scale-[1.14] transition-transform duration-500" />
                       <span className="absolute top-3 right-3 px-2.5 py-1 bg-white dark:bg-slate-900 rounded-lg text-xs font-semibold text-foreground shadow">{route.price}</span>
                     </div>
                     <div className="p-4 sm:p-5">
@@ -576,7 +846,7 @@ const WelcomePage = () => {
                   </div>
                   <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-1 sm:mb-2">{stat.number}</p>
                   <p className="text-xs sm:text-sm text-muted-foreground">{stat.label}</p>
-          </motion.div>
+                </motion.div>
               )
             })}
           </div>
@@ -601,18 +871,30 @@ const WelcomePage = () => {
             </p>
           </motion.div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            {features.map((feature, index) => {
+          <motion.div
+            className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8"
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.08 }}
+            variants={{
+              hidden: {},
+              show: {
+                transition: { staggerChildren: reducedMotion ? 0 : 0.06, delayChildren: reducedMotion ? 0 : 0.05 },
+              },
+            }}
+          >
+            {features.map((feature) => {
               const Icon = feature.icon
               return (
                 <motion.div
                   key={feature.title}
-                  initial={{ opacity: 0, y: 36 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ ...transitionSmooth, delay: index * 0.07 }}
-                  viewport={viewportDefaults}
+                  variants={{
+                    hidden: { opacity: 0, y: 28 },
+                    show: { opacity: 1, y: 0, transition: transitionSmooth },
+                  }}
+                  whileHover={reducedMotion ? undefined : { y: -6 }}
                 >
-                  <div className="bg-card border border-border rounded-xl p-4 sm:p-5 md:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                  <div className="bg-card border border-border rounded-xl p-4 sm:p-5 md:p-6 hover:shadow-xl transition-shadow duration-300 h-full">
                     <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${feature.color} rounded-xl flex items-center justify-center mb-3 sm:mb-4`}>
                       <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                     </div>
@@ -623,7 +905,7 @@ const WelcomePage = () => {
                 </motion.div>
               )
             })}
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -636,7 +918,8 @@ const WelcomePage = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={transitionSmooth}
               viewport={viewportDefaults}
-              className="col-span-2 md:col-span-2 md:row-span-2 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-end min-h-[200px] sm:min-h-[280px] md:min-h-[320px]"
+              whileHover={reducedMotion ? undefined : { scale: 1.01 }}
+              className="col-span-2 md:col-span-2 md:row-span-2 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-end min-h-[200px] sm:min-h-[280px] md:min-h-[320px] shadow-lg shadow-primary/20 [transform-style:preserve-3d]"
             >
               <p className="text-white/80 text-sm sm:text-base font-medium uppercase tracking-widest mb-2">
                 One platform
@@ -719,15 +1002,15 @@ const WelcomePage = () => {
               viewport={viewportDefaults}
               className="relative"
             >
-              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
+              <div className="welcome-showcase-frame relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
                 <img
                   src="/home/2/1.webp"
                   alt="Real-time tracking system - Track Your Shipments in Real-Time"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover will-change-transform"
                   loading="lazy"
                 />
                 {/* Subtle overlay for better visual integration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
               </div>
             </motion.div>
             <motion.div
@@ -737,9 +1020,15 @@ const WelcomePage = () => {
               viewport={viewportDefaults}
               className="space-y-4 sm:space-y-6"
             >
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground">
+              <motion.h2
+                className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-foreground"
+                initial={reducedMotion ? false : { opacity: 0, x: 16 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={viewportDefaults}
+                transition={{ ...transitionSmooth, delay: 0.05 }}
+              >
                 Track Your Shipments in Real-Time
-              </h2>
+              </motion.h2>
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
                 Our advanced GPS tracking system allows you to monitor your packages from pickup to delivery. Get instant
                 notifications and updates throughout the journey.
@@ -849,15 +1138,15 @@ const WelcomePage = () => {
               viewport={viewportDefaults}
               className="relative order-1 lg:order-2"
             >
-              <div className="relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
+              <div className="welcome-showcase-frame relative rounded-xl sm:rounded-2xl overflow-hidden aspect-[4/3] shadow-2xl">
                 <img
                   src="/home/3/1.webp"
                   alt="Secure and Verified Transport Network"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover will-change-transform"
                   loading="lazy"
                 />
                 {/* Subtle overlay for better visual integration */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
               </div>
             </motion.div>
           </div>
@@ -966,6 +1255,9 @@ const WelcomePage = () => {
           </motion.div>
         </div>
       </section>
+
+      </div>
+      {/* end below-hero motion + GSAP scope */}
 
       {/* Footer - always dark for contrast */}
       <footer className="bg-slate-900 dark:bg-black text-white py-12 sm:py-14 md:py-16 px-3 sm:px-4 md:px-6 border-t border-white/10">
