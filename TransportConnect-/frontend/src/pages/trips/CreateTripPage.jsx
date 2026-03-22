@@ -1,13 +1,26 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useForm, useFieldArray } from "react-hook-form"
-import { ArrowLeft, MapPin, Calendar, Weight, Euro, Package, Plus, Trash2, ChevronUp, ChevronDown } from "../../utils/icons"
+import {
+  ArrowLeft,
+  MapPin,
+  Calendar,
+  Weight,
+  Euro,
+  Package,
+  Plus,
+  Trash2,
+  ChevronUp,
+  ChevronDown,
+  Navigation,
+  Shield,
+  MessageCircle,
+} from "../../utils/icons"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { tripsAPI, usersAPI, estimateAPI, recurringTripsAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import PlaceAutocompleteInput from "../../components/ui/PlaceAutocompleteInput"
-import Card from "../../components/ui/Card"
 import RouteStepsMap from "../../components/map/RouteStepsMap"
 import { CARGO_TYPES } from "../../config/constants"
 import toast from "react-hot-toast"
@@ -276,26 +289,44 @@ const CreateTripPage = () => {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto space-y-4 md:space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        </Button>
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">Create New Trip</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Fill in your trip information to connect shippers and drivers</p>
+    <div className="min-h-screen pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-w-0 sm:min-h-0 p-2 sm:px-3"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg font-bold text-foreground truncate sm:text-xl md:text-2xl lg:text-3xl">Create New Trip</h1>
+              <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1 sm:text-sm">
+                Fill in route, schedule, and capacity to connect with shippers
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <MapPin className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Route</h2>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Navigation className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Route</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-            <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Départ</h3>
+            <div className="route-step-card space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
+                  <MapPin className="w-4 h-4 text-white" aria-hidden />
+                </div>
+                <h3 className="font-bold text-foreground text-sm sm:text-base">Départ</h3>
+              </div>
               {savedAddresses?.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
@@ -332,7 +363,7 @@ const CreateTripPage = () => {
                 cityRules={{ required: "Ville de départ requise" }}
                 addressRules={{ required: "Adresse de départ requise" }}
               />
-              <div className="pt-2 border-t border-border">
+              <div className="pt-2 border-t border-border/50">
                 {saveAddressType === "departure" ? (
                   <div className="flex flex-wrap items-end gap-2">
                     <input
@@ -350,8 +381,13 @@ const CreateTripPage = () => {
                 )}
               </div>
             </div>
-            <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Destination</h3>
+            <div className="route-step-card space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0 shadow-md">
+                  <MapPin className="w-4 h-4 text-white" aria-hidden />
+                </div>
+                <h3 className="font-bold text-foreground text-sm sm:text-base">Destination</h3>
+              </div>
               {savedAddresses?.length > 0 && (
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
@@ -388,7 +424,7 @@ const CreateTripPage = () => {
                 cityRules={{ required: "Ville de destination requise" }}
                 addressRules={{ required: "Adresse de destination requise" }}
               />
-              <div className="pt-2 border-t border-border">
+              <div className="pt-2 border-t border-border/50">
                 {saveAddressType === "destination" ? (
                   <div className="flex flex-wrap items-end gap-2">
                     <input
@@ -408,9 +444,9 @@ const CreateTripPage = () => {
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-border">
+          <div className="mt-6 pt-6 border-t border-border/50">
             <div className="flex items-center justify-between gap-2 mb-3">
-              <h3 className="font-medium text-foreground">Intermediate stops (optional)</h3>
+              <h3 className="text-sm font-semibold text-foreground">Intermediate stops (optional)</h3>
               <Button
                 type="button"
                 variant="outline"
@@ -424,7 +460,7 @@ const CreateTripPage = () => {
             {intermediateStopsFields.length > 0 && (
               <ul className="space-y-4">
                 {intermediateStopsFields.map((field, index) => (
-                  <li key={field.id} className="flex flex-wrap items-start gap-2 p-3 rounded-lg border border-border bg-muted/30">
+                  <li key={field.id} className="route-step-card flex flex-wrap items-start gap-2">
                     <div className="flex-1 min-w-[200px] space-y-2">
                       <input type="hidden" {...register(`intermediateStops.${index}.lat`)} />
                       <input type="hidden" {...register(`intermediateStops.${index}.lng`)} />
@@ -476,8 +512,8 @@ const CreateTripPage = () => {
 
           {routeEstimate && (
             <>
-              <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-sm font-medium text-foreground mb-2">Route preview</p>
+              <div className="mt-6 pt-6 border-t border-border/50">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Route on map</p>
                 <RouteStepsMap
                   waypoints={[
                     { ...waypoints[0], label: watch("departureCity") || "Departure" },
@@ -489,48 +525,57 @@ const CreateTripPage = () => {
                   ]}
                   routeGeometry={routeEstimate.geometry}
                   height="280px"
-                  className="mt-2"
+                  className="rounded-xl mt-2"
                 />
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-4 gap-y-2">
-                <span className="text-sm text-muted-foreground">
-                  Approx. distance: <strong className="text-foreground">{routeEstimate.distanceKm} km</strong>
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Duration: <strong className="text-foreground">~{routeEstimate.durationMinutes} min</strong>
-                  {routeEstimate.durationMinutes >= 60 && ` (${(routeEstimate.durationMinutes / 60).toFixed(1)} h)`}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  Suggested price:{" "}
-                  <strong className="text-primary">
+              <div className="mt-4 flex flex-wrap gap-3 sm:gap-4 gap-y-2">
+                <div className="stat-tile min-w-0 flex-1 sm:flex-initial sm:min-w-[140px]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Distance</p>
+                  <p className="text-lg font-bold text-foreground tabular-nums">{routeEstimate.distanceKm} km</p>
+                </div>
+                <div className="stat-tile min-w-0 flex-1 sm:flex-initial sm:min-w-[140px]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Duration</p>
+                  <p className="text-lg font-bold text-foreground tabular-nums">
+                    ~{routeEstimate.durationMinutes} min
+                    {routeEstimate.durationMinutes >= 60 && (
+                      <span className="text-sm font-medium text-muted-foreground"> ({(routeEstimate.durationMinutes / 60).toFixed(1)} h)</span>
+                    )}
+                  </p>
+                </div>
+                <div className="stat-tile-primary min-w-0 flex-1 sm:flex-initial sm:min-w-[160px]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-1">Suggested price</p>
+                  <p className="text-lg font-bold text-primary tabular-nums">
                     {routeEstimate.estimatedPrice} {routeEstimate.currency}
-                  </strong>
-                </span>
-                {watchedInsured && watchedDeclaredValue > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    Insurance:{" "}
-                    <strong className="text-foreground">
-                      {computedPremium} {routeEstimate.currency} premium
-                    </strong>{" "}
-                    (coverage up to{" "}
-                    <strong className="text-foreground">
-                      {watchedDeclaredValue.toLocaleString()} {routeEstimate.currency}
-                    </strong>
-                    )
-                  </span>
-                )}
+                  </p>
+                </div>
               </div>
+              {watchedInsured && watchedDeclaredValue > 0 && (
+                <div className="mt-3 stat-tile min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1">Insurance (preview)</p>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-semibold text-foreground">
+                      {computedPremium} {routeEstimate.currency}
+                    </span>{" "}
+                    premium · coverage up to{" "}
+                    <span className="font-semibold text-foreground">
+                      {watchedDeclaredValue.toLocaleString()} {routeEstimate.currency}
+                    </span>
+                  </p>
+                </div>
+              )}
             </>
           )}
-        </Card>
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Calendar className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Schedule</h2>
+        </div>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Calendar className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Schedule</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
-            <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Departure</h3>
+            <div className="route-step-card space-y-4">
+              <h3 className="text-sm font-bold text-foreground">Departure</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Departure date"
@@ -546,8 +591,8 @@ const CreateTripPage = () => {
                 />
               </div>
             </div>
-            <div className="space-y-4">
-              <h3 className="font-medium text-foreground">Arrival</h3>
+            <div className="route-step-card space-y-4">
+              <h3 className="text-sm font-bold text-foreground">Arrival</h3>
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label="Arrival date"
@@ -564,7 +609,7 @@ const CreateTripPage = () => {
               </div>
             </div>
           </div>
-          <div className="mt-6 pt-6 border-t border-border">
+          <div className="mt-6 pt-6 border-t border-border/50">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -598,11 +643,16 @@ const CreateTripPage = () => {
               </div>
             )}
           </div>
-        </Card>
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-4 sm:mb-5">
-            <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary mr-3" />
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground">Insurance (optional)</h2>
+        </div>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Shield className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">Insurance (optional)</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Optional cargo coverage based on declared value</p>
+            </div>
           </div>
           <div className="space-y-3 sm:space-y-4">
             <label className="flex items-start gap-2 cursor-pointer">
@@ -648,11 +698,13 @@ const CreateTripPage = () => {
               </div>
             )}
           </div>
-        </Card>
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Weight className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Available Capacity</h2>
+        </div>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Weight className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Available capacity</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <div>
@@ -700,20 +752,22 @@ const CreateTripPage = () => {
               </div>
             </div>
           </div>
-        </Card>
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Package className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Accepted Cargo Types</h2>
+        </div>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Package className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Accepted cargo types</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {CARGO_TYPES.map((type) => (
               <label
                 key={type.value}
-                className={`p-3 border-2 rounded-lg cursor-pointer transition-all text-center ${
+                className={`p-3 border-2 rounded-xl cursor-pointer transition-all text-center stat-tile ${
                   selectedCargoTypes.includes(type.value)
-                    ? "border-primary bg-primary/5"
-                    : "border-border hover:border-primary hover:bg-accent"
+                    ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+                    : "border-border/80 hover:border-primary/60 hover:bg-accent/50"
                 }`}
               >
                 <input
@@ -737,11 +791,13 @@ const CreateTripPage = () => {
               />
             </div>
           )}
-        </Card>
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Euro className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Pricing</h2>
+        </div>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Euro className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Pricing</h2>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
             <Input
@@ -756,27 +812,35 @@ const CreateTripPage = () => {
               })}
             />
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-foreground">Description (optional)</label>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="section-icon-badge bg-primary/15" style={{ width: "2rem", height: "2rem" }}>
+                  <MessageCircle className="w-4 h-4 text-primary" aria-hidden />
+                </div>
+                <label className="block text-sm font-medium text-foreground">Description (optional)</label>
+              </div>
               <textarea
-                className="input-field min-h-[100px] resize-none"
+                className="input-field min-h-[100px] resize-y"
                 placeholder="Additional information about your trip..."
                 {...register("description")}
               />
             </div>
           </div>
-        </Card>
-        <div className="flex items-center justify-end gap-4">
-          <Button variant="outline" onClick={() => navigate(-1)}>
+        </div>
+        <div className="detail-card p-4 sm:p-5 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Button variant="outline" type="button" onClick={() => navigate(-1)} className="w-full sm:w-auto">
             Cancel
           </Button>
           <Button
             type="submit"
             loading={isRecurring ? createRecurringMutation.isPending : createTripMutation.isPending}
+            size="large"
+            className="w-full sm:w-auto min-h-11 sm:min-w-[200px]"
           >
-            {isRecurring ? "Create Recurring Trip" : "Create Trip"}
+            {isRecurring ? "Create recurring trip" : "Create trip"}
           </Button>
         </div>
       </form>
+      </div>
     </div>
   )
 }

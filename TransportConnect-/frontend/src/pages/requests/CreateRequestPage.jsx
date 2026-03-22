@@ -2,12 +2,11 @@ import { useEffect, useState } from "react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { ArrowLeft, Package, MapPin, User, Euro, AlertCircle } from "../../utils/icons"
+import { ArrowLeft, Package, MapPin, Euro, AlertCircle, Weight, MessageCircle, Calendar } from "../../utils/icons"
 import { tripsAPI, requestsAPI, usersAPI } from "../../services/api"
 import Button from "../../components/ui/Button"
 import Input from "../../components/ui/Input"
 import PlaceAutocompleteInput from "../../components/ui/PlaceAutocompleteInput"
-import Card from "../../components/ui/Card"
 import LoadingSpinner from "../../components/ui/LoadingSpinner"
 import { CARGO_TYPES } from "../../config/constants"
 import toast from "react-hot-toast"
@@ -226,48 +225,76 @@ const CreateRequestPage = () => {
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 max-w-4xl mx-auto space-y-4 md:space-y-6">
-      {/* Header — même structure que Create Trip */}
-      <div className="flex items-center gap-2 sm:gap-4">
-        <Button variant="ghost" onClick={() => navigate(-1)} className="flex-shrink-0">
-          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-        </Button>
-        <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground mb-2">New Transport Request</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            For trip {trip.departure.city} → {trip.destination.city}
-          </p>
-        </div>
-      </div>
-
-      <div className="space-y-6">
-        {/* Trip Summary */}
-        <Card className="p-4 sm:p-5 md:p-6">
-          <h2 className="text-xl font-semibold text-foreground mb-4">Trip Summary</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6">
-          <div>
-            <h3 className="font-medium text-foreground">Route</h3>
-            <p className="text-muted-foreground">
-              {trip.departure.city} → {trip.destination.city}
-            </p>
-          </div>
-          <div>
-            <h3 className="font-medium text-foreground">Departure</h3>
-            <p className="text-muted-foreground">{new Date(trip.departureDate).toLocaleDateString("en-US")}</p>
-          </div>
-          <div>
-            <h3 className="font-medium text-foreground">Price</h3>
-            <p className="text-primary font-semibold">{Number(trip.pricePerKg).toFixed(2)}€/kg</p>
+    <div className="min-h-screen pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="px-3 py-4 sm:px-4 sm:py-5 md:px-6 md:py-6 max-w-7xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
+        {/* Header — aligned with Trip detail page */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(-1)}
+              className="flex-shrink-0 min-h-[44px] min-w-[44px] sm:min-w-0 sm:min-h-0 p-2 sm:px-3"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-5 h-5 sm:w-4 sm:h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Back</span>
+            </Button>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-lg font-bold text-foreground truncate sm:text-xl md:text-2xl lg:text-3xl">
+                New Transport Request
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5 sm:mt-1 sm:text-sm">
+                Fill in cargo and stops—estimate updates when you enter weight.
+              </p>
+            </div>
           </div>
         </div>
-      </Card>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Cargo Information */}
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Package className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Package Information</h2>
+        {/* Trip context — same visual language as Trip detail sections */}
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-4 sm:mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <MapPin className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Selected trip</p>
+              <p className="text-base sm:text-lg font-semibold text-foreground leading-tight">
+                {trip.departure.city} → {trip.destination.city}
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="stat-tile min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Departure date</h3>
+              </div>
+              <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">
+                {new Date(trip.departureDate).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+            <div className="stat-tile-primary min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Euro className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-primary truncate">Driver rate</h3>
+              </div>
+              <p className="text-lg sm:text-xl font-bold text-primary tabular-nums">{Number(trip.pricePerKg).toFixed(2)}€/kg</p>
+            </div>
+          </div>
+        </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-5 md:space-y-6">
+        {/* Package — detail-card + section header (Trip detail pattern) */}
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Package className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <h2 className="text-base font-semibold text-foreground sm:text-lg">Package information</h2>
           </div>
 
           <div className="space-y-4">
@@ -411,241 +438,301 @@ const CreateRequestPage = () => {
               })}
             />
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <MapPin className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Pickup Information</h2>
-          </div>
-
-          {savedAddresses?.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
-              <select
-                className="input-field"
-                onChange={(e) => {
-                  const id = e.target.value
-                  if (!id) return
-                  const addr = savedAddresses.find((a) => a._id === id)
-                  fillPickupFromAddress(addr)
-                }}
-              >
-                <option value="">Select an address...</option>
-                {savedAddresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.label} — {addr.city}
-                  </option>
-                ))}
-              </select>
+        {/* Estimated cost — stat tiles like Capacity & pricing on Trip detail */}
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <Euro className="w-5 h-5 text-primary" aria-hidden />
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <PlaceAutocompleteInput
-              label="Lieu de ramassage (Maroc)"
-              cityField="pickupCity"
-              addressField="pickupAddress"
-              setValue={setValue}
-              register={register}
-              watch={watch}
-              error={errors.pickupCity?.message || errors.pickupAddress?.message}
-              placeholder="Casablanca, Rabat..."
-              cityRules={{ required: "Ville de ramassage requise" }}
-              addressRules={{ required: "Adresse de ramassage requise" }}
-            />
-
-            <Input
-              label="Contact name"
-              placeholder="John Doe"
-              error={errors.pickupContactName?.message}
-              {...register("pickupContactName")}
-            />
-
-            <Input
-              label="Contact phone"
-              placeholder="+1234567890"
-              error={errors.pickupContactPhone?.message}
-              {...register("pickupContactPhone")}
-            />
-          </div>
-          <div className="mt-4 pt-4 border-t border-border">
-            {saveAddressType === "pickup" ? (
-              <div className="flex flex-wrap items-end gap-2">
-                <input
-                  type="text"
-                  placeholder="Label (e.g. Warehouse)"
-                  value={saveAddressLabel}
-                  onChange={(e) => setSaveAddressLabel(e.target.value)}
-                  className="input-field flex-1 min-w-[140px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSaveAddress("pickup")}
-                  disabled={saveAddressMutation.isPending}
-                  className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                >
-                  Save
-                </button>
-                <button type="button" onClick={() => setSaveAddressType(null)} className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50">
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setSaveAddressType("pickup")}
-                className="text-sm text-primary hover:underline"
-              >
-                Save this pickup to my addresses
-              </button>
-            )}
-          </div>
-        </Card>
-
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <MapPin className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Delivery Information</h2>
-          </div>
-
-          {savedAddresses?.length > 0 && (
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
-              <select
-                className="input-field"
-                onChange={(e) => {
-                  const id = e.target.value
-                  if (!id) return
-                  const addr = savedAddresses.find((a) => a._id === id)
-                  fillDeliveryFromAddress(addr)
-                }}
-              >
-                <option value="">Select an address...</option>
-                {savedAddresses.map((addr) => (
-                  <option key={addr._id} value={addr._id}>
-                    {addr.label} — {addr.city}
-                  </option>
-                ))}
-              </select>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">Estimated cost</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Based on weight and this trip&apos;s rate</p>
             </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <PlaceAutocompleteInput
-              label="Lieu de livraison (Maroc)"
-              cityField="deliveryCity"
-              addressField="deliveryAddress"
-              setValue={setValue}
-              register={register}
-              watch={watch}
-              error={errors.deliveryCity?.message || errors.deliveryAddress?.message}
-              placeholder="Marrakech, Fès, Tanger..."
-              cityRules={{ required: "Ville de livraison requise" }}
-              addressRules={{ required: "Adresse de livraison requise" }}
-            />
-
-            <Input
-              label="Contact name"
-              placeholder="Jane Smith"
-              error={errors.deliveryContactName?.message}
-              {...register("deliveryContactName")}
-            />
-
-            <Input
-              label="Contact phone"
-              placeholder="+0987654321"
-              error={errors.deliveryContactPhone?.message}
-              {...register("deliveryContactPhone")}
-            />
           </div>
-          <div className="mt-4 pt-4 border-t border-border">
-            {saveAddressType === "delivery" ? (
-              <div className="flex flex-wrap items-end gap-2">
-                <input
-                  type="text"
-                  placeholder="Label (e.g. Client Rabat)"
-                  value={saveAddressLabel}
-                  onChange={(e) => setSaveAddressLabel(e.target.value)}
-                  className="input-field flex-1 min-w-[140px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => handleSaveAddress("delivery")}
-                  disabled={saveAddressMutation.isPending}
-                  className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                >
-                  Save
-                </button>
-                <button type="button" onClick={() => setSaveAddressType(null)} className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50">
-                  Cancel
-                </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+            <div className="stat-tile min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Weight className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Weight</h3>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setSaveAddressType("delivery")}
-                className="text-sm text-primary hover:underline"
-              >
-                Save this delivery to my addresses
-              </button>
-            )}
+              <p className="text-2xl font-bold text-foreground tabular-nums">{watchedWeight || "—"} kg</p>
+            </div>
+            <div className="stat-tile min-w-0">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Euro className="w-3.5 h-3.5 text-muted-foreground shrink-0" aria-hidden />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground truncate">Price per kg</h3>
+              </div>
+              <p className="text-xl font-bold text-foreground tabular-nums">{Number(trip.pricePerKg).toFixed(2)}€</p>
+            </div>
+            <div className="stat-tile-primary min-w-0 sm:col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Euro className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-primary truncate">Estimated total</h3>
+              </div>
+              <p className="text-2xl sm:text-3xl font-bold text-primary tabular-nums">{estimatedPrice}€</p>
+            </div>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <User className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Message to Driver</h2>
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <MapPin className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">Pickup &amp; delivery</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Collection first, then where the cargo should arrive
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-4 sm:space-y-5">
+            {/* Pickup — route-step-card (Trip detail route steps) */}
+            <div className="route-step-card">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0 shadow-md">
+                  <span className="text-sm font-bold text-primary-foreground" aria-hidden>
+                    1
+                  </span>
+                </div>
+                <h3 className="font-bold text-foreground text-sm sm:text-base">Pickup</h3>
+              </div>
+              {savedAddresses?.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
+                  <select
+                    className="input-field"
+                    onChange={(e) => {
+                      const id = e.target.value
+                      if (!id) return
+                      const addr = savedAddresses.find((a) => a._id === id)
+                      fillPickupFromAddress(addr)
+                    }}
+                  >
+                    <option value="">Select an address...</option>
+                    {savedAddresses.map((addr) => (
+                      <option key={addr._id} value={addr._id}>
+                        {addr.label} — {addr.city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <PlaceAutocompleteInput
+                  label="Lieu de ramassage (Maroc)"
+                  cityField="pickupCity"
+                  addressField="pickupAddress"
+                  setValue={setValue}
+                  register={register}
+                  watch={watch}
+                  error={errors.pickupCity?.message || errors.pickupAddress?.message}
+                  placeholder="Casablanca, Rabat..."
+                  cityRules={{ required: "Ville de ramassage requise" }}
+                  addressRules={{ required: "Adresse de ramassage requise" }}
+                />
+                <Input
+                  label="Contact name"
+                  placeholder="John Doe"
+                  error={errors.pickupContactName?.message}
+                  {...register("pickupContactName")}
+                />
+                <div className="md:col-span-2">
+                  <Input
+                    label="Contact phone"
+                    placeholder="+1234567890"
+                    error={errors.pickupContactPhone?.message}
+                    {...register("pickupContactPhone")}
+                  />
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-border/50">
+                {saveAddressType === "pickup" ? (
+                  <div className="flex flex-wrap items-end gap-2">
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Warehouse)"
+                      value={saveAddressLabel}
+                      onChange={(e) => setSaveAddressLabel(e.target.value)}
+                      className="input-field flex-1 min-w-[140px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSaveAddress("pickup")}
+                      disabled={saveAddressMutation.isPending}
+                      className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSaveAddressType(null)}
+                      className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setSaveAddressType("pickup")}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Save this pickup to my addresses
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="route-step-card">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-8 h-8 rounded-full bg-success flex items-center justify-center shrink-0 shadow-md">
+                  <span className="text-sm font-bold text-white" aria-hidden>
+                    2
+                  </span>
+                </div>
+                <h3 className="font-bold text-foreground text-sm sm:text-base">Delivery</h3>
+              </div>
+              {savedAddresses?.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-foreground mb-1.5">Use saved address</label>
+                  <select
+                    className="input-field"
+                    onChange={(e) => {
+                      const id = e.target.value
+                      if (!id) return
+                      const addr = savedAddresses.find((a) => a._id === id)
+                      fillDeliveryFromAddress(addr)
+                    }}
+                  >
+                    <option value="">Select an address...</option>
+                    {savedAddresses.map((addr) => (
+                      <option key={addr._id} value={addr._id}>
+                        {addr.label} — {addr.city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <PlaceAutocompleteInput
+                  label="Lieu de livraison (Maroc)"
+                  cityField="deliveryCity"
+                  addressField="deliveryAddress"
+                  setValue={setValue}
+                  register={register}
+                  watch={watch}
+                  error={errors.deliveryCity?.message || errors.deliveryAddress?.message}
+                  placeholder="Marrakech, Fès, Tanger..."
+                  cityRules={{ required: "Ville de livraison requise" }}
+                  addressRules={{ required: "Adresse de livraison requise" }}
+                />
+                <Input
+                  label="Contact name"
+                  placeholder="Jane Smith"
+                  error={errors.deliveryContactName?.message}
+                  {...register("deliveryContactName")}
+                />
+                <div className="md:col-span-2">
+                  <Input
+                    label="Contact phone"
+                    placeholder="+0987654321"
+                    error={errors.deliveryContactPhone?.message}
+                    {...register("deliveryContactPhone")}
+                  />
+                </div>
+              </div>
+              <div className="mt-4 pt-4 border-t border-border/50">
+                {saveAddressType === "delivery" ? (
+                  <div className="flex flex-wrap items-end gap-2">
+                    <input
+                      type="text"
+                      placeholder="Label (e.g. Client Rabat)"
+                      value={saveAddressLabel}
+                      onChange={(e) => setSaveAddressLabel(e.target.value)}
+                      className="input-field flex-1 min-w-[140px]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleSaveAddress("delivery")}
+                      disabled={saveAddressMutation.isPending}
+                      className="rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSaveAddressType(null)}
+                      className="rounded-xl border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-accent/50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setSaveAddressType("delivery")}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Save this delivery to my addresses
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="detail-card p-4 sm:p-5 md:p-6">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="section-icon-badge bg-primary/15">
+              <MessageCircle className="w-5 h-5 text-primary" aria-hidden />
+            </div>
+            <div className="min-w-0">
+              <h2 className="text-base font-semibold text-foreground sm:text-lg">Message to the driver</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                Optional — access instructions, time windows, or special handling
+              </p>
+            </div>
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-foreground">Message (optional)</label>
+            <label className="block text-sm font-medium text-foreground">Message</label>
             <textarea
-              className="input-field min-h-[100px] resize-none"
-              placeholder="Additional information for the driver..."
+              className="input-field min-h-[100px] resize-y"
+              placeholder="e.g. Call 15 min before arrival, goods at loading dock B…"
               {...register("message")}
             />
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-4 sm:p-5 md:p-6">
-          <div className="flex items-center mb-6">
-            <Euro className="w-6 h-6 text-primary mr-3" />
-            <h2 className="text-xl font-semibold text-foreground">Cost Summary</h2>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Weight:</span>
-              <span className="text-foreground">{watchedWeight || 0} kg</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Price per kg:</span>
-              <span className="text-foreground">{Number(trip.pricePerKg).toFixed(2)}€</span>
-            </div>
-            <div className="border-t border-border pt-2 flex justify-between">
-              <span className="font-semibold text-foreground">Estimated total:</span>
-              <span className="font-bold text-primary text-xl">{estimatedPrice}€</span>
-            </div>
-          </div>
-        </Card>
-
-        <div className="flex items-center justify-end gap-4">
-          <Button 
-            variant="outline" 
+        <div className="detail-card p-4 sm:p-5 flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            variant="outline"
+            type="button"
             onClick={() => navigate(-1)}
             disabled={createRequestMutation.isLoading}
+            className="w-full sm:w-auto"
           >
             Cancel
           </Button>
-          <Button 
-            type="submit" 
-            loading={createRequestMutation.isLoading}
-            disabled={createRequestMutation.isLoading}
-          >
-            Send Request
-          </Button>
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4 w-full sm:w-auto">
+            <div className="text-center sm:text-right">
+              <p className="text-xs text-muted-foreground">Estimated total</p>
+              <p className="text-xl font-bold text-primary tabular-nums">{estimatedPrice}€</p>
+            </div>
+            <Button
+              type="submit"
+              loading={createRequestMutation.isLoading}
+              disabled={createRequestMutation.isLoading}
+              size="large"
+              className="w-full sm:w-auto min-h-11"
+            >
+              Send request
+            </Button>
+          </div>
         </div>
       </form>
       </div>
